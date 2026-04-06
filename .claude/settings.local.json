@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /c/Users/tafad/Documents/PROJECTS/Cure_Compliance/cure_comply/app/Services -name *.php -type f)",
+      "Bash(xargs wc:*)",
+      "Bash(grep -l \"try\\\\|catch\\\\|throw\" /c/Users/tafad/Documents/PROJECTS/Cure_Compliance/cure_comply/app/Http/Controllers/*.php)",
+      "Bash(ls -la /c/Users/tafad/Documents/PROJECTS/Cure_Compliance/cure_comply/*.md)",
+      "Bash(xargs grep:*)",
+      "Bash(grep -v \":0$\")",
+      "Bash(find /c/Users/tafad/Documents/PROJECTS/Cure_Compliance/cure_comply -name \"health\\\\|monitor\\\\|healthcheck\" -o -name *health* -o -name *monitor*)",
+      "Bash(grep -l \"use SoftDeletes\" app/Models/*.php)",
+      "Bash(php artisan:*)",
+      "Bash(npm run:*)",
+      "WebFetch(domain:privacycure.com)",
+      "Bash(npx tsc:*)"
+    ]
+  }
+}
