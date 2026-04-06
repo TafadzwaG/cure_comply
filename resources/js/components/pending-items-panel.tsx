@@ -1,5 +1,7 @@
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import { type PendingItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import {
@@ -7,6 +9,7 @@ import {
     ArrowRight,
     BookOpen,
     Building2,
+    CheckCircle2,
     FileSearch,
     ShieldCheck,
 } from 'lucide-react';
@@ -17,139 +20,237 @@ interface PendingItemsPanelProps {
 
 const typeConfig: Record<
     PendingItem['type'],
-    { label: string; icon: typeof BookOpen; color: string; bgColor: string }
+    {
+        label: string;
+        icon: typeof BookOpen;
+    }
 > = {
     tenant_approval: {
         label: 'Tenant Approvals',
         icon: Building2,
-        color: 'text-violet-700 dark:text-violet-300',
-        bgColor: 'bg-violet-100 dark:bg-violet-900/40',
     },
     course_assignment: {
         label: 'Course Assignments',
         icon: BookOpen,
-        color: 'text-blue-700 dark:text-blue-300',
-        bgColor: 'bg-blue-100 dark:bg-blue-900/40',
     },
     compliance_submission: {
         label: 'Compliance Submissions',
         icon: ShieldCheck,
-        color: 'text-amber-700 dark:text-amber-300',
-        bgColor: 'bg-amber-100 dark:bg-amber-900/40',
     },
     evidence_review: {
         label: 'Evidence Review',
         icon: FileSearch,
-        color: 'text-emerald-700 dark:text-emerald-300',
-        bgColor: 'bg-emerald-100 dark:bg-emerald-900/40',
     },
 };
 
-const priorityStyles: Record<string, string> = {
-    high: 'border-red-300 bg-red-50 text-red-700 dark:border-red-700 dark:bg-red-950/40 dark:text-red-300',
-    medium: 'border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-300',
-    low: 'border-slate-300 bg-slate-50 text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400',
-};
+function PriorityBadge({ value }: { value: PendingItem['priority'] }) {
+    return (
+        <Badge
+            variant="outline"
+            className="rounded-md px-2 py-0 text-[10px] uppercase tracking-[0.12em] text-muted-foreground"
+        >
+            {value}
+        </Badge>
+    );
+}
+
+function QueueStat({
+    label,
+    value,
+}: {
+    label: string;
+    value: number;
+}) {
+    return (
+        <div className="flex items-center justify-between rounded-md border border-border/60 px-3 py-2">
+            <span className="text-sm text-muted-foreground">{label}</span>
+            <span className="text-sm font-medium tabular-nums">{value}</span>
+        </div>
+    );
+}
 
 export default function PendingItemsPanel({ items }: PendingItemsPanelProps) {
     if (!items || items.length === 0) {
         return null;
     }
 
-    const grouped = items.reduce(
-        (acc, item) => {
-            if (!acc[item.type]) acc[item.type] = [];
-            acc[item.type].push(item);
-            return acc;
-        },
-        {} as Record<string, PendingItem[]>,
-    );
+    const counts = {
+        total: items.length,
+        high: items.filter((item) => item.priority === 'high').length,
+        medium: items.filter((item) => item.priority === 'medium').length,
+        low: items.filter((item) => item.priority === 'low').length,
+        tenant_approval: items.filter((item) => item.type === 'tenant_approval').length,
+        course_assignment: items.filter((item) => item.type === 'course_assignment').length,
+        compliance_submission: items.filter((item) => item.type === 'compliance_submission').length,
+        evidence_review: items.filter((item) => item.type === 'evidence_review').length,
+    };
 
-    const totalCount = items.length;
-    const highPriority = items.filter((i) => i.priority === 'high').length;
+    const sortedItems = [...items].sort((a, b) => {
+        const priorityRank = { high: 0, medium: 1, low: 2 };
+        const priorityDiff = priorityRank[a.priority] - priorityRank[b.priority];
+        if (priorityDiff !== 0) return priorityDiff;
+        return a.title.localeCompare(b.title);
+    });
 
     return (
-        <Card className="border-[#c3c6d1]/50 shadow-none">
-            <CardHeader>
-                <div className="flex items-start justify-between gap-4">
+        <Card className="rounded-md border-border/60 shadow-none">
+            <CardHeader className="pb-4">
+                <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                     <div className="space-y-1">
-                        <CardTitle className="flex items-center gap-2 text-base font-medium text-[#002753] dark:text-slate-100">
-                            <AlertTriangle className="size-4 text-amber-500" />
+                        <CardTitle className="flex items-center gap-2 text-base font-medium">
+                            <AlertTriangle className="size-4 text-[#14417A]" />
                             Action Required
                         </CardTitle>
                         <CardDescription>
-                            {totalCount} pending {totalCount === 1 ? 'item' : 'items'} across your workspace
-                            {highPriority > 0 && (
-                                <span className="ml-1 font-medium text-red-600 dark:text-red-400">
-                                    ({highPriority} high priority)
-                                </span>
-                            )}
+                            A unified queue of approvals, assignments, submissions, and evidence items
+                            that still need attention.
                         </CardDescription>
                     </div>
-                    <Badge variant="outline" className="rounded-full tabular-nums">
-                        {totalCount}
+
+                    <Badge variant="outline" className="w-fit rounded-md tabular-nums">
+                        {counts.total} open
                     </Badge>
                 </div>
             </CardHeader>
-            <CardContent className="space-y-5">
-                {Object.entries(grouped).map(([type, groupItems]) => {
-                    const config = typeConfig[type as PendingItem['type']];
-                    const Icon = config.icon;
 
-                    return (
-                        <div key={type} className="space-y-2.5">
-                            <div className="flex items-center gap-2">
-                                <div className={`rounded-lg p-1.5 ${config.bgColor}`}>
-                                    <Icon className={`size-3.5 ${config.color}`} />
-                                </div>
-                                <span className="text-sm font-medium text-[#002753] dark:text-slate-200">
-                                    {config.label}
-                                </span>
-                                <Badge variant="secondary" className="ml-auto rounded-full text-xs tabular-nums">
-                                    {groupItems.length}
-                                </Badge>
-                            </div>
+            <CardContent>
+                <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
+                    <aside className="space-y-4">
+                        <div className="space-y-2">
+                            <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                                Overview
+                            </p>
 
-                            <div className="space-y-2 pl-1">
-                                {groupItems.map((item) => (
-                                    <Link
-                                        key={`${item.type}-${item.id}`}
-                                        href={item.href}
-                                        className="group block rounded-lg border border-[#c3c6d1]/40 bg-white p-3 transition-all hover:border-[#14417A]/30 hover:bg-[#d6e3ff]/10 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-500 dark:hover:bg-slate-800"
-                                    >
-                                        <div className="flex items-start justify-between gap-3">
-                                            <div className="min-w-0 flex-1 space-y-1">
-                                                <div className="flex items-center gap-2">
-                                                    <p className="truncate text-sm font-medium text-[#002753] dark:text-slate-100">
-                                                        {item.title}
-                                                    </p>
-                                                    <Badge
-                                                        variant="outline"
-                                                        className={`shrink-0 rounded-full px-2 py-0 text-[10px] uppercase tracking-wider ${priorityStyles[item.priority]}`}
-                                                    >
-                                                        {item.priority}
-                                                    </Badge>
+                            <QueueStat label="Total Open" value={counts.total} />
+                            <QueueStat label="High Priority" value={counts.high} />
+                            <QueueStat label="Medium Priority" value={counts.medium} />
+                            <QueueStat label="Low Priority" value={counts.low} />
+                        </div>
+
+                        <Separator />
+
+                        <div className="space-y-2">
+                            <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                                By Type
+                            </p>
+
+                            <div className="space-y-2">
+                                {(
+                                    [
+                                        'tenant_approval',
+                                        'course_assignment',
+                                        'compliance_submission',
+                                        'evidence_review',
+                                    ] as PendingItem['type'][]
+                                ).map((type) => {
+                                    const config = typeConfig[type];
+                                    const Icon = config.icon;
+                                    const count = counts[type];
+
+                                    if (!count) return null;
+
+                                    return (
+                                        <div
+                                            key={type}
+                                            className="flex items-center justify-between rounded-md border border-border/60 px-3 py-2"
+                                        >
+                                            <div className="flex min-w-0 items-center gap-2">
+                                                <div className="flex h-7 w-7 items-center justify-center rounded-md border border-[#14417A]/15 bg-[#14417A]/5">
+                                                    <Icon className="size-3.5 text-[#14417A]" />
                                                 </div>
-                                                <p className="text-xs leading-5 text-[#434750] dark:text-slate-400">
-                                                    {item.description}
-                                                </p>
-                                                <div className="flex items-center gap-3 text-[11px] text-[#434750]/70 dark:text-slate-500">
-                                                    {item.due_date && (
-                                                        <span>Due: {item.due_date}</span>
-                                                    )}
-                                                    {item.created_at && (
-                                                        <span>{item.created_at}</span>
-                                                    )}
-                                                </div>
+                                                <span className="truncate text-sm">{config.label}</span>
                                             </div>
-                                            <ArrowRight className="mt-0.5 size-4 shrink-0 text-[#434750]/50 transition-transform group-hover:translate-x-0.5 group-hover:text-[#14417A] dark:text-slate-500 dark:group-hover:text-slate-300" />
+
+                                            <span className="text-sm font-medium tabular-nums">{count}</span>
                                         </div>
-                                    </Link>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </div>
-                    );
-                })}
+
+                        <Separator />
+
+                        <div className="rounded-md border border-border/60 bg-muted/20 p-3">
+                            <div className="flex items-start gap-2">
+                                <CheckCircle2 className="mt-0.5 size-4 text-[#14417A]" />
+                                <div className="space-y-1">
+                                    <p className="text-sm font-medium">Queue guidance</p>
+                                    <p className="text-xs leading-5 text-muted-foreground">
+                                        Prioritize high items first, then clear grouped operational work
+                                        like assignments and evidence review.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <div className="min-w-0 space-y-2">
+                        <div className="flex items-center justify-between">
+                            <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                                Pending Queue
+                            </p>
+                            <span className="text-xs text-muted-foreground">
+                                Sorted by priority
+                            </span>
+                        </div>
+
+                        <div className="overflow-hidden rounded-md border border-border/60">
+                            {sortedItems.map((item, index) => {
+                                const config = typeConfig[item.type];
+                                const Icon = config.icon;
+
+                                return (
+                                    <div key={`${item.type}-${item.id}`}>
+                                        <Link
+                                            href={item.href}
+                                            className="group block bg-background px-4 py-3 transition-colors hover:bg-muted/30"
+                                        >
+                                            <div className="flex items-start gap-3">
+                                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[#14417A]/15 bg-[#14417A]/5">
+                                                    <Icon className="size-4 text-[#14417A]" />
+                                                </div>
+
+                                                <div className="min-w-0 flex-1 space-y-1.5">
+                                                    <div className="flex flex-wrap items-center gap-2">
+                                                        <p className="truncate text-sm font-medium">
+                                                            {item.title}
+                                                        </p>
+                                                        <PriorityBadge value={item.priority} />
+                                                        <Badge
+                                                            variant="secondary"
+                                                            className="rounded-md px-1.5 py-0 text-[11px]"
+                                                        >
+                                                            {config.label}
+                                                        </Badge>
+                                                    </div>
+
+                                                    <p className="text-xs leading-5 text-muted-foreground">
+                                                        {item.description}
+                                                    </p>
+
+                                                    <div className="flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
+                                                        {item.due_date ? <span>Due: {item.due_date}</span> : null}
+                                                        {item.created_at ? <span>{item.created_at}</span> : null}
+                                                    </div>
+                                                </div>
+
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 shrink-0 rounded-md text-[#14417A] hover:bg-[#14417A]/5 hover:text-[#14417A]"
+                                                >
+                                                    <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                                                </Button>
+                                            </div>
+                                        </Link>
+
+                                        {index < sortedItems.length - 1 ? <Separator /> : null}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
             </CardContent>
         </Card>
     );

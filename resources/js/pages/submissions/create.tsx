@@ -1,4 +1,5 @@
 import { CreateGuidancePanel } from '@/components/create-guidance-panel';
+import InputError from '@/components/input-error';
 import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,13 +20,24 @@ export default function SubmissionsCreate({ frameworks }: { frameworks: Array<{ 
                     <Card className="border-border/70 shadow-none">
                         <CardHeader><CardTitle>Submission Details</CardTitle></CardHeader>
                         <CardContent className="space-y-4">
-                            <Select value={form.data.compliance_framework_id} onValueChange={(value) => form.setData('compliance_framework_id', value)}>
-                                <SelectTrigger><SelectValue placeholder="Framework" /></SelectTrigger>
-                                <SelectContent>{frameworks.map((framework) => <SelectItem key={framework.id} value={String(framework.id)}>{framework.name}</SelectItem>)}</SelectContent>
-                            </Select>
-                            <Input value={form.data.title} onChange={(e) => form.setData('title', e.target.value)} placeholder="Submission title" />
-                            <Input value={form.data.reporting_period} onChange={(e) => form.setData('reporting_period', e.target.value)} placeholder="Reporting period" />
-                            <Button onClick={() => form.post(route('submissions.store'))}>Create Submission</Button>
+                            <div className="space-y-2">
+                                <Select value={form.data.compliance_framework_id} onValueChange={(value) => form.setData('compliance_framework_id', value)}>
+                                    <SelectTrigger><SelectValue placeholder="Framework" /></SelectTrigger>
+                                    <SelectContent>{frameworks.map((framework) => <SelectItem key={framework.id} value={String(framework.id)}>{framework.name}</SelectItem>)}</SelectContent>
+                                </Select>
+                                <InputError message={form.errors.compliance_framework_id} />
+                            </div>
+                            <div className="space-y-2">
+                                <Input value={form.data.title} onChange={(e) => form.setData('title', e.target.value)} placeholder="Submission title" />
+                                <InputError message={form.errors.title} />
+                            </div>
+                            <div className="space-y-2">
+                                <Input value={form.data.reporting_period} onChange={(e) => form.setData('reporting_period', e.target.value)} placeholder="Reporting period" />
+                                <InputError message={form.errors.reporting_period} />
+                            </div>
+                            <Button disabled={form.processing} onClick={() => form.post(route('submissions.store'))}>
+                                {form.processing ? 'Creating submission...' : 'Create Submission'}
+                            </Button>
                         </CardContent>
                     </Card>
                     <CreateGuidancePanel

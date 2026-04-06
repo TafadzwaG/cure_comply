@@ -66,13 +66,16 @@ Route::middleware(['auth', 'throttle:api', 'tenant', 'impersonation.audit'])->gr
     Route::post('sections/{section}/questions', [ComplianceQuestionController::class, 'store'])->name('sections.questions.store');
     Route::patch('sections/{section}/questions/{question}', [ComplianceQuestionController::class, 'update'])->name('sections.questions.update');
     Route::delete('sections/{section}/questions/{question}', [ComplianceQuestionController::class, 'destroy'])->name('sections.questions.destroy');
-    Route::resource('submissions', ComplianceSubmissionController::class)->only(['index', 'create', 'store', 'show', 'update']);
+    Route::resource('submissions', ComplianceSubmissionController::class)
+        ->parameters(['submissions' => 'complianceSubmission'])
+        ->only(['index', 'create', 'store', 'show', 'update']);
     Route::post('submissions/{complianceSubmission}/responses', [ComplianceSubmissionController::class, 'saveResponses'])->name('submissions.responses.store');
     Route::post('submissions/{complianceSubmission}/submit', [ComplianceSubmissionController::class, 'submit'])->name('submissions.submit');
     Route::post('submissions/{complianceSubmission}/recalculate', [ComplianceSubmissionController::class, 'recalculate'])->name('submissions.recalculate');
 
     Route::get('evidence', [EvidenceFileController::class, 'index'])->name('evidence.index');
     Route::post('responses/{complianceResponse}/evidence', [EvidenceFileController::class, 'store'])->middleware('throttle:uploads')->name('evidence.store');
+    Route::post('submissions/{complianceSubmission}/questions/{complianceQuestion}/evidence', [EvidenceFileController::class, 'storeForQuestion'])->middleware('throttle:uploads')->name('submissions.questions.evidence.store');
     Route::get('evidence/{evidenceFile}/download', [EvidenceFileController::class, 'download'])->name('evidence.download');
     Route::post('evidence/{evidenceFile}/reviews', [EvidenceReviewController::class, 'store'])->name('evidence.reviews.store');
 

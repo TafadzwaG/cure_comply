@@ -16,6 +16,7 @@ import { formatLongDateTime } from '@/lib/date';
 import { SharedData } from '@/types';
 import { router, useForm, usePage } from '@inertiajs/react';
 import { CalendarDays, CheckCircle2, ClipboardCheck, Download, FileSearch, FileText, Gauge, MessageSquareText, Paperclip, ShieldCheck, UploadCloud } from 'lucide-react';
+import { useRef, useState, type DragEvent } from 'react';
 
 interface EvidenceReview {
     id: number;
@@ -258,6 +259,8 @@ export default function SubmissionShow({
                                                         </div>
 
                                                         <EvidencePanel
+                                                            submissionId={submission.id}
+                                                            questionId={question.id}
                                                             responseId={existingResponse?.id}
                                                             evidenceFiles={evidenceFiles}
                                                             requiresEvidence={question.requires_evidence}
@@ -354,12 +357,16 @@ export default function SubmissionShow({
 }
 
 function EvidencePanel({
+    submissionId,
+    questionId,
     responseId,
     evidenceFiles,
     requiresEvidence,
     canUploadEvidence,
     canReviewEvidence,
 }: {
+    submissionId: number;
+    questionId: number;
     responseId?: number;
     evidenceFiles: EvidenceFileItem[];
     requiresEvidence: boolean;
@@ -367,6 +374,38 @@ function EvidencePanel({
     canReviewEvidence: boolean;
 }) {
     const uploadForm = useForm<{ file: File | null }>({ file: null });
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const selectedFile = uploadForm.data.file;
+
+    const setUploadFile = (file?: File | null) => {
+        uploadForm.setData('file', file ?? null);
+    };
+
+    const handleDrop = (event: DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setIsDragging(false);
+        setUploadFile(event.dataTransfer.files?.[0] ?? null);
+    };
+
+    const handleUpload = () => {
+        if (!selectedFile) {
+            return;
+        }
+
+        uploadForm.post(route('submissions.questions.evidence.store', { complianceSubmission: submissionId, complianceQuestion: questionId }, false), {
+            forceFormData: true,
+            preserveScroll: true,
+            onSuccess: () => {
+                uploadForm.reset();
+
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = '';
+                }
+            },
+        });
+    };
 
     return (
         <Card className="border-dashed border-border/70 shadow-none">
@@ -383,34 +422,83 @@ function EvidencePanel({
             </CardHeader>
             <CardContent className="space-y-4">
                 {canUploadEvidence ? (
-                    responseId ? (
-                        <div className="grid gap-3 md:grid-cols-[1fr_auto]">
-                            <div className="space-y-2">
-                                <Label>Upload evidence</Label>
-                                <Input type="file" onChange={(event) => uploadForm.setData('file', event.target.files?.[0] ?? null)} />
-                                <InputError message={uploadForm.errors.file} />
-                                <p className="text-xs text-muted-foreground">Recommended private disk: `private` or a private S3 bucket with controller-based downloads.</p>
-                            </div>
-                            <div className="flex items-end">
-                                <Button
-                                    onClick={() =>
-                                        uploadForm.post(route('evidence.store', responseId, false), {
-                                            forceFormData: true,
-                                            onSuccess: () => uploadForm.reset(),
-                                        })
+                    <div className="space-y-3">
+                        <div className="space-y-2">
+                            <Label>Upload evidence</Label>
+                            <div
+                                role="button"
+                                tabIndex={0}
+                                onClick={() => fileInputRef.current?.click()}
+                                onKeyDown={(event) => {
+                                    if (event.key === 'Enter' || event.key === ' ') {
+                                        event.preventDefault();
+                                        fileInputRef.current?.click();
                                     }
-                                    disabled={uploadForm.processing || !uploadForm.data.file}
-                                >
-                                    <UploadCloud className="size-4" />
-                                    Upload
-                                </Button>
+                                }}
+                                onDragOver={(event) => {
+                                    event.preventDefault();
+                                    setIsDragging(true);
+                                }}
+                                onDragLeave={() => setIsDragging(false)}
+                                onDrop={handleDrop}
+                                className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed p-6 text-center transition ${
+                                    isDragging
+                                        ? 'border-[#14417A] bg-[#14417A]/10'
+                                        : 'border-[#14417A]/25 bg-[#14417A]/[0.03] hover:border-[#14417A] hover:bg-[#14417A]/10'
+                                }`}
+                            >
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    className="sr-only"
+                                    accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.png,.jpg,.jpeg"
+                                    onChange={(event) => setUploadFile(event.target.files?.[0] ?? null)}
+                                />
+                                <div className="mb-3 rounded-xl bg-[#14417A]/10 p-3 text-[#14417A]">
+                                    <UploadCloud className="size-6" />
+                                </div>
+                                <p className="text-sm font-medium text-[#0F2E52] dark:text-blue-200">
+                                    {selectedFile ? selectedFile.name : 'Drop evidence here or click to browse'}
+                                </p>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    PDF, Word, Excel, CSV, PNG, or JPG. Maximum file size is 20MB.
+                                </p>
+                                {selectedFile ? (
+                                    <p className="mt-2 text-xs font-medium text-[#14417A]">
+                                        Selected file: {formatFileSize(selectedFile.size)}
+                                    </p>
+                                ) : null}
                             </div>
+                            <InputError message={uploadForm.errors.file} />
+                            <p className="text-xs text-muted-foreground">
+                                Uploading here automatically creates the draft response record if it does not exist yet.
+                            </p>
                         </div>
-                    ) : (
-                        <div className="rounded-xl border border-dashed border-border/70 bg-muted/10 p-4 text-sm text-muted-foreground">
-                            Save draft responses first to create the response record, then upload evidence.
+                        <div className="flex flex-wrap gap-2">
+                            <Button
+                                onClick={handleUpload}
+                                disabled={uploadForm.processing || !selectedFile}
+                            >
+                                <UploadCloud className="size-4" />
+                                {uploadForm.processing ? 'Uploading...' : responseId ? 'Upload evidence' : 'Create response and upload'}
+                            </Button>
+                            {selectedFile ? (
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => {
+                                        uploadForm.reset();
+
+                                        if (fileInputRef.current) {
+                                            fileInputRef.current.value = '';
+                                        }
+                                    }}
+                                >
+                                    Clear file
+                                </Button>
+                            ) : null}
                         </div>
-                    )
+                    </div>
                 ) : null}
 
                 <div className="space-y-3">

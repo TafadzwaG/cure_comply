@@ -1,12 +1,33 @@
 import { DataIndexPage } from '@/components/data-index-page';
-import { RowActionsMenu } from '@/components/row-actions-menu';
 import { SortableTableHead } from '@/components/sortable-table-head';
-import { StatusBadge } from '@/components/status-badge';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import PlatformLayout from '@/layouts/platform-layout';
 import { IndexStat, Paginated, TableFilters } from '@/types';
-import { router } from '@inertiajs/react';
-import { ClipboardCheck, FileBadge2, FolderSync, ShieldCheck } from 'lucide-react';
+import { Link, router } from '@inertiajs/react';
+import {
+    ClipboardCheck,
+    FileBadge2,
+    FolderSync,
+    MoreHorizontal,
+    Plus,
+    RotateCw,
+    ShieldCheck,
+} from 'lucide-react';
 
 interface Submission {
     id: number;
@@ -15,6 +36,60 @@ interface Submission {
     reporting_period?: string | null;
     framework?: { id: number; name: string } | null;
     score?: { overall_score?: number | null } | null;
+}
+
+function StatusPill({ value }: { value: string }) {
+    const styles: Record<string, string> = {
+        draft:
+            'border-slate-200 bg-slate-100 text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300',
+        submitted:
+            'border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900/50 dark:bg-blue-950/30 dark:text-blue-300',
+        in_review:
+            'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-300',
+        scored:
+            'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-300',
+        closed:
+            'border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-900/50 dark:bg-violet-950/30 dark:text-violet-300',
+    };
+
+    const labels: Record<string, string> = {
+        draft: 'Draft',
+        submitted: 'Submitted',
+        in_review: 'In Review',
+        scored: 'Scored',
+        closed: 'Closed',
+    };
+
+    return (
+        <Badge
+            variant="outline"
+            className={`font-medium ${styles[value?.toLowerCase()] ?? 'border-border bg-background text-foreground'}`}
+        >
+            {labels[value?.toLowerCase()] ?? value}
+        </Badge>
+    );
+}
+
+function ScoreBadge({ score }: { score?: number | null }) {
+    if (score === null || score === undefined) {
+        return (
+            <Badge
+                variant="outline"
+                className="border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
+            >
+                Not scored
+            </Badge>
+        );
+    }
+
+    const scoreClass =
+        score >= 80
+            ? 'bg-emerald-600 text-white'
+            : score >= 50
+              ? 'bg-amber-500 text-white'
+              : 'bg-rose-600 text-white';
+
+    return <Badge className={scoreClass}>{score}%</Badge>;
 }
 
 export default function SubmissionsIndex({
@@ -29,10 +104,30 @@ export default function SubmissionsIndex({
     stats: Record<string, number>;
 }) {
     const statItems: IndexStat[] = [
-        { label: 'Submissions', value: stats.total, detail: 'Compliance execution records.', icon: ClipboardCheck },
-        { label: 'Submitted', value: stats.submitted, detail: 'Awaiting review and scoring.', icon: ShieldCheck },
-        { label: 'In review', value: stats.inReview, detail: 'Currently being assessed.', icon: FolderSync },
-        { label: 'Scored', value: stats.scored, detail: 'Completed calculations available.', icon: FileBadge2 },
+        {
+            label: 'Submissions',
+            value: stats.total,
+            detail: 'Compliance execution records.',
+            icon: ClipboardCheck,
+        },
+        {
+            label: 'Submitted',
+            value: stats.submitted,
+            detail: 'Awaiting review and scoring.',
+            icon: ShieldCheck,
+        },
+        {
+            label: 'In review',
+            value: stats.inReview,
+            detail: 'Currently being assessed.',
+            icon: FolderSync,
+        },
+        {
+            label: 'Scored',
+            value: stats.scored,
+            detail: 'Completed calculations available.',
+            icon: FileBadge2,
+        },
     ];
 
     return (
@@ -42,7 +137,13 @@ export default function SubmissionsIndex({
                     title="Compliance Submissions"
                     description="Create and manage tenant submissions against the selected framework version."
                     stats={statItems}
-                    actions={[{ label: 'New Submission', href: route('submissions.create'), icon: ClipboardCheck }]}
+                    actions={[
+                        {
+                            label: 'New Submission',
+                            href: route('submissions.create'),
+                            icon: ClipboardCheck,
+                        },
+                    ]}
                     filters={filters}
                     filterConfigs={[
                         {
@@ -59,7 +160,10 @@ export default function SubmissionsIndex({
                         {
                             key: 'framework_id',
                             label: 'Framework',
-                            options: frameworks.map((framework) => ({ label: framework.name, value: String(framework.id) })),
+                            options: frameworks.map((framework) => ({
+                                label: framework.name,
+                                value: String(framework.id),
+                            })),
                         },
                     ]}
                     paginated={submissions}
@@ -67,35 +171,207 @@ export default function SubmissionsIndex({
                     tableDescription="Submissions move from draft to submitted, then into scoring and closure."
                     exportable
                 >
-                    <Table>
-                        <TableHeader>
-                        <TableRow>
-                            <SortableTableHead label="Title" column="title" filters={filters} />
-                            <TableHead>Framework</TableHead>
-                            <TableHead>Score</TableHead>
-                            <SortableTableHead label="Status" column="status" filters={filters} />
-                            <TableHead className="w-[70px] text-right">Actions</TableHead>
-                        </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {submissions.data.map((submission) => (
-                                <TableRow key={submission.id}>
-                                    <TableCell>{submission.title}</TableCell>
-                                    <TableCell>{submission.framework?.name}</TableCell>
-                                    <TableCell>{submission.score?.overall_score ?? 'Not scored'}</TableCell>
-                                    <TableCell><StatusBadge value={submission.status} /></TableCell>
-                                    <TableCell className="text-right">
-                                        <RowActionsMenu
-                                            actions={[
-                                                { label: 'View submission', href: route('submissions.show', submission.id) },
-                                                { label: 'Recalculate', method: 'post', href: route('submissions.recalculate', submission.id) },
-                                            ]}
-                                        />
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                    <div className="space-y-6">
+                        <Card className="overflow-hidden border-0 shadow-none">
+                            <CardContent className="bg-gradient-to-r from-[#0F2E52] via-[#123867] to-[#14417A] p-6 text-white">
+                                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                                    <div className="max-w-2xl space-y-2">
+                                        <Badge className="border-white/20 bg-white/10 text-white hover:bg-white/10">
+                                            PrivacyCure Submission Hub
+                                        </Badge>
+                                        <h2 className="text-2xl font-semibold tracking-tight">
+                                            Manage compliance submissions with clearer status and scoring visibility
+                                        </h2>
+                                        <p className="text-sm text-white/80">
+                                            Track framework-based submissions, review progress, and surface scoring
+                                            results in a stronger brand-led interface.
+                                        </p>
+                                    </div>
+
+                                    <div className="flex flex-wrap gap-3">
+                                        <Button
+                                            asChild
+                                            size="sm"
+                                            className="bg-white text-[#0F2E52] hover:bg-white/90"
+                                        >
+                                            <Link href={route('submissions.create')}>
+                                                <Plus className="mr-2 h-4 w-4" />
+                                                Create Submission
+                                            </Link>
+                                        </Button>
+
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="border-white/20 bg-white/10 text-white hover:bg-white/15"
+                                        >
+                                            {submissions.total ?? submissions.data.length} Total Submissions
+                                        </Button>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="border-[#14417A]/15 shadow-none">
+                            <CardHeader className="border-b border-border/60 bg-gradient-to-r from-[#14417A]/[0.06] to-transparent">
+                                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                    <div className="space-y-1">
+                                        <CardTitle className="text-base font-semibold text-[#0F2E52] dark:text-blue-200">
+                                            Submission Register
+                                        </CardTitle>
+                                        <CardDescription>
+                                            A brand-led view of active submissions, linked frameworks, and score state.
+                                        </CardDescription>
+                                    </div>
+
+                                    <Badge
+                                        variant="outline"
+                                        className="w-fit border-[#14417A]/20 bg-[#14417A]/5 text-[#14417A] dark:border-blue-900/50 dark:bg-blue-950/30 dark:text-blue-300"
+                                    >
+                                        {submissions.total ?? submissions.data.length} records
+                                    </Badge>
+                                </div>
+                            </CardHeader>
+
+                            <CardContent className="px-0 pb-0">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow className="border-border/60">
+                                            <SortableTableHead label="Title" column="title" filters={filters} />
+                                            <TableHead>Framework</TableHead>
+                                            <TableHead>Score</TableHead>
+                                            <SortableTableHead label="Status" column="status" filters={filters} />
+                                            <TableHead className="w-[190px] text-right">Actions</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+
+                                    <TableBody>
+                                        {submissions.data.map((submission) => (
+                                            <TableRow
+                                                key={submission.id}
+                                                className="border-border/60 transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-900/40"
+                                            >
+                                                <TableCell className="py-4">
+                                                    <div className="flex items-start gap-3">
+                                                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#14417A]/10 text-[#14417A] dark:bg-blue-950/40 dark:text-blue-300">
+                                                            <ClipboardCheck className="h-4 w-4" />
+                                                        </div>
+
+                                                        <div className="space-y-1">
+                                                            <Link
+                                                                href={route('submissions.show', submission.id)}
+                                                                className="font-medium text-[#0F2E52] hover:text-[#14417A] hover:underline dark:text-blue-200 dark:hover:text-blue-300"
+                                                            >
+                                                                {submission.title}
+                                                            </Link>
+                                                            <div className="flex flex-wrap items-center gap-2">
+                                                                <p className="text-sm text-muted-foreground">
+                                                                    Submission #{submission.id}
+                                                                </p>
+
+                                                                {submission.reporting_period && (
+                                                                    <Badge
+                                                                        variant="outline"
+                                                                        className="border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
+                                                                    >
+                                                                        {submission.reporting_period}
+                                                                    </Badge>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </TableCell>
+
+                                                <TableCell className="py-4">
+                                                    <Badge
+                                                        variant="outline"
+                                                        className="border-[#14417A]/15 bg-[#14417A]/5 text-[#14417A] dark:border-blue-900/50 dark:bg-blue-950/30 dark:text-blue-300"
+                                                    >
+                                                        {submission.framework?.name ?? 'No framework'}
+                                                    </Badge>
+                                                </TableCell>
+
+                                                <TableCell className="py-4">
+                                                    <ScoreBadge score={submission.score?.overall_score} />
+                                                </TableCell>
+
+                                                <TableCell className="py-4">
+                                                    <StatusPill value={submission.status} />
+                                                </TableCell>
+
+                                                <TableCell className="py-4">
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <Button
+                                                            asChild
+                                                            size="sm"
+                                                            className="bg-[#14417A] text-white hover:bg-[#0F2E52]"
+                                                        >
+                                                            <Link href={route('submissions.show', submission.id)}>
+                                                                View
+                                                            </Link>
+                                                        </Button>
+
+                                                        <Button
+                                                            size="sm"
+                                                            className="bg-emerald-600 text-white hover:bg-emerald-700"
+                                                            onClick={() =>
+                                                                router.post(route('submissions.recalculate', submission.id))
+                                                            }
+                                                        >
+                                                            <RotateCw className="mr-2 h-4 w-4" />
+                                                            Recalculate
+                                                        </Button>
+
+                                                        <DropdownMenu>
+                                                            <DropdownMenuTrigger asChild>
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="icon"
+                                                                    className="border-[#14417A]/20 text-[#14417A] hover:bg-[#14417A]/5 hover:text-[#14417A]"
+                                                                >
+                                                                    <MoreHorizontal className="h-4 w-4" />
+                                                                    <span className="sr-only">Open actions</span>
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
+
+                                                            <DropdownMenuContent align="end" className="w-44">
+                                                                <DropdownMenuItem asChild>
+                                                                    <Link href={route('submissions.show', submission.id)}>
+                                                                        View submission
+                                                                    </Link>
+                                                                </DropdownMenuItem>
+
+                                                                <DropdownMenuItem
+                                                                    onClick={() =>
+                                                                        router.post(
+                                                                            route('submissions.recalculate', submission.id),
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    Recalculate
+                                                                </DropdownMenuItem>
+                                                            </DropdownMenuContent>
+                                                        </DropdownMenu>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+
+                                        {submissions.data.length === 0 && (
+                                            <TableRow>
+                                                <TableCell
+                                                    colSpan={5}
+                                                    className="py-12 text-center text-sm text-muted-foreground"
+                                                >
+                                                    No submissions found for the current filters.
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
+                    </div>
                 </DataIndexPage>
             </div>
         </PlatformLayout>

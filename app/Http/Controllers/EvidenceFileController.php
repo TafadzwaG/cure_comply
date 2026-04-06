@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\InteractsWithIndexTables;
 use App\Http\Requests\EvidenceUploadRequest;
+use App\Models\ComplianceQuestion;
 use App\Models\ComplianceResponse;
+use App\Models\ComplianceSubmission;
 use App\Models\EvidenceFile;
 use App\Services\EvidenceStorageService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -75,6 +78,51 @@ class EvidenceFileController extends Controller
         } catch (\RuntimeException $e) {
             Log::error('Evidence upload failed', [
                 'response_id' => $complianceResponse->id,
+                'user_id' => $request->user()->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->with('error', 'Failed to upload evidence file. Please try again.');
+        }
+
+        return back()->with('success', 'Evidence uploaded.');
+    }
+
+    public function storeForQuestion(
+        EvidenceUploadRequest $request,
+        ComplianceSubmission $complianceSubmission,
+        ComplianceQuestion $complianceQuestion
+    ): RedirectResponse {
+        $this->authorize('create', EvidenceFile::class);
+        $this->authorize('view', $complianceSubmission);
+
+        $questionBelongsToFramework = $complianceSubmission->framework()
+            ->whereHas('sections.questions', fn ($query) => $query->whereKey($complianceQuestion->id))
+            ->exists();
+
+        abort_unless($questionBelongsToFramework, 404);
+
+        try {
+            DB::transaction(function () use ($request, $complianceSubmission, $complianceQuestion) {
+                $response = ComplianceResponse::query()->firstOrCreate(
+                    [
+                        'tenant_id' => $complianceSubmission->tenant_id,
+                        'compliance_submission_id' => $complianceSubmission->id,
+                        'compliance_question_id' => $complianceQuestion->id,
+                    ],
+                    [
+                        'status' => 'draft',
+                        'answered_by' => $request->user()?->id,
+                        'answered_at' => now(),
+                    ]
+                );
+
+                $this->evidenceStorageService->store($response, $request->file('file'), $request->user()->id);
+            });
+        } catch (\RuntimeException $e) {
+            Log::error('Evidence upload failed', [
+                'submission_id' => $complianceSubmission->id,
+                'question_id' => $complianceQuestion->id,
                 'user_id' => $request->user()->id,
                 'error' => $e->getMessage(),
             ]);
