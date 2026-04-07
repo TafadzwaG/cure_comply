@@ -21,6 +21,7 @@ import { IndexStat, Paginated, TableFilters } from '@/types';
 import { Link, router } from '@inertiajs/react';
 import {
     ClipboardCheck,
+    Eye,
     FileBadge2,
     FolderSync,
     MoreHorizontal,
@@ -71,26 +72,45 @@ function StatusPill({ value }: { value: string }) {
     );
 }
 
-function ScoreBadge({ score }: { score?: number | null }) {
+function ScoreDonut({ score }: { score?: number | null }) {
     if (score === null || score === undefined) {
-        return (
-            <Badge
-                variant="outline"
-                className="border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
-            >
-                Not scored
-            </Badge>
-        );
+        return <span className="text-xs text-muted-foreground">Not scored</span>;
     }
 
-    const scoreClass =
-        score >= 80
-            ? 'bg-emerald-600 text-white'
-            : score >= 50
-              ? 'bg-amber-500 text-white'
-              : 'bg-rose-600 text-white';
+    const value = Math.max(0, Math.min(100, Number(score)));
+    const stroke =
+        value >= 80 ? '#059669' : value >= 50 ? '#d97706' : '#e11d48';
+    const radius = 16;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (value / 100) * circumference;
 
-    return <Badge className={scoreClass}>{score}%</Badge>;
+    return (
+        <div className="flex items-center gap-2">
+            <svg width="40" height="40" viewBox="0 0 40 40" className="-rotate-90">
+                <circle
+                    cx="20"
+                    cy="20"
+                    r={radius}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    className="text-muted"
+                />
+                <circle
+                    cx="20"
+                    cy="20"
+                    r={radius}
+                    fill="none"
+                    stroke={stroke}
+                    strokeWidth="4"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={offset}
+                    strokeLinecap="round"
+                />
+            </svg>
+            <span className="text-sm font-semibold text-[#0F2E52] dark:text-blue-200">{value}%</span>
+        </div>
+    );
 }
 
 export default function SubmissionsIndex({
@@ -197,11 +217,10 @@ export default function SubmissionsIndex({
                                             PrivacyCure Submission Hub
                                         </Badge>
                                         <h2 className="text-2xl font-semibold tracking-tight">
-                                            Manage compliance submissions with clearer status and scoring visibility
+                                            Manage compliance submissions
                                         </h2>
                                         <p className="text-sm text-white/80">
-                                            Track framework-based submissions, review progress, and surface scoring
-                                            results in a stronger brand-led interface.
+                                            Track framework submissions, review progress, and surface scoring results.
                                         </p>
                                     </div>
 
@@ -271,38 +290,28 @@ export default function SubmissionsIndex({
                                             >
                                                 <TableCell className="py-4">
                                                     <div className="flex items-start gap-3">
-                                                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#14417A]/10 text-[#14417A] dark:bg-blue-950/40 dark:text-blue-300">
+                                                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted text-muted-foreground">
                                                             <ClipboardCheck className="h-4 w-4" />
                                                         </div>
 
-                                                        <div className="space-y-1">
+                                                        <div className="space-y-0.5">
                                                             <Link
                                                                 href={route('submissions.show', submission.id)}
-                                                                className="font-medium text-[#0F2E52] hover:text-[#14417A] hover:underline dark:text-blue-200 dark:hover:text-blue-300"
+                                                                className="text-sm font-semibold text-[#0F2E52] hover:text-[#14417A] hover:underline dark:text-blue-200 dark:hover:text-blue-300"
                                                             >
                                                                 {submission.title}
                                                             </Link>
-                                                            <div className="flex flex-wrap items-center gap-2">
-                                                                <p className="text-sm text-muted-foreground">
-                                                                    Submission #{submission.id}
-                                                                </p>
-
-                                                                {submission.reporting_period && (
-                                                                    <Badge
-                                                                        variant="outline"
-                                                                        className="border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
-                                                                    >
-                                                                        {submission.reporting_period}
-                                                                    </Badge>
-                                                                )}
-                                                            </div>
+                                                            <p className="text-xs text-muted-foreground">
+                                                                Submission #{submission.id}
+                                                                {submission.reporting_period ? ` · ${submission.reporting_period}` : ''}
+                                                            </p>
                                                         </div>
                                                     </div>
                                                 </TableCell>
 
                                                 {isSuperAdmin && (
                                                     <TableCell className="py-4">
-                                                        <span className="text-sm font-medium text-[#0F2E52] dark:text-blue-200">
+                                                        <span className="text-sm text-[#0F2E52] dark:text-blue-200">
                                                             {submission.tenant?.name ?? 'Platform'}
                                                         </span>
                                                     </TableCell>
@@ -318,7 +327,7 @@ export default function SubmissionsIndex({
                                                 </TableCell>
 
                                                 <TableCell className="py-4">
-                                                    <ScoreBadge score={submission.score?.overall_score} />
+                                                    <ScoreDonut score={submission.score?.overall_score} />
                                                 </TableCell>
 
                                                 <TableCell className="py-4">
@@ -333,6 +342,7 @@ export default function SubmissionsIndex({
                                                             className="bg-[#14417A] text-white hover:bg-[#0F2E52]"
                                                         >
                                                             <Link href={route('submissions.show', submission.id)}>
+                                                                <Eye className="mr-2 h-4 w-4" />
                                                                 View
                                                             </Link>
                                                         </Button>
@@ -363,6 +373,7 @@ export default function SubmissionsIndex({
                                                             <DropdownMenuContent align="end" className="w-44">
                                                                 <DropdownMenuItem asChild>
                                                                     <Link href={route('submissions.show', submission.id)}>
+                                                                        <Eye className="mr-2 h-4 w-4" />
                                                                         View submission
                                                                     </Link>
                                                                 </DropdownMenuItem>
@@ -374,6 +385,7 @@ export default function SubmissionsIndex({
                                                                         )
                                                                     }
                                                                 >
+                                                                    <RotateCw className="mr-2 h-4 w-4" />
                                                                     Recalculate
                                                                 </DropdownMenuItem>
                                                             </DropdownMenuContent>

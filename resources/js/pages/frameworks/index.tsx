@@ -22,12 +22,14 @@ import { IndexStat, Paginated, TableFilters } from '@/types';
 import { Link, router } from '@inertiajs/react';
 import {
     BookMarked,
+    Eye,
     Files,
     FolderKanban,
     MoreHorizontal,
     PenSquare,
     Plus,
     ShieldCheck,
+    Trash2,
 } from 'lucide-react';
 
 interface Framework {
@@ -134,11 +136,10 @@ export default function FrameworksIndex({
                                             PrivacyCure Framework Hub
                                         </Badge>
                                         <h2 className="text-2xl font-semibold tracking-tight">
-                                            Manage compliance frameworks with clearer structure and brand styling
+                                            Manage compliance frameworks
                                         </h2>
                                         <p className="text-sm text-white/80">
-                                            Organize reusable framework versions, track publication state, and
-                                            structure sections for compliance submissions.
+                                            Organize reusable framework versions and structure sections for submissions.
                                         </p>
                                     </div>
 
@@ -212,14 +213,14 @@ export default function FrameworksIndex({
                                                             <ShieldCheck className="h-4 w-4" />
                                                         </div>
 
-                                                        <div className="space-y-1">
+                                                        <div className="space-y-0.5">
                                                             <Link
                                                                 href={route('frameworks.show', framework.id, false)}
-                                                                className="font-medium text-[#0F2E52] hover:text-[#14417A] hover:underline dark:text-blue-200 dark:hover:text-blue-300"
+                                                                className="text-sm font-semibold text-[#0F2E52] hover:text-[#14417A] hover:underline dark:text-blue-200 dark:hover:text-blue-300"
                                                             >
                                                                 {framework.name}
                                                             </Link>
-                                                            <p className="text-sm text-muted-foreground">
+                                                            <p className="text-xs text-muted-foreground">
                                                                 Framework #{framework.id}
                                                             </p>
                                                         </div>
@@ -237,11 +238,11 @@ export default function FrameworksIndex({
 
                                                 <TableCell className="py-4">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
+                                                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-muted-foreground">
                                                             <FolderKanban className="h-4 w-4" />
                                                         </div>
-                                                        <div className="space-y-1">
-                                                            <span className="font-medium text-[#3A3A3C] dark:text-slate-200">
+                                                        <div className="space-y-0.5">
+                                                            <span className="text-sm text-[#3A3A3C] dark:text-slate-200">
                                                                 {framework.sections_count ?? 0}
                                                             </span>
                                                             <p className="text-xs text-muted-foreground">
@@ -263,6 +264,7 @@ export default function FrameworksIndex({
                                                             className="bg-[#14417A] text-white hover:bg-[#0F2E52]"
                                                         >
                                                             <Link href={route('frameworks.show', framework.id, false)}>
+                                                                <Eye className="mr-2 h-4 w-4" />
                                                                 View
                                                             </Link>
                                                         </Button>
@@ -288,6 +290,7 @@ export default function FrameworksIndex({
                                                                             false,
                                                                         )}
                                                                     >
+                                                                        <Eye className="mr-2 h-4 w-4" />
                                                                         View framework
                                                                     </Link>
                                                                 </DropdownMenuItem>
@@ -306,6 +309,7 @@ export default function FrameworksIndex({
                                                                         )
                                                                     }
                                                                 >
+                                                                    <Trash2 className="mr-2 h-4 w-4" />
                                                                     Delete
                                                                 </DropdownMenuItem>
                                                             </DropdownMenuContent>

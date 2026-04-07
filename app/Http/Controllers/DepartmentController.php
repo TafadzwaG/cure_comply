@@ -22,11 +22,12 @@ class DepartmentController extends Controller
 
         $filters = $this->validateIndex($request, ['name', 'status', 'created_at', 'updated_at'], [
             'status' => ['nullable', 'string'],
+            'tenant_id' => ['nullable', 'integer'],
         ]);
 
-        $query = Department::query()->withCount('employeeProfiles');
+        $query = Department::query()->with('tenant:id,name')->withCount('employeeProfiles');
         $this->applySearch($query, $filters['search'] ?? null, ['name', 'description']);
-        $this->applyFilters($query, $filters, ['status' => 'status']);
+        $this->applyFilters($query, $filters, ['status' => 'status', 'tenant_id' => 'tenant_id']);
         $this->applySort($query, [
             'name' => 'name',
             'status' => 'status',
@@ -45,6 +46,8 @@ class DepartmentController extends Controller
             return $this->exportTable('departments.xlsx', ['Name', 'Description', 'Employees', 'Status'], $rows);
         }
 
+        $isSuperAdmin = (bool) $request->user()?->hasRole('super_admin');
+
         return Inertia::render('departments/index', [
             'departments' => $query->paginate($this->perPage($filters))->withQueryString(),
             'filters' => $filters,
@@ -54,6 +57,8 @@ class DepartmentController extends Controller
                 'inactive' => Department::query()->where('status', 'inactive')->count(),
                 'employees' => Department::query()->withCount('employeeProfiles')->get()->sum('employee_profiles_count'),
             ],
+            'tenants' => $isSuperAdmin ? Tenant::query()->orderBy('name')->get(['id', 'name']) : [],
+            'isSuperAdmin' => $isSuperAdmin,
         ]);
     }
 

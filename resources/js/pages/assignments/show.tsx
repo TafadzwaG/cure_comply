@@ -6,20 +6,26 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import PlatformLayout from '@/layouts/platform-layout';
-import { Head, Link, router } from '@inertiajs/react';
+import { SharedData } from '@/types';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import moment from 'moment';
 import {
     ArrowLeft,
     BookOpen,
     Calendar,
     CheckCircle2,
+    ChevronLeft,
+    ChevronRight,
     Circle,
     Clock,
+    Eye,
     FileText,
     Film,
     Loader2,
+    Mail,
     PlayCircle,
     RotateCcw,
-    User,
+    UserRound,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -81,9 +87,47 @@ const contentTypeIcon: Record<string, typeof FileText> = {
     file: BookOpen,
 };
 
+function ProgressDonut({ value, size = 96 }: { value: number; size?: number }) {
+    const radius = (size - 12) / 2;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (Math.max(0, Math.min(100, value)) / 100) * circumference;
+    const stroke = value >= 80 ? '#059669' : value >= 40 ? '#14417A' : '#94a3b8';
+    return (
+        <div className="relative inline-flex items-center justify-center">
+            <svg width={size} height={size} className="-rotate-90">
+                <circle
+                    cx={size / 2}
+                    cy={size / 2}
+                    r={radius}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="8"
+                    className="text-muted"
+                />
+                <circle
+                    cx={size / 2}
+                    cy={size / 2}
+                    r={radius}
+                    fill="none"
+                    stroke={stroke}
+                    strokeWidth="8"
+                    strokeLinecap="round"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={offset}
+                />
+            </svg>
+            <span className="absolute text-lg font-semibold text-[#0F2E52] dark:text-blue-200">
+                {Math.round(value)}%
+            </span>
+        </div>
+    );
+}
+
 export default function AssignmentShow({ assignment, completedLessonIds, progress }: Props) {
+    const { auth } = usePage<SharedData>().props;
+    const isLearner = auth?.user?.id === assignment.assigned_to?.id;
+
     const [activeLessonId, setActiveLessonId] = useState<number | null>(() => {
-        // Default to first incomplete lesson
         for (const mod of assignment.course.modules) {
             for (const lesson of mod.lessons) {
                 if (!completedLessonIds.includes(lesson.id)) {
@@ -91,7 +135,6 @@ export default function AssignmentShow({ assignment, completedLessonIds, progres
                 }
             }
         }
-        // All done — show last lesson
         const lastModule = assignment.course.modules[assignment.course.modules.length - 1];
         const lastLesson = lastModule?.lessons[lastModule.lessons.length - 1];
         return lastLesson?.id ?? null;
@@ -106,6 +149,7 @@ export default function AssignmentShow({ assignment, completedLessonIds, progres
     const isCompleted = (lessonId: number) => completedLessonIds.includes(lessonId);
 
     function markComplete(lessonId: number) {
+        if (!isLearner) return;
         setProcessingLessonId(lessonId);
         router.post(
             route('assignments.progress.store', assignment.id),
@@ -114,7 +158,6 @@ export default function AssignmentShow({ assignment, completedLessonIds, progres
                 preserveScroll: true,
                 onFinish: () => setProcessingLessonId(null),
                 onSuccess: () => {
-                    // Auto-advance to next incomplete lesson
                     const allLessons = assignment.course.modules.flatMap((m) => m.lessons);
                     const currentIdx = allLessons.findIndex((l) => l.id === lessonId);
                     for (let i = currentIdx + 1; i < allLessons.length; i++) {
@@ -129,6 +172,7 @@ export default function AssignmentShow({ assignment, completedLessonIds, progres
     }
 
     function undoComplete(lessonId: number) {
+        if (!isLearner) return;
         setProcessingLessonId(lessonId);
         router.delete(route('assignments.progress.destroy', assignment.id), {
             data: { lesson_id: lessonId },
@@ -137,80 +181,120 @@ export default function AssignmentShow({ assignment, completedLessonIds, progres
         });
     }
 
+    const initials = (assignment.assigned_to?.name ?? '?')
+        .split(' ')
+        .map((n) => n[0])
+        .slice(0, 2)
+        .join('')
+        .toUpperCase();
+
     return (
         <PlatformLayout>
             <Head title={`${assignment.course.title} — Assignment`} />
 
-            <div className="flex flex-col gap-5">
-                {/* Header */}
+            <div className="space-y-6">
                 <PageHeader
                     title={assignment.course.title}
-                    description={assignment.course.description || 'Work through the course modules and mark lessons as complete.'}
+                    description={
+                        isLearner
+                            ? assignment.course.description || 'Work through the modules and mark lessons complete as you go.'
+                            : `Tracking progress for ${assignment.assigned_to?.name ?? 'the learner'}.`
+                    }
                 >
-                    <Link
-                        href={route('assignments.index')}
-                        className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-                    >
-                        <ArrowLeft className="size-4" />
-                        Back to assignments
-                    </Link>
+                    <Button asChild size="sm" className="bg-white text-[#0F2E52] hover:bg-white/90 hover:text-black">
+                        <Link href={route('assignments.index')}>
+                            <ArrowLeft className="mr-2 h-4 w-4" />
+                            Back to assignments
+                        </Link>
+                    </Button>
                 </PageHeader>
 
-                {/* Progress + info strip */}
-                <div className="grid gap-4 md:grid-cols-[1fr_auto]">
-                    <Card className="border-border/60 shadow-none">
-                        <CardHeader className="pb-3">
-                            <div className="flex items-center justify-between gap-4">
-                                <div>
-                                    <CardTitle className="text-base font-medium">Course Progress</CardTitle>
-                                    <CardDescription>
-                                        {progress.completed} of {progress.total} lessons completed
-                                    </CardDescription>
+                {/* Hero strip */}
+                <Card className="overflow-hidden border-0 shadow-none">
+                    <CardContent className="bg-gradient-to-r from-[#0F2E52] via-[#123867] to-[#14417A] p-6 text-white">
+                        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                            <div className="flex items-center gap-5">
+                                <ProgressDonut value={progress.percentage} />
+                                <div className="space-y-1">
+                                    <Badge className="border-white/20 bg-white/10 text-white hover:bg-white/10">
+                                        {isLearner ? 'Your training' : 'Learner tracking'}
+                                    </Badge>
+                                    <div className="text-xl font-semibold tracking-tight">
+                                        {progress.completed} / {progress.total} lessons completed
+                                    </div>
+                                    <p className="text-sm text-white/80">
+                                        {assignment.course.modules.length} modules · {assignment.course.estimated_minutes
+                                            ? `~${assignment.course.estimated_minutes} min total`
+                                            : 'Self-paced'}
+                                    </p>
                                 </div>
-                                <span className="text-2xl font-semibold tabular-nums text-[#002753] dark:text-slate-100">
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-2">
+                                <StatusBadge value={assignment.status} />
+                                {assignment.due_date && (
+                                    <Badge className="border-white/15 bg-white/10 text-white hover:bg-white/10">
+                                        <Calendar className="mr-1.5 h-3.5 w-3.5" />
+                                        Due {moment(assignment.due_date).format('DD MMM YYYY')} ({moment(assignment.due_date).fromNow()})
+                                    </Badge>
+                                )}
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Learner card (admin view emphasizes it) */}
+                {assignment.assigned_to && (
+                    <Card className="border-[#14417A]/15 shadow-none">
+                        <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted text-sm font-semibold text-muted-foreground">
+                                    {initials}
+                                </div>
+                                <div className="space-y-0.5">
+                                    <div className="text-sm font-semibold text-[#0F2E52] dark:text-blue-200">
+                                        {assignment.assigned_to.name}
+                                    </div>
+                                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                        <Mail className="h-3 w-3" />
+                                        {assignment.assigned_to.email}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-1 items-center gap-3 sm:max-w-md">
+                                <Progress value={progress.percentage} className="h-2" />
+                                <span className="text-sm font-semibold tabular-nums text-[#0F2E52] dark:text-blue-200">
                                     {progress.percentage}%
                                 </span>
                             </div>
-                        </CardHeader>
-                        <CardContent>
-                            <Progress value={progress.percentage} className="h-3" />
-                        </CardContent>
-                    </Card>
 
-                    <Card className="border-border/60 shadow-none">
-                        <CardContent className="flex flex-wrap items-center gap-5 p-5">
-                            <InfoChip icon={<StatusBadge value={assignment.status} />} label="Status" />
-                            {assignment.due_date && (
-                                <InfoChip
-                                    icon={<Calendar className="size-4 text-muted-foreground" />}
-                                    label={`Due ${assignment.due_date}`}
-                                />
-                            )}
-                            {assignment.assigned_to && (
-                                <InfoChip
-                                    icon={<User className="size-4 text-muted-foreground" />}
-                                    label={assignment.assigned_to.name}
-                                />
-                            )}
-                            {assignment.course.estimated_minutes && (
-                                <InfoChip
-                                    icon={<Clock className="size-4 text-muted-foreground" />}
-                                    label={`~${assignment.course.estimated_minutes} min`}
-                                />
+                            {!isLearner && (
+                                <Badge
+                                    variant="outline"
+                                    className="border-[#14417A]/20 bg-[#14417A]/5 text-[#14417A] dark:border-blue-900/50 dark:bg-blue-950/30 dark:text-blue-300"
+                                >
+                                    <Eye className="mr-1.5 h-3 w-3" />
+                                    Read-only tracking
+                                </Badge>
                             )}
                         </CardContent>
                     </Card>
-                </div>
+                )}
 
                 {/* Main content: sidebar + lesson viewer */}
                 <div className="grid gap-5 xl:grid-cols-[340px_1fr]">
-                    {/* Sidebar — module & lesson nav */}
                     <Card className="h-fit border-border/60 shadow-none xl:sticky xl:top-20">
-                        <CardHeader className="pb-3">
-                            <CardTitle className="text-base font-medium">Modules</CardTitle>
-                            <CardDescription>{assignment.course.modules.length} modules in this course</CardDescription>
+                        <CardHeader className="border-b border-border/60 bg-gradient-to-r from-[#14417A]/[0.06] to-transparent">
+                            <CardTitle className="flex items-center gap-2 text-base font-semibold text-[#0F2E52] dark:text-blue-200">
+                                <BookOpen className="h-4 w-4" />
+                                Modules
+                            </CardTitle>
+                            <CardDescription>
+                                {assignment.course.modules.length} modules · {progress.total} lessons
+                            </CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-4">
+                        <CardContent className="space-y-4 p-4">
                             {assignment.course.modules.map((mod) => {
                                 const modLessons = mod.lessons;
                                 const modCompleted = modLessons.filter((l) => isCompleted(l.id)).length;
@@ -220,7 +304,7 @@ export default function AssignmentShow({ assignment, completedLessonIds, progres
                                 return (
                                     <div key={mod.id} className="space-y-1.5">
                                         <div className="flex items-center justify-between gap-2">
-                                            <h3 className="text-sm font-semibold text-[#002753] dark:text-slate-100">
+                                            <h3 className="text-sm font-semibold text-[#0F2E52] dark:text-blue-200">
                                                 {mod.title}
                                             </h3>
                                             <Badge
@@ -230,10 +314,6 @@ export default function AssignmentShow({ assignment, completedLessonIds, progres
                                                 {modCompleted}/{modTotal}
                                             </Badge>
                                         </div>
-
-                                        {mod.description && (
-                                            <p className="text-xs text-muted-foreground">{mod.description}</p>
-                                        )}
 
                                         <div className="space-y-0.5">
                                             {modLessons.map((lesson) => {
@@ -247,12 +327,12 @@ export default function AssignmentShow({ assignment, completedLessonIds, progres
                                                         onClick={() => setActiveLessonId(lesson.id)}
                                                         className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm transition-colors ${
                                                             active
-                                                                ? 'bg-[#d6e3ff]/50 font-medium text-[#002753] dark:bg-slate-800 dark:text-white'
+                                                                ? 'bg-[#14417A]/10 font-medium text-[#0F2E52] dark:bg-slate-800 dark:text-white'
                                                                 : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
                                                         }`}
                                                     >
                                                         <Icon
-                                                            className={`size-4 shrink-0 ${
+                                                            className={`h-4 w-4 shrink-0 ${
                                                                 done
                                                                     ? 'text-emerald-600 dark:text-emerald-400'
                                                                     : active
@@ -280,11 +360,10 @@ export default function AssignmentShow({ assignment, completedLessonIds, progres
                         </CardContent>
                     </Card>
 
-                    {/* Lesson viewer */}
                     <Card className="border-border/60 shadow-none">
                         {activeLesson ? (
                             <>
-                                <CardHeader>
+                                <CardHeader className="border-b border-border/60 bg-gradient-to-r from-[#14417A]/[0.06] to-transparent">
                                     <div className="flex items-start justify-between gap-4">
                                         <div className="space-y-2">
                                             <div className="flex items-center gap-2">
@@ -294,16 +373,17 @@ export default function AssignmentShow({ assignment, completedLessonIds, progres
                                                 </Badge>
                                                 {isCompleted(activeLesson.id) && (
                                                     <Badge className="rounded-full bg-emerald-100 text-[10px] text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
-                                                        Completed
+                                                        <CheckCircle2 className="mr-1 h-3 w-3" />
+                                                        Completed by learner
                                                     </Badge>
                                                 )}
                                             </div>
-                                            <CardTitle className="text-xl font-semibold tracking-tight text-[#002753] dark:text-slate-100">
+                                            <CardTitle className="text-xl font-semibold tracking-tight text-[#0F2E52] dark:text-blue-200">
                                                 {activeLesson.title}
                                             </CardTitle>
                                             {activeLesson.estimated_minutes && (
                                                 <CardDescription className="flex items-center gap-1.5">
-                                                    <Clock className="size-3.5" />
+                                                    <Clock className="h-3.5 w-3.5" />
                                                     Estimated {activeLesson.estimated_minutes} minutes
                                                 </CardDescription>
                                             )}
@@ -311,52 +391,56 @@ export default function AssignmentShow({ assignment, completedLessonIds, progres
                                     </div>
                                 </CardHeader>
 
-                                <Separator />
-
                                 <CardContent className="py-6">
                                     <LessonContent lesson={activeLesson} />
                                 </CardContent>
 
                                 <Separator />
 
-                                <CardContent className="flex items-center justify-between gap-4 py-4">
+                                <CardContent className="flex flex-col items-start justify-between gap-4 py-4 sm:flex-row sm:items-center">
                                     <NavigationButtons
                                         modules={assignment.course.modules}
                                         activeLessonId={activeLesson.id}
                                         onNavigate={setActiveLessonId}
                                     />
 
-                                    <div className="flex items-center gap-2">
-                                        {isCompleted(activeLesson.id) ? (
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => undoComplete(activeLesson.id)}
-                                                disabled={processingLessonId === activeLesson.id}
-                                            >
-                                                {processingLessonId === activeLesson.id ? (
-                                                    <Loader2 className="size-4 animate-spin" />
-                                                ) : (
-                                                    <RotateCcw className="size-4" />
-                                                )}
-                                                Undo completion
-                                            </Button>
-                                        ) : (
-                                            <Button
-                                                size="sm"
-                                                onClick={() => markComplete(activeLesson.id)}
-                                                disabled={processingLessonId === activeLesson.id}
-                                                className="bg-emerald-600 hover:bg-emerald-700"
-                                            >
-                                                {processingLessonId === activeLesson.id ? (
-                                                    <Loader2 className="size-4 animate-spin" />
-                                                ) : (
-                                                    <CheckCircle2 className="size-4" />
-                                                )}
-                                                Mark as complete
-                                            </Button>
-                                        )}
-                                    </div>
+                                    {isLearner ? (
+                                        <div className="flex items-center gap-2">
+                                            {isCompleted(activeLesson.id) ? (
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => undoComplete(activeLesson.id)}
+                                                    disabled={processingLessonId === activeLesson.id}
+                                                >
+                                                    {processingLessonId === activeLesson.id ? (
+                                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                    ) : (
+                                                        <RotateCcw className="mr-2 h-4 w-4" />
+                                                    )}
+                                                    Undo completion
+                                                </Button>
+                                            ) : (
+                                                <Button
+                                                    size="sm"
+                                                    onClick={() => markComplete(activeLesson.id)}
+                                                    disabled={processingLessonId === activeLesson.id}
+                                                    className="bg-emerald-600 hover:bg-emerald-700"
+                                                >
+                                                    {processingLessonId === activeLesson.id ? (
+                                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                    ) : (
+                                                        <CheckCircle2 className="mr-2 h-4 w-4" />
+                                                    )}
+                                                    Mark as complete
+                                                </Button>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div className="text-xs text-muted-foreground">
+                                            Only the assigned learner can mark lessons complete.
+                                        </div>
+                                    )}
                                 </CardContent>
                             </>
                         ) : (
@@ -379,20 +463,11 @@ export default function AssignmentShow({ assignment, completedLessonIds, progres
 
 /* ───── sub-components ───── */
 
-function InfoChip({ icon, label }: { icon: React.ReactNode; label: string }) {
-    return (
-        <div className="flex items-center gap-2 text-sm">
-            {icon}
-            <span className="text-[#434750] dark:text-slate-400">{label}</span>
-        </div>
-    );
-}
-
 function LessonTypeIcon({ type }: { type: string }) {
     const Icon = contentTypeIcon[type] ?? FileText;
     return (
-        <div className="rounded-lg bg-[#d6e3ff]/60 p-1.5 text-[#083d77] dark:bg-slate-800 dark:text-blue-400">
-            <Icon className="size-4" />
+        <div className="rounded-lg bg-muted p-1.5 text-muted-foreground">
+            <Icon className="h-4 w-4" />
         </div>
     );
 }
@@ -456,7 +531,6 @@ function LessonContent({ lesson }: { lesson: Lesson }) {
         );
     }
 
-    // Default: text content
     if (lesson.content_body) {
         return (
             <div
@@ -491,10 +565,12 @@ function NavigationButtons({
     return (
         <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" disabled={!prev} onClick={() => prev && onNavigate(prev.id)}>
+                <ChevronLeft className="mr-1 h-4 w-4" />
                 Previous
             </Button>
             <Button variant="outline" size="sm" disabled={!next} onClick={() => next && onNavigate(next.id)}>
                 Next
+                <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
         </div>
     );

@@ -67,9 +67,9 @@ class ComplianceFrameworkController extends Controller
     public function store(ComplianceFrameworkRequest $request): RedirectResponse
     {
         $this->authorize('create', ComplianceFramework::class);
-        ComplianceFramework::query()->create($request->validated());
+        $framework = ComplianceFramework::query()->create($request->validated());
 
-        return back()->with('success', 'Framework created.');
+        return redirect()->route('frameworks.show', $framework->id)->with('success', 'Framework created successfully.');
     }
 
     public function show(ComplianceFramework $framework): Response

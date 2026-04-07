@@ -22,12 +22,14 @@ import { IndexStat, Paginated, TableFilters } from '@/types';
 import { Link, router } from '@inertiajs/react';
 import {
     ClipboardCheck,
+    Eye,
     FolderKanban,
     GraduationCap,
     MoreHorizontal,
     PenSquare,
     PlayCircle,
     Plus,
+    Trash2,
 } from 'lucide-react';
 
 interface TestRecord {
@@ -119,11 +121,10 @@ export default function TestsIndex({
                                             PrivacyCure Assessment Hub
                                         </Badge>
                                         <h2 className="text-2xl font-semibold tracking-tight">
-                                            Manage assessments with a stronger brand presence
+                                            Manage assessments
                                         </h2>
                                         <p className="text-sm text-white/80">
-                                            Add more visual hierarchy with branded CTAs, richer status colors,
-                                            and clearer course-linked test management.
+                                            Create, publish, and monitor course-linked tests from one place.
                                         </p>
                                     </div>
 
@@ -197,25 +198,16 @@ export default function TestsIndex({
                                                             <ClipboardCheck className="h-4 w-4" />
                                                         </div>
 
-                                                        <div className="space-y-1">
+                                                        <div className="space-y-0.5">
                                                             <Link
                                                                 href={route('tests.show', test.id)}
-                                                                className="font-medium text-[#0F2E52] hover:text-[#14417A] hover:underline dark:text-blue-200 dark:hover:text-blue-300"
+                                                                className="text-sm font-semibold text-[#0F2E52] hover:text-[#14417A] hover:underline dark:text-blue-200 dark:hover:text-blue-300"
                                                             >
                                                                 {test.title}
                                                             </Link>
-
-                                                            <div className="flex items-center gap-2">
-                                                                <p className="text-sm text-muted-foreground">
-                                                                    Assessment #{test.id}
-                                                                </p>
-                                                                <Badge
-                                                                    variant="outline"
-                                                                    className="border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
-                                                                >
-                                                                    {test.questions_count ?? 0} questions
-                                                                </Badge>
-                                                            </div>
+                                                            <p className="text-xs text-muted-foreground">
+                                                                Assessment #{test.id} · {test.questions_count ?? 0} questions
+                                                            </p>
                                                         </div>
                                                     </div>
                                                 </TableCell>
@@ -230,7 +222,7 @@ export default function TestsIndex({
                                                 </TableCell>
 
                                                 <TableCell className="py-4">
-                                                    <span className="font-medium text-[#3A3A3C] dark:text-slate-200">
+                                                    <span className="text-sm text-[#3A3A3C] dark:text-slate-200">
                                                         {test.questions_count ?? 0}
                                                     </span>
                                                 </TableCell>
@@ -252,7 +244,10 @@ export default function TestsIndex({
                                                             size="sm"
                                                             className="bg-[#14417A] text-white hover:bg-[#0F2E52]"
                                                         >
-                                                            <Link href={route('tests.show', test.id)}>View</Link>
+                                                            <Link href={route('tests.show', test.id)}>
+                                                                <Eye className="mr-2 h-4 w-4" />
+                                                                View
+                                                            </Link>
                                                         </Button>
 
                                                         {test.status === 'published' && (
@@ -283,6 +278,7 @@ export default function TestsIndex({
                                                             <DropdownMenuContent align="end" className="w-44">
                                                                 <DropdownMenuItem asChild>
                                                                     <Link href={route('tests.show', test.id)}>
+                                                                        <Eye className="mr-2 h-4 w-4" />
                                                                         View test
                                                                     </Link>
                                                                 </DropdownMenuItem>
@@ -295,6 +291,7 @@ export default function TestsIndex({
                                                                             )
                                                                         }
                                                                     >
+                                                                        <PlayCircle className="mr-2 h-4 w-4" />
                                                                         Take test
                                                                     </DropdownMenuItem>
                                                                 )}
@@ -307,6 +304,7 @@ export default function TestsIndex({
                                                                         router.delete(route('tests.destroy', test.id))
                                                                     }
                                                                 >
+                                                                    <Trash2 className="mr-2 h-4 w-4" />
                                                                     Delete
                                                                 </DropdownMenuItem>
                                                             </DropdownMenuContent>

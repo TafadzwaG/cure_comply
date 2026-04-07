@@ -28,9 +28,11 @@ import {
     BadgeCheck,
     CalendarDays,
     ClipboardList,
+    ExternalLink,
     MoreHorizontal,
     Plus,
     SquareKanban,
+    Trash2,
     UserRound,
 } from 'lucide-react';
 
@@ -212,7 +214,7 @@ export default function AssignmentsIndex({
                                             PrivacyCure Assignment Hub
                                         </Badge>
                                         <h2 className="text-2xl font-semibold tracking-tight">
-                                            Manage employee assignments with clear progress and due dates
+                                            Manage employee assignments
                                         </h2>
                                         <p className="text-sm text-white/80">
                                             Track course allocation, monitor overdue employees, and keep training
@@ -289,11 +291,11 @@ export default function AssignmentsIndex({
                                                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#14417A]/10 text-[#14417A] dark:bg-blue-950/40 dark:text-blue-300">
                                                             <UserRound className="h-4 w-4" />
                                                         </div>
-                                                        <div className="space-y-1">
-                                                            <p className="font-medium text-[#0F2E52] dark:text-blue-200">
+                                                        <div className="space-y-0.5">
+                                                            <p className="text-sm text-[#0F2E52] dark:text-blue-200">
                                                                 {assignment.assigned_to?.name ?? 'Unassigned'}
                                                             </p>
-                                                            <p className="text-sm text-muted-foreground">
+                                                            <p className="text-xs text-muted-foreground">
                                                                 Assignment #{assignment.id}
                                                             </p>
                                                         </div>
@@ -302,7 +304,7 @@ export default function AssignmentsIndex({
 
                                                 {isSuperAdmin && (
                                                     <TableCell className="py-4">
-                                                        <span className="text-sm font-medium text-[#0F2E52] dark:text-blue-200">
+                                                        <span className="text-sm text-[#0F2E52] dark:text-blue-200">
                                                             {assignment.tenant?.name ?? 'Platform'}
                                                         </span>
                                                     </TableCell>
@@ -310,29 +312,24 @@ export default function AssignmentsIndex({
 
                                                 <TableCell className="py-4">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
+                                                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted text-muted-foreground">
                                                             <ClipboardList className="h-4 w-4" />
                                                         </div>
-                                                        <div className="space-y-1">
+                                                        <div className="space-y-0.5">
                                                             <Link
                                                                 href={route('assignments.show', assignment.id)}
-                                                                className="font-medium text-[#0F2E52] hover:text-[#14417A] hover:underline dark:text-blue-200 dark:hover:text-blue-300"
+                                                                className="text-sm font-semibold text-[#0F2E52] hover:text-[#14417A] hover:underline dark:text-blue-200 dark:hover:text-blue-300"
                                                             >
                                                                 {assignment.course?.title ?? 'No course'}
                                                             </Link>
-                                                            <Badge
-                                                                variant="outline"
-                                                                className="border-[#14417A]/15 bg-[#14417A]/5 text-[#14417A] dark:border-blue-900/50 dark:bg-blue-950/30 dark:text-blue-300"
-                                                            >
-                                                                Training Assignment
-                                                            </Badge>
+                                                            <p className="text-xs text-muted-foreground">Training assignment</p>
                                                         </div>
                                                     </div>
                                                 </TableCell>
 
                                                 <TableCell className="py-4">
                                                     <div className="flex items-start gap-2">
-                                                        <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
+                                                        <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-lg bg-muted text-muted-foreground">
                                                             <CalendarDays className="h-4 w-4" />
                                                         </div>
                                                         <DueDateBadge
@@ -354,6 +351,7 @@ export default function AssignmentsIndex({
                                                             className="bg-[#14417A] text-white hover:bg-[#0F2E52]"
                                                         >
                                                             <Link href={route('assignments.show', assignment.id)}>
+                                                                <ExternalLink className="mr-2 h-4 w-4" />
                                                                 Open
                                                             </Link>
                                                         </Button>
@@ -376,6 +374,7 @@ export default function AssignmentsIndex({
                                                                         router.get(route('assignments.show', assignment.id))
                                                                     }
                                                                 >
+                                                                    <ExternalLink className="mr-2 h-4 w-4" />
                                                                     Open course
                                                                 </DropdownMenuItem>
 
@@ -387,6 +386,7 @@ export default function AssignmentsIndex({
                                                                         router.delete(route('assignments.destroy', assignment.id))
                                                                     }
                                                                 >
+                                                                    <Trash2 className="mr-2 h-4 w-4" />
                                                                     Delete
                                                                 </DropdownMenuItem>
                                                             </DropdownMenuContent>

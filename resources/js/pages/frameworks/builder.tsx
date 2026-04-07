@@ -13,6 +13,7 @@ import PlatformLayout from '@/layouts/platform-layout';
 import { Link, router, useForm, useRemember } from '@inertiajs/react';
 import { ReactNode, useEffect } from 'react';
 import {
+    ArrowLeft,
     BookMarked,
     FileStack,
     HelpCircle,
@@ -20,7 +21,9 @@ import {
     ListChecks,
     LucideIcon,
     PencilRuler,
+    Pencil,
     Plus,
+    Save,
     Scale,
     ShieldCheck,
     Sparkles,
@@ -150,8 +153,7 @@ export function FrameworkBuilder({
                                 <div className="space-y-2">
                                     <h1 className="text-2xl font-semibold tracking-tight">{framework.name}</h1>
                                     <p className="text-sm text-white/80">
-                                        Expandable builder workspace for framework settings, section ordering,
-                                        and question design.
+                                        Framework settings, sections, and questions.
                                     </p>
                                 </div>
 
@@ -176,6 +178,7 @@ export function FrameworkBuilder({
                                         }
                                         className="bg-white text-[#0F2E52] hover:bg-white/90"
                                     >
+                                        <Save className="mr-2 h-4 w-4" />
                                         Save Framework
                                     </Button>
                                 ) : (
@@ -184,6 +187,7 @@ export function FrameworkBuilder({
                                         className="bg-white text-[#0F2E52] hover:bg-white/90"
                                     >
                                         <Link href={route('frameworks.edit', framework.id, false)}>
+                                            <Pencil className="mr-2 h-4 w-4" />
                                             Open Edit Mode
                                         </Link>
                                     </Button>
@@ -195,6 +199,7 @@ export function FrameworkBuilder({
                                     className="border-white/20 bg-white/10 text-white hover:bg-white/15"
                                 >
                                     <Link href={route('frameworks.index', undefined, false)}>
+                                        <ArrowLeft className="mr-2 h-4 w-4" />
                                         Back to Frameworks
                                     </Link>
                                 </Button>
@@ -208,25 +213,25 @@ export function FrameworkBuilder({
                         label="Sections"
                         value={framework.sections?.length ?? 0}
                         icon={Layers3}
-                        iconClassName="bg-[#14417A]/10 text-[#14417A] dark:bg-blue-950/40 dark:text-blue-300"
+                        iconClassName="bg-muted text-muted-foreground"
                     />
                     <MetricCard
                         label="Questions"
                         value={questionsCount}
                         icon={ListChecks}
-                        iconClassName="bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+                        iconClassName="bg-muted text-muted-foreground"
                     />
                     <MetricCard
                         label="Submissions"
                         value={framework.submissions_count ?? 0}
                         icon={ShieldCheck}
-                        iconClassName="bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300"
+                        iconClassName="bg-muted text-muted-foreground"
                     />
                     <MetricCard
                         label="Status"
                         value={framework.status}
                         icon={BookMarked}
-                        iconClassName="bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
+                        iconClassName="bg-muted text-muted-foreground"
                     />
                 </section>
 
@@ -328,6 +333,7 @@ export function FrameworkBuilder({
                                                 }
                                                 className="bg-[#14417A] text-white hover:bg-[#0F2E52]"
                                             >
+                                                <Save className="mr-2 h-4 w-4" />
                                                 Save framework
                                             </Button>
                                         ) : (
@@ -337,6 +343,7 @@ export function FrameworkBuilder({
                                                 className="border-[#14417A]/20 text-[#14417A] hover:bg-[#14417A]/5"
                                             >
                                                 <Link href={route('frameworks.edit', framework.id, false)}>
+                                                    <Pencil className="mr-2 h-4 w-4" />
                                                     Open edit mode
                                                 </Link>
                                             </Button>
@@ -361,25 +368,25 @@ export function FrameworkBuilder({
                                         icon={Layers3}
                                         title="Organize by section"
                                         description="Group related controls together and set section weights deliberately."
-                                        iconClassName="bg-[#14417A]/10 text-[#14417A] dark:bg-blue-950/40 dark:text-blue-300"
+                                        iconClassName="bg-muted text-muted-foreground"
                                     />
                                     <GuidanceRow
                                         icon={TextSearch}
                                         title="Choose the right answer type"
                                         description="Use yes / no / partial for scored controls and text, score, or date where needed."
-                                        iconClassName="bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+                                        iconClassName="bg-muted text-muted-foreground"
                                     />
                                     <GuidanceRow
                                         icon={HelpCircle}
                                         title="Add guidance text"
                                         description="Help text improves completion quality for company admins answering the assessment."
-                                        iconClassName="bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
+                                        iconClassName="bg-muted text-muted-foreground"
                                     />
                                     <GuidanceRow
                                         icon={ShieldCheck}
                                         title="Publish only when ready"
                                         description="Published frameworks should be stable because submissions depend on their structure."
-                                        iconClassName="bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300"
+                                        iconClassName="bg-muted text-muted-foreground"
                                     />
                                 </CardContent>
                             </Card>
@@ -488,21 +495,29 @@ export function FrameworkBuilder({
                                 onValueChange={setOpenSections}
                                 className="space-y-4"
                             >
-                                {framework.sections?.map((section) => (
+                                {framework.sections?.map((section, idx) => (
                                     <AccordionItem
                                         key={section.id}
                                         value={`section-${section.id}`}
-                                        className="overflow-hidden rounded-xl border border-[#14417A]/15 bg-card px-0"
+                                        className="overflow-hidden rounded-xl border border-[#14417A]/15 bg-card px-0 shadow-sm"
                                     >
-                                        <AccordionTrigger className="px-5 py-4 hover:no-underline">
+                                        <AccordionTrigger className="px-5 py-4 hover:no-underline [&[data-state=open]]:border-b [&[data-state=open]]:border-border/60 [&[data-state=open]]:bg-gradient-to-r [&[data-state=open]]:from-[#14417A]/[0.04] [&[data-state=open]]:to-transparent">
                                             <div className="flex flex-1 items-center justify-between gap-4 text-left">
-                                                <div className="space-y-1">
-                                                    <div className="text-sm font-semibold text-[#0F2E52] dark:text-blue-200">
-                                                        {section.name}
+                                                <div className="flex items-center gap-3">
+                                                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                                                        <FileStack className="h-4 w-4" />
                                                     </div>
-                                                    <div className="text-xs text-muted-foreground">
-                                                        Weight {section.weight} · Sort {section.sort_order} ·{' '}
-                                                        {section.questions?.length ?? 0} questions
+                                                    <div className="space-y-0.5">
+                                                        <div className="text-sm font-semibold text-[#0F2E52] dark:text-blue-200">
+                                                            {idx + 1}. {section.name}
+                                                        </div>
+                                                        <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+                                                            <Scale className="h-3 w-3" />
+                                                            <span>Weight {section.weight}</span>
+                                                            <span>·</span>
+                                                            <ListChecks className="h-3 w-3" />
+                                                            <span>{section.questions?.length ?? 0} questions</span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 <SectionBadge />
@@ -540,31 +555,31 @@ export function FrameworkBuilder({
                                     icon={BookMarked}
                                     title="1. Create the framework"
                                     description="Start with the framework name, version, status, and description so the library has a clear assessment record."
-                                    iconClassName="bg-[#14417A]/10 text-[#14417A] dark:bg-blue-950/40 dark:text-blue-300"
+                                    iconClassName="bg-muted text-muted-foreground"
                                 />
                                 <GuidanceRow
                                     icon={Layers3}
                                     title="2. Add sections"
                                     description="Break the framework into sections such as Governance, Data Lifecycle, or Security and set sort order and section weight."
-                                    iconClassName="bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
+                                    iconClassName="bg-muted text-muted-foreground"
                                 />
                                 <GuidanceRow
                                     icon={ListChecks}
                                     title="3. Add questions"
                                     description="Inside each section, create the actual controls that companies will answer during a submission cycle."
-                                    iconClassName="bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+                                    iconClassName="bg-muted text-muted-foreground"
                                 />
                                 <GuidanceRow
                                     icon={TextSearch}
                                     title="4. Choose answer types"
                                     description="Use yes / no / partial for scored controls, text for narrative answers, score for numeric values, and date for dated evidence points."
-                                    iconClassName="bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300"
+                                    iconClassName="bg-muted text-muted-foreground"
                                 />
                                 <GuidanceRow
                                     icon={ShieldCheck}
                                     title="5. Companies answer submissions"
                                     description="Company admins open a submission from the framework, answer the questions section by section, and attach evidence where required."
-                                    iconClassName="bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300"
+                                    iconClassName="bg-muted text-muted-foreground"
                                 />
                                 <GuidanceRow
                                     icon={Sparkles}
@@ -680,6 +695,7 @@ function SectionEditor({
                                     );
                                 }}
                             >
+                                <Save className="mr-2 h-4 w-4" />
                                 {sectionForm.processing ? 'Saving section...' : 'Save section'}
                             </Button>
 

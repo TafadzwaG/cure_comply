@@ -15,7 +15,7 @@ import PlatformLayout from '@/layouts/platform-layout';
 import { formatLongDateTime } from '@/lib/date';
 import { SharedData } from '@/types';
 import { router, useForm, usePage } from '@inertiajs/react';
-import { CalendarDays, CheckCircle2, ClipboardCheck, Download, FileSearch, FileText, Gauge, MessageSquareText, Paperclip, ShieldCheck, UploadCloud } from 'lucide-react';
+import { Building2, CalendarDays, CheckCircle2, ClipboardCheck, Download, FileSearch, FileText, Gauge, MessageSquareText, Paperclip, ShieldCheck, UploadCloud } from 'lucide-react';
 import { useRef, useState, type DragEvent } from 'react';
 
 interface EvidenceReview {
@@ -74,6 +74,7 @@ interface SubmissionData {
     reporting_period?: string | null;
     status: string;
     submitted_at?: string | null;
+    tenant?: { id: number; name: string } | null;
     framework?: {
         id: number;
         name: string;
@@ -161,9 +162,18 @@ export default function SubmissionShow({
             <div className="space-y-6">
                 <PageHeader
                     title={submission.title}
-                    description="Work section by section, capture evidence-backed answers, save progress as draft, and submit when the assessment is complete."
+                    description={`Submission for ${submission.tenant?.name ?? 'Platform'} · Work section by section, capture evidence-backed answers, and submit when complete.`}
                 >
-                    <StatusBadge value={submission.status} />
+                    <div className="flex items-center gap-2">
+                        <Badge
+                            variant="outline"
+                            className="border-[#14417A]/20 bg-[#14417A]/5 text-[#14417A] dark:border-blue-900/50 dark:bg-blue-950/30 dark:text-blue-300"
+                        >
+                            <Building2 className="mr-1.5 h-3.5 w-3.5" />
+                            {submission.tenant?.name ?? 'Platform'}
+                        </Badge>
+                        <StatusBadge value={submission.status} />
+                    </div>
                 </PageHeader>
 
                 <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">

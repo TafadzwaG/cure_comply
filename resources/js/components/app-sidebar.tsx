@@ -40,8 +40,8 @@ export function AppSidebar() {
               { title: 'Employees', url: '/employees', icon: Users, visible: can('manage users') },
               { title: 'Courses', url: '/courses', icon: GraduationCap, visible: can('manage courses') },
               { title: 'Assignments', url: '/assignments', icon: SquareKanban, visible: can('assign training') || can('manage courses') },
-              { title: 'Tests', url: '/tests', icon: ClipboardCheck, visible: can('manage tests') },
-              { title: 'Test Attempts', url: '/test-attempts', icon: ClipboardCheck, visible: can('manage tests') },
+              { title: 'Assessments ', url: '/tests', icon: ClipboardCheck, visible: can('manage tests') },
+              { title: 'Assessments Attempts', url: '/test-attempts', icon: ClipboardCheck, visible: can('manage tests') },
               { title: 'Compliance Frameworks', url: '/frameworks', icon: ShieldCheck, visible: can('manage compliance frameworks') },
               //   { title: 'Compliance Frameworks', url: '/frameworks', icon: ShieldCheck, visible: can('manage compliance frameworks') },
               {
@@ -50,7 +50,7 @@ export function AppSidebar() {
                   icon: FileCheck2,
                   visible: can('manage compliance submissions') || can('answer compliance questions'),
               },
-              { title: 'Evidence', url: '/evidence', icon: FileSearch, visible: can('review evidence') || can('upload evidence') },
+              { title: 'Frameworks Evidence', url: '/evidence', icon: FileSearch, visible: can('review evidence') || can('upload evidence') },
           ])
         : hasRole('company_admin')
           ? makeNav([

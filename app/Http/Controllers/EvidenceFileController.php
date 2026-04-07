@@ -6,8 +6,10 @@ use App\Http\Controllers\Concerns\InteractsWithIndexTables;
 use App\Http\Requests\EvidenceUploadRequest;
 use App\Models\ComplianceQuestion;
 use App\Models\ComplianceResponse;
+use App\Models\ComplianceFramework;
 use App\Models\ComplianceSubmission;
 use App\Models\EvidenceFile;
+use App\Models\Tenant;
 use App\Services\EvidenceStorageService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -31,13 +33,19 @@ class EvidenceFileController extends Controller
 
         $filters = $this->validateIndex($request, ['original_name', 'review_status', 'uploaded_at', 'created_at'], [
             'review_status' => ['nullable', 'string'],
+            'tenant_id' => ['nullable', 'integer'],
+            'framework_id' => ['nullable', 'integer'],
         ]);
 
-        $query = EvidenceFile::query()->with(['response.question', 'submission.framework', 'uploader', 'reviews.reviewer']);
-        $this->applySearch($query, $filters['search'] ?? null, ['original_name', 'response.question.question_text', 'submission.framework.name']);
+        $query = EvidenceFile::query()->with(['response.question', 'submission.framework', 'submission.tenant:id,name', 'tenant:id,name', 'uploader', 'reviews.reviewer']);
+        $this->applySearch($query, $filters['search'] ?? null, ['original_name', 'response.question.question_text', 'submission.framework.name', 'submission.tenant.name']);
         $this->applyFilters($query, $filters, [
             'review_status' => 'review_status',
+            'tenant_id' => 'tenant_id',
         ]);
+        if (! empty($filters['framework_id'])) {
+            $query->whereHas('submission', fn ($q) => $q->where('compliance_framework_id', $filters['framework_id']));
+        }
         $this->applySort($query, [
             'original_name' => 'original_name',
             'review_status' => 'review_status',
@@ -56,6 +64,8 @@ class EvidenceFileController extends Controller
             return $this->exportTable('evidence.xlsx', ['Question', 'File', 'Uploaded', 'Review Status'], $rows);
         }
 
+        $isSuperAdmin = (bool) $request->user()?->hasRole('super_admin');
+
         return Inertia::render('evidence/index', [
             'evidence' => $query->paginate($this->perPage($filters))->withQueryString(),
             'filters' => $filters,
@@ -65,6 +75,9 @@ class EvidenceFileController extends Controller
                 'approved' => EvidenceFile::query()->where('review_status', 'approved')->count(),
                 'rejected' => EvidenceFile::query()->where('review_status', 'rejected')->count(),
             ],
+            'frameworks' => ComplianceFramework::query()->orderBy('name')->get(['id', 'name']),
+            'tenants' => $isSuperAdmin ? Tenant::query()->orderBy('name')->get(['id', 'name']) : [],
+            'isSuperAdmin' => $isSuperAdmin,
         ]);
     }
 

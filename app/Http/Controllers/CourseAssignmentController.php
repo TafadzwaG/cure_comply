@@ -137,14 +137,24 @@ class CourseAssignmentController extends Controller
     {
         $this->authorize('create', CourseAssignment::class);
 
-        CourseAssignment::query()->create([
+        $assignment = CourseAssignment::query()->create([
             ...$request->validated(),
             'assigned_by' => $request->user()?->id,
             'assigned_at' => now(),
             'status' => $request->input('status', 'assigned'),
         ]);
 
-        return back()->with('success', 'Assignment created.');
+        $isSelf = (int) $assignment->assigned_to_user_id === (int) $request->user()?->id;
+
+        if ($isSelf) {
+            return redirect()
+                ->route('assignments.show', $assignment->id)
+                ->with('success', 'Assignment created. Start your training below.');
+        }
+
+        return redirect()
+            ->route('assignments.index')
+            ->with('success', 'Assignment created successfully.');
     }
 
     public function update(CourseAssignmentRequest $request, CourseAssignment $courseAssignment): RedirectResponse

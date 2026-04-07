@@ -107,6 +107,7 @@ class ComplianceSubmissionController extends Controller
         $this->authorize('view', $complianceSubmission);
 
         $complianceSubmission->load([
+            'tenant:id,name',
             'framework.sections.questions' => fn ($query) => $query->orderBy('sort_order'),
             'responses.evidenceFiles.uploader',
             'responses.evidenceFiles.reviews.reviewer',

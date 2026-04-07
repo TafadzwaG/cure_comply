@@ -157,4 +157,13 @@
     body {
         @apply bg-background text-foreground;
     }
+
+    button:not(:disabled),
+    [role="button"]:not([aria-disabled="true"]),
+    [role="menuitem"]:not([aria-disabled="true"]),
+    [role="tab"]:not([aria-disabled="true"]),
+    [data-slot="select-trigger"]:not(:disabled),
+    a[href] {
+        cursor: pointer;
+    }
 }

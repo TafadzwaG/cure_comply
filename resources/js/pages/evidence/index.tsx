@@ -119,10 +119,16 @@ export default function EvidenceIndex({
     evidence,
     filters,
     stats,
+    frameworks = [],
+    tenants = [],
+    isSuperAdmin = false,
 }: {
     evidence: Paginated<EvidenceFileRow>;
     filters: TableFilters;
     stats: Record<string, number>;
+    frameworks?: Array<{ id: number; name: string }>;
+    tenants?: Array<{ id: number; name: string }>;
+    isSuperAdmin?: boolean;
 }) {
     const statItems: IndexStat[] = [
         {
@@ -176,6 +182,20 @@ export default function EvidenceIndex({
                                 { label: 'Rejected', value: 'rejected' },
                             ],
                         },
+                        {
+                            key: 'framework_id',
+                            label: 'Framework',
+                            options: frameworks.map((f) => ({ label: f.name, value: String(f.id) })),
+                        },
+                        ...(isSuperAdmin
+                            ? [
+                                  {
+                                      key: 'tenant_id',
+                                      label: 'Tenant',
+                                      options: tenants.map((t) => ({ label: t.name, value: String(t.id) })),
+                                  },
+                              ]
+                            : []),
                     ]}
                     paginated={evidence}
                     tableTitle="Evidence Queue"
@@ -183,46 +203,6 @@ export default function EvidenceIndex({
                     exportable
                 >
                     <div className="space-y-6">
-                        <Card className="overflow-hidden border-0 shadow-none">
-                            <CardContent className="bg-gradient-to-r from-[#0F2E52] via-[#123867] to-[#14417A] p-6 text-white">
-                                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                                    <div className="max-w-2xl space-y-2">
-                                        <Badge className="border-white/20 bg-white/10 text-white hover:bg-white/10">
-                                            PrivacyCure Evidence Hub
-                                        </Badge>
-                                        <h2 className="text-2xl font-semibold tracking-tight">
-                                            Review uploaded evidence with clearer status and secure actions
-                                        </h2>
-                                        <p className="text-sm text-white/80">
-                                            Keep evidence validation organized with branded actions, visible review
-                                            states, and cleaner upload tracking.
-                                        </p>
-                                    </div>
-
-                                    <div className="flex flex-wrap gap-3">
-                                        <Button
-                                            asChild
-                                            size="sm"
-                                            className="bg-white text-[#0F2E52] hover:bg-white/90"
-                                        >
-                                            <Link href="/evidence?review_status=pending">
-                                                <Clock3 className="mr-2 h-4 w-4" />
-                                                Pending Queue
-                                            </Link>
-                                        </Button>
-
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            className="border-white/20 bg-white/10 text-white hover:bg-white/15"
-                                        >
-                                            {evidence.total ?? evidence.data.length} Total Files
-                                        </Button>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-
                         <Card className="border-[#14417A]/15 shadow-none">
                             <CardHeader className="border-b border-border/60 bg-gradient-to-r from-[#14417A]/[0.06] to-transparent">
                                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

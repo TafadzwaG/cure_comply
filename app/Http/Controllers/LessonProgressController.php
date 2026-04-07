@@ -18,6 +18,8 @@ class LessonProgressController extends Controller
     {
         $this->authorize('view', $assignment);
 
+        abort_unless($request->user()?->id === $assignment->assigned_to_user_id, 403, 'Only the assigned learner can mark lessons complete.');
+
         $request->validate([
             'lesson_id' => ['required', 'integer', 'exists:lessons,id'],
         ]);
@@ -57,6 +59,8 @@ class LessonProgressController extends Controller
     public function destroy(Request $request, CourseAssignment $assignment): RedirectResponse
     {
         $this->authorize('view', $assignment);
+
+        abort_unless($request->user()?->id === $assignment->assigned_to_user_id, 403, 'Only the assigned learner can update their progress.');
 
         $request->validate([
             'lesson_id' => ['required', 'integer', 'exists:lessons,id'],
