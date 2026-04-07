@@ -7,6 +7,7 @@ use App\Http\Requests\CourseRequest;
 use App\Models\Course;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -70,8 +71,15 @@ class CourseController extends Controller
     {
         $this->authorize('create', Course::class);
 
+        $data = $request->validated();
+        unset($data['image'], $data['remove_image']);
+
+        if ($request->hasFile('image')) {
+            $data['image_path'] = $request->file('image')->store('courses', 'public');
+        }
+
         Course::query()->create([
-            ...$request->validated(),
+            ...$data,
             'slug' => Str::slug($request->string('title')).'-'.Str::lower(Str::random(6)),
             'created_by' => $request->user()?->id,
         ]);
@@ -85,13 +93,29 @@ class CourseController extends Controller
 
         return Inertia::render('courses/show', [
             'course' => $course->load(['modules.lessons', 'tests.questions.options']),
+            'canManage' => request()->user()?->can('manage courses') ?? false,
         ]);
     }
 
     public function update(CourseRequest $request, Course $course): RedirectResponse
     {
         $this->authorize('update', $course);
-        $course->update($request->validated());
+
+        $data = $request->validated();
+        $removeImage = (bool) ($data['remove_image'] ?? false);
+        unset($data['image'], $data['remove_image']);
+
+        if ($request->hasFile('image')) {
+            if ($course->image_path) {
+                Storage::disk('public')->delete($course->image_path);
+            }
+            $data['image_path'] = $request->file('image')->store('courses', 'public');
+        } elseif ($removeImage && $course->image_path) {
+            Storage::disk('public')->delete($course->image_path);
+            $data['image_path'] = null;
+        }
+
+        $course->update($data);
 
         return back()->with('success', 'Course updated.');
     }

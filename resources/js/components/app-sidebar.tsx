@@ -39,7 +39,9 @@ export function AppSidebar() {
 
               { title: 'Employees', url: '/employees', icon: Users, visible: can('manage users') },
               { title: 'Courses', url: '/courses', icon: GraduationCap, visible: can('manage courses') },
+              { title: 'Assignments', url: '/assignments', icon: SquareKanban, visible: can('assign training') || can('manage courses') },
               { title: 'Tests', url: '/tests', icon: ClipboardCheck, visible: can('manage tests') },
+              { title: 'Test Attempts', url: '/test-attempts', icon: ClipboardCheck, visible: can('manage tests') },
               { title: 'Compliance Frameworks', url: '/frameworks', icon: ShieldCheck, visible: can('manage compliance frameworks') },
               //   { title: 'Compliance Frameworks', url: '/frameworks', icon: ShieldCheck, visible: can('manage compliance frameworks') },
               {

@@ -36,6 +36,7 @@ interface Submission {
     reporting_period?: string | null;
     framework?: { id: number; name: string } | null;
     score?: { overall_score?: number | null } | null;
+    tenant?: { id: number; name: string } | null;
 }
 
 function StatusPill({ value }: { value: string }) {
@@ -97,11 +98,15 @@ export default function SubmissionsIndex({
     frameworks,
     filters,
     stats,
+    isSuperAdmin = false,
+    tenants = [],
 }: {
     submissions: Paginated<Submission>;
     frameworks: Array<{ id: number; name: string }>;
     filters: TableFilters;
     stats: Record<string, number>;
+    isSuperAdmin?: boolean;
+    tenants?: Array<{ id: number; name: string }>;
 }) {
     const statItems: IndexStat[] = [
         {
@@ -165,6 +170,18 @@ export default function SubmissionsIndex({
                                 value: String(framework.id),
                             })),
                         },
+                        ...(isSuperAdmin
+                            ? [
+                                  {
+                                      key: 'tenant_id',
+                                      label: 'Tenant',
+                                      options: tenants.map((tenant) => ({
+                                          label: tenant.name,
+                                          value: String(tenant.id),
+                                      })),
+                                  },
+                              ]
+                            : []),
                     ]}
                     paginated={submissions}
                     tableTitle="Submission Register"
@@ -238,6 +255,7 @@ export default function SubmissionsIndex({
                                     <TableHeader>
                                         <TableRow className="border-border/60">
                                             <SortableTableHead label="Title" column="title" filters={filters} />
+                                            {isSuperAdmin && <TableHead>Tenant</TableHead>}
                                             <TableHead>Framework</TableHead>
                                             <TableHead>Score</TableHead>
                                             <SortableTableHead label="Status" column="status" filters={filters} />
@@ -281,6 +299,14 @@ export default function SubmissionsIndex({
                                                         </div>
                                                     </div>
                                                 </TableCell>
+
+                                                {isSuperAdmin && (
+                                                    <TableCell className="py-4">
+                                                        <span className="text-sm font-medium text-[#0F2E52] dark:text-blue-200">
+                                                            {submission.tenant?.name ?? 'Platform'}
+                                                        </span>
+                                                    </TableCell>
+                                                )}
 
                                                 <TableCell className="py-4">
                                                     <Badge
@@ -360,7 +386,7 @@ export default function SubmissionsIndex({
                                         {submissions.data.length === 0 && (
                                             <TableRow>
                                                 <TableCell
-                                                    colSpan={5}
+                                                    colSpan={isSuperAdmin ? 6 : 5}
                                                     className="py-12 text-center text-sm text-muted-foreground"
                                                 >
                                                     No submissions found for the current filters.

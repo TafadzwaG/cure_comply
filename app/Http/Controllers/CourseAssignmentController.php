@@ -8,6 +8,7 @@ use App\Http\Requests\CourseAssignmentRequest;
 use App\Models\Course;
 use App\Models\CourseAssignment;
 use App\Models\LessonProgress;
+use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -26,12 +27,16 @@ class CourseAssignmentController extends Controller
         $filters = $this->validateIndex($request, ['status', 'due_date', 'created_at', 'updated_at'], [
             'status' => ['nullable', 'string'],
             'due_state' => ['nullable', 'string'],
+            'course_id' => ['nullable', 'integer'],
+            'tenant_id' => ['nullable', 'integer'],
         ]);
 
-        $query = CourseAssignment::query()->with(['course', 'assignedTo', 'assignedBy']);
-        $this->applySearch($query, $filters['search'] ?? null, ['course.title', 'assignedTo.name', 'assignedTo.email']);
+        $query = CourseAssignment::query()->with(['course', 'assignedTo', 'assignedBy', 'tenant:id,name']);
+        $this->applySearch($query, $filters['search'] ?? null, ['course.title', 'assignedTo.name', 'assignedTo.email', 'tenant.name']);
         $this->applyFilters($query, $filters, [
             'status' => 'status',
+            'course_id' => 'course_id',
+            'tenant_id' => 'tenant_id',
             'due_state' => function ($builder, $value) {
                 if ($value === 'overdue') {
                     $builder->whereDate('due_date', '<', now())->whereNotIn('status', ['completed']);
@@ -52,18 +57,24 @@ class CourseAssignmentController extends Controller
         if ($this->wantsExport($filters)) {
             $rows = $query->get()->map(fn (CourseAssignment $assignment) => [
                 $assignment->assignedTo?->name,
+                $assignment->assignedTo?->email,
+                $assignment->tenant?->name ?: 'Platform',
                 $assignment->course?->title,
                 optional($assignment->due_date)?->format('Y-m-d') ?: 'None',
                 $assignment->status->value,
             ])->all();
 
-            return $this->exportTable('assignments.xlsx', ['Employee', 'Course', 'Due Date', 'Status'], $rows);
+            return $this->exportTable('assignments.xlsx', ['Employee', 'Email', 'Tenant', 'Course', 'Due Date', 'Status'], $rows);
         }
 
         return Inertia::render('assignments/index', [
             'assignments' => $query->paginate($this->perPage($filters))->withQueryString(),
             'courses' => Course::query()->orderBy('title')->get(),
             'users' => User::query()->where('tenant_id', current_tenant()?->id)->orderBy('name')->get(),
+            'tenants' => $request->user()?->isSuperAdmin()
+                ? Tenant::query()->orderBy('name')->get(['id', 'name'])
+                : [],
+            'isSuperAdmin' => $request->user()?->isSuperAdmin() ?? false,
             'filters' => $filters,
             'stats' => [
                 'total' => CourseAssignment::query()->count(),

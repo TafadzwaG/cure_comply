@@ -77,12 +77,13 @@ class TestController extends Controller
     public function store(TestRequest $request): RedirectResponse
     {
         $this->authorize('create', Test::class);
-        Test::query()->create([
+
+        $test = Test::query()->create([
             ...$request->validated(),
             'created_by' => $request->user()?->id,
         ]);
 
-        return back()->with('success', 'Test created.');
+        return redirect()->route('tests.show', $test)->with('success', 'Test created. Now add questions below.');
     }
 
     public function show(Test $test): Response
@@ -102,11 +103,13 @@ class TestController extends Controller
             && ($test->max_attempts === null || $attempts->count() < $test->max_attempts);
 
         return Inertia::render('tests/show', [
-            'test' => $test->load(['course', 'questions.options']),
+            'test' => $test->load(['course', 'questions' => fn ($q) => $q->orderBy('sort_order'), 'questions.options' => fn ($q) => $q->orderBy('sort_order')]),
             'attempts' => $attempts,
             'canTake' => $canTake,
+            'canManage' => $user?->can('manage tests') ?? false,
             'attemptsUsed' => $attempts->count(),
             'maxAttempts' => $test->max_attempts,
+            'courses' => Course::query()->orderBy('title')->get(['id', 'title']),
         ]);
     }
 

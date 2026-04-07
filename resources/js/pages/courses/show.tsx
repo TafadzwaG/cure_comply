@@ -2,9 +2,22 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import PlatformLayout from '@/layouts/platform-layout';
-import { Link } from '@inertiajs/react';
-import { BookOpen, ChevronRight, FileText, Layers3, PlaySquare, ShieldCheck } from 'lucide-react';
+import { Link, useForm } from '@inertiajs/react';
+import { BookOpen, ChevronRight, FileText, ImagePlus, Layers3, Loader2, Pencil, PlaySquare, ShieldCheck, X } from 'lucide-react';
+import { useRef, useState } from 'react';
 
 interface Lesson {
     id: number;
@@ -24,6 +37,8 @@ interface Course {
     title: string;
     status: string;
     description?: string | null;
+    estimated_minutes?: number | null;
+    image_url?: string | null;
     modules?: Module[];
 }
 
@@ -69,9 +84,10 @@ function LessonTypeBadge({ value }: { value?: string | null }) {
     );
 }
 
-export default function CourseShow({ course }: { course: Course }) {
+export default function CourseShow({ course, canManage }: { course: Course; canManage: boolean }) {
     const modules = course.modules ?? [];
     const lessonsCount = modules.reduce((total, module) => total + (module.lessons?.length ?? 0), 0);
+    const [showEdit, setShowEdit] = useState(false);
 
     return (
         <PlatformLayout>
@@ -79,6 +95,13 @@ export default function CourseShow({ course }: { course: Course }) {
                 <Card className="overflow-hidden border-0 shadow-none">
                     <CardContent className="bg-gradient-to-r from-[#0F2E52] via-[#123867] to-[#14417A] p-6 text-white">
                         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                            {course.image_url && (
+                                <img
+                                    src={course.image_url}
+                                    alt={course.title}
+                                    className="h-32 w-48 shrink-0 rounded-xl border border-white/20 object-cover shadow-lg"
+                                />
+                            )}
                             <div className="max-w-3xl space-y-3">
                                 <div className="flex flex-wrap items-center gap-2">
                                     <Badge className="border-white/20 bg-white/10 text-white hover:bg-white/10">
@@ -106,6 +129,16 @@ export default function CourseShow({ course }: { course: Course }) {
                             </div>
 
                             <div className="flex flex-wrap gap-3">
+                                {canManage && (
+                                    <Button
+                                        variant="outline"
+                                        className="border-white/20 bg-white/10 text-white hover:bg-white/20"
+                                        onClick={() => setShowEdit(true)}
+                                    >
+                                        <Pencil className="size-4" />
+                                        Edit course
+                                    </Button>
+                                )}
                                 <Button
                                     asChild
                                     variant="outline"
@@ -306,6 +339,175 @@ export default function CourseShow({ course }: { course: Course }) {
                     </div>
                 </div>
             </div>
+
+            {canManage && <EditCourseDialog course={course} open={showEdit} onOpenChange={setShowEdit} />}
         </PlatformLayout>
+    );
+}
+
+function EditCourseDialog({
+    course,
+    open,
+    onOpenChange,
+}: {
+    course: Course;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+}) {
+    const form = useForm<{
+        _method: string;
+        title: string;
+        description: string;
+        status: string;
+        estimated_minutes: number | '';
+        image: File | null;
+        remove_image: boolean;
+    }>({
+        _method: 'patch',
+        title: course.title,
+        description: course.description ?? '',
+        status: course.status,
+        estimated_minutes: course.estimated_minutes ?? '',
+        image: null,
+        remove_image: false,
+    });
+    const [preview, setPreview] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    function handleImageChange(file: File | null) {
+        form.setData('image', file);
+        form.setData('remove_image', false);
+        if (preview) URL.revokeObjectURL(preview);
+        setPreview(file ? URL.createObjectURL(file) : null);
+    }
+
+    const currentImage = preview ?? (form.data.remove_image ? null : course.image_url ?? null);
+
+    function handleSubmit() {
+        // Use POST + _method=patch so file upload works through Inertia
+        form.post(route('courses.update', course.id), {
+            forceFormData: true,
+            preserveScroll: true,
+            onSuccess: () => onOpenChange(false),
+        });
+    }
+
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+                <DialogHeader>
+                    <DialogTitle>Edit Course</DialogTitle>
+                    <DialogDescription>Update the course details and publishing status.</DialogDescription>
+                </DialogHeader>
+
+                <div className="space-y-5 py-2">
+                    <div className="space-y-2">
+                        <Label htmlFor="title">Title</Label>
+                        <Input id="title" value={form.data.title} onChange={(e) => form.setData('title', e.target.value)} />
+                        {form.errors.title && <p className="text-sm text-destructive">{form.errors.title}</p>}
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="description">Description</Label>
+                        <Textarea
+                            id="description"
+                            rows={4}
+                            value={form.data.description}
+                            onChange={(e) => form.setData('description', e.target.value)}
+                            placeholder="Optional description for this course..."
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label>Course image</Label>
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            className="hidden"
+                            onChange={(e) => handleImageChange(e.target.files?.[0] ?? null)}
+                        />
+                        {currentImage ? (
+                            <div className="relative inline-block">
+                                <img src={currentImage} alt="Preview" className="h-32 w-56 rounded-md border border-border/60 object-cover" />
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        if (preview) URL.revokeObjectURL(preview);
+                                        setPreview(null);
+                                        form.setData('image', null);
+                                        form.setData('remove_image', true);
+                                        if (fileInputRef.current) fileInputRef.current.value = '';
+                                    }}
+                                    className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-rose-600 text-white shadow"
+                                >
+                                    <X className="h-3 w-3" />
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="absolute bottom-2 right-2 rounded-md bg-white/90 px-2 py-1 text-xs font-medium text-[#0F2E52] shadow"
+                                >
+                                    Change
+                                </button>
+                            </div>
+                        ) : (
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                className="flex h-32 w-56 flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed border-border/60 bg-muted/20 text-sm text-muted-foreground hover:border-[#14417A]/40 hover:bg-[#14417A]/5"
+                            >
+                                <ImagePlus className="h-5 w-5" />
+                                Upload image
+                            </button>
+                        )}
+                        {form.errors.image && <p className="text-sm text-destructive">{form.errors.image}</p>}
+                    </div>
+
+                    <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="space-y-2">
+                            <Label>Status</Label>
+                            <Select value={form.data.status} onValueChange={(v) => form.setData('status', v)}>
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="draft">Draft</SelectItem>
+                                    <SelectItem value="published">Published</SelectItem>
+                                    <SelectItem value="archived">Archived</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="estimated_minutes">Estimated minutes</Label>
+                            <Input
+                                id="estimated_minutes"
+                                type="number"
+                                min={1}
+                                value={form.data.estimated_minutes}
+                                onChange={(e) =>
+                                    form.setData('estimated_minutes', e.target.value === '' ? '' : Number(e.target.value))
+                                }
+                                placeholder="e.g. 60"
+                            />
+                            {form.errors.estimated_minutes && (
+                                <p className="text-sm text-destructive">{form.errors.estimated_minutes}</p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                <DialogFooter className="gap-2 sm:gap-0">
+                    <Button variant="outline" onClick={() => onOpenChange(false)} disabled={form.processing}>
+                        Cancel
+                    </Button>
+                    <Button onClick={handleSubmit} disabled={form.processing}>
+                        {form.processing && <Loader2 className="size-4 animate-spin" />}
+                        Save changes
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     );
 }

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Enums\TestAttemptResultStatus;
+use App\Http\Controllers\Concerns\InteractsWithIndexTables;
+use App\Models\Tenant;
 use App\Models\Test;
 use App\Models\TestAnswer;
 use App\Models\TestAttempt;
@@ -11,9 +13,70 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TestAttemptController extends Controller
 {
+    use InteractsWithIndexTables;
+
+    public function index(Request $request): Response|StreamedResponse
+    {
+        abort_unless($request->user()?->can('manage tests'), 403);
+
+        $filters = $this->validateIndex($request, ['submitted_at', 'percentage', 'attempt_number'], [
+            'result_status' => ['nullable', 'string'],
+            'test_id' => ['nullable', 'integer'],
+            'tenant_id' => ['nullable', 'integer'],
+        ]);
+
+        $query = TestAttempt::query()->with(['test:id,title', 'user:id,name,email', 'tenant:id,name']);
+        $this->applySearch($query, $filters['search'] ?? null, ['user.name', 'user.email', 'test.title']);
+        $this->applyFilters($query, $filters, [
+            'result_status' => 'result_status',
+            'test_id' => 'test_id',
+            'tenant_id' => 'tenant_id',
+        ]);
+        $this->applySort($query, [
+            'submitted_at' => 'submitted_at',
+            'percentage' => 'percentage',
+            'attempt_number' => 'attempt_number',
+        ], $filters['sort'] ?? null, $filters['direction'] ?? 'desc');
+
+        if ($this->wantsExport($filters)) {
+            $rows = $query->get()->map(fn (TestAttempt $a) => [
+                $a->user?->name,
+                $a->user?->email,
+                $a->tenant?->name ?: 'Platform',
+                $a->test?->title,
+                $a->attempt_number,
+                $a->percentage,
+                $a->result_status?->value,
+                optional($a->submitted_at)->toDateTimeString(),
+            ])->all();
+
+            return $this->exportTable('test-attempts.xlsx',
+                ['User', 'Email', 'Tenant', 'Test', 'Attempt', 'Score %', 'Result', 'Submitted'],
+                $rows,
+            );
+        }
+
+        return Inertia::render('test-attempts/index', [
+            'attempts' => $query->paginate($this->perPage($filters))->withQueryString(),
+            'tests' => Test::query()->orderBy('title')->get(['id', 'title']),
+            'tenants' => $request->user()?->isSuperAdmin()
+                ? Tenant::query()->orderBy('name')->get(['id', 'name'])
+                : [],
+            'isSuperAdmin' => $request->user()?->isSuperAdmin() ?? false,
+            'filters' => $filters,
+            'stats' => [
+                'total' => TestAttempt::query()->count(),
+                'passed' => TestAttempt::query()->where('result_status', 'passed')->count(),
+                'failed' => TestAttempt::query()->where('result_status', 'failed')->count(),
+                'pending' => TestAttempt::query()->where('result_status', 'pending_review')->count(),
+            ],
+        ]);
+    }
+
     public function create(Test $test): Response
     {
         $this->authorize('view', $test);

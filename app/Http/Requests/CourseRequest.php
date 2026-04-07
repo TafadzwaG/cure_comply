@@ -19,6 +19,8 @@ class CourseRequest extends FormRequest
             'description' => ['nullable', 'string'],
             'status' => ['required', 'string', 'max:50'],
             'estimated_minutes' => ['nullable', 'integer', 'min:1'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'remove_image' => ['nullable', 'boolean'],
         ];
     }
 }

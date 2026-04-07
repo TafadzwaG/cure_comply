@@ -40,6 +40,7 @@ interface Assignment {
     status: string;
     course?: { id: number; title: string } | null;
     assigned_to?: { id: number; name: string } | null;
+    tenant?: { id: number; name: string } | null;
 }
 
 function StatusPill({ value }: { value: string }) {
@@ -114,12 +115,16 @@ export default function AssignmentsIndex({
     assignments,
     courses,
     users,
+    tenants = [],
+    isSuperAdmin = false,
     filters,
     stats,
 }: {
     assignments: Paginated<Assignment>;
     courses: Array<{ id: number; title: string }>;
     users: User[];
+    tenants?: Array<{ id: number; name: string }>;
+    isSuperAdmin?: boolean;
     filters: TableFilters;
     stats: Record<string, number>;
 }) {
@@ -178,6 +183,20 @@ export default function AssignmentsIndex({
                                 { label: 'Overdue', value: 'overdue' },
                             ],
                         },
+                        {
+                            key: 'course_id',
+                            label: 'Course',
+                            options: courses.map((c) => ({ label: c.title, value: String(c.id) })),
+                        },
+                        ...(isSuperAdmin
+                            ? [
+                                  {
+                                      key: 'tenant_id',
+                                      label: 'Tenant',
+                                      options: tenants.map((t) => ({ label: t.name, value: String(t.id) })),
+                                  },
+                              ]
+                            : []),
                     ]}
                     paginated={assignments}
                     tableTitle="Assignment Tracker"
@@ -251,6 +270,7 @@ export default function AssignmentsIndex({
                                     <TableHeader>
                                         <TableRow className="border-border/60">
                                             <TableHead>Employee</TableHead>
+                                            {isSuperAdmin && <TableHead>Tenant</TableHead>}
                                             <TableHead>Course</TableHead>
                                             <SortableTableHead label="Due Date" column="due_date" filters={filters} />
                                             <SortableTableHead label="Status" column="status" filters={filters} />
@@ -279,6 +299,14 @@ export default function AssignmentsIndex({
                                                         </div>
                                                     </div>
                                                 </TableCell>
+
+                                                {isSuperAdmin && (
+                                                    <TableCell className="py-4">
+                                                        <span className="text-sm font-medium text-[#0F2E52] dark:text-blue-200">
+                                                            {assignment.tenant?.name ?? 'Platform'}
+                                                        </span>
+                                                    </TableCell>
+                                                )}
 
                                                 <TableCell className="py-4">
                                                     <div className="flex items-center gap-3">
@@ -371,7 +399,7 @@ export default function AssignmentsIndex({
                                         {assignments.data.length === 0 && (
                                             <TableRow>
                                                 <TableCell
-                                                    colSpan={5}
+                                                    colSpan={isSuperAdmin ? 6 : 5}
                                                     className="py-12 text-center text-sm text-muted-foreground"
                                                 >
                                                     No assignments found for the current filters.

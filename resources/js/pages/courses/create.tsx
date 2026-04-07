@@ -4,15 +4,31 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import PlatformLayout from '@/layouts/platform-layout';
 import { Link, useForm } from '@inertiajs/react';
-import { BookOpen, Clock3, Layers3, Plus, ShieldCheck } from 'lucide-react';
+import { BookOpen, Clock3, ImagePlus, Layers3, Plus, ShieldCheck, X } from 'lucide-react';
+import { useRef, useState } from 'react';
 
 export default function CoursesCreate() {
-    const form = useForm({
+    const form = useForm<{
+        title: string;
+        description: string;
+        estimated_minutes: number;
+        status: string;
+        image: File | null;
+    }>({
         title: '',
         description: '',
         estimated_minutes: 45,
         status: 'draft',
+        image: null,
     });
+    const [preview, setPreview] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    function handleImageChange(file: File | null) {
+        form.setData('image', file);
+        if (preview) URL.revokeObjectURL(preview);
+        setPreview(file ? URL.createObjectURL(file) : null);
+    }
 
     const guidanceItems = [
         {
@@ -153,6 +169,42 @@ export default function CoursesCreate() {
                                 </div>
                             </div>
 
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Course image</label>
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp"
+                                    className="hidden"
+                                    onChange={(e) => handleImageChange(e.target.files?.[0] ?? null)}
+                                />
+                                {preview ? (
+                                    <div className="relative inline-block">
+                                        <img src={preview} alt="Preview" className="h-40 w-72 rounded-md border border-border/60 object-cover" />
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                handleImageChange(null);
+                                                if (fileInputRef.current) fileInputRef.current.value = '';
+                                            }}
+                                            className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-rose-600 text-white shadow"
+                                        >
+                                            <X className="h-3 w-3" />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="flex h-40 w-72 flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed border-border/60 bg-muted/20 text-sm text-muted-foreground hover:border-[#14417A]/40 hover:bg-[#14417A]/5"
+                                    >
+                                        <ImagePlus className="h-6 w-6" />
+                                        Click to upload (JPG, PNG, WEBP — max 4MB)
+                                    </button>
+                                )}
+                                {form.errors.image && <p className="text-sm text-destructive">{form.errors.image}</p>}
+                            </div>
+
                             <div className="rounded-md border border-border/60 bg-muted/20 p-4">
                                 <div className="flex items-start gap-3">
                                     <div className="flex h-9 w-9 items-center justify-center rounded-md border border-[#14417A]/10 bg-[#14417A]/5">
@@ -172,7 +224,7 @@ export default function CoursesCreate() {
                                 <Button
                                     type="button"
                                     disabled={form.processing}
-                                    onClick={() => form.post(route('courses.store'))}
+                                    onClick={() => form.post(route('courses.store'), { forceFormData: true })}
                                     className="rounded-md bg-[#14417A] text-white hover:bg-[#0F2E52]"
                                 >
                                     <Plus className="mr-2 h-4 w-4" />

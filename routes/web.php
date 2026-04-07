@@ -15,6 +15,7 @@ use App\Http\Controllers\EmployeeProfileCompletionController;
 use App\Http\Controllers\EvidenceFileController;
 use App\Http\Controllers\EvidenceReviewController;
 use App\Http\Controllers\ImpersonationController;
+use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\LessonProgressController;
 use App\Http\Controllers\ReportController;
@@ -55,6 +56,10 @@ Route::middleware(['auth', 'throttle:api', 'tenant', 'impersonation.audit'])->gr
     Route::post('assignments/{assignment}/progress', [LessonProgressController::class, 'store'])->name('assignments.progress.store');
     Route::delete('assignments/{assignment}/progress', [LessonProgressController::class, 'destroy'])->name('assignments.progress.destroy');
     Route::resource('tests', TestController::class)->only(['index', 'create', 'store', 'show', 'update', 'destroy']);
+    Route::post('tests/{test}/questions', [QuestionController::class, 'store'])->name('tests.questions.store');
+    Route::patch('tests/{test}/questions/{question}', [QuestionController::class, 'update'])->name('tests.questions.update');
+    Route::delete('tests/{test}/questions/{question}', [QuestionController::class, 'destroy'])->name('tests.questions.destroy');
+    Route::get('test-attempts', [TestAttemptController::class, 'index'])->name('test-attempts.index');
     Route::get('tests/{test}/take', [TestAttemptController::class, 'create'])->name('tests.attempts.create');
     Route::post('tests/{test}/attempts', [TestAttemptController::class, 'store'])->name('tests.attempts.store');
     Route::get('tests/{test}/attempts/{testAttempt}', [TestAttemptController::class, 'show'])->name('tests.attempts.show');

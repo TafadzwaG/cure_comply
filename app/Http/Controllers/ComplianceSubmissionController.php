@@ -8,6 +8,7 @@ use App\Http\Requests\ComplianceSubmissionRequest;
 use App\Models\ComplianceFramework;
 use App\Models\ComplianceResponse;
 use App\Models\ComplianceSubmission;
+use App\Models\Tenant;
 use App\Services\ComplianceScoringService;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
@@ -32,13 +33,15 @@ class ComplianceSubmissionController extends Controller
         $filters = $this->validateIndex($request, ['title', 'status', 'reporting_period', 'created_at', 'updated_at'], [
             'status' => ['nullable', 'string'],
             'framework_id' => ['nullable', 'integer'],
+            'tenant_id' => ['nullable', 'integer'],
         ]);
 
-        $query = ComplianceSubmission::query()->with(['framework', 'score']);
-        $this->applySearch($query, $filters['search'] ?? null, ['title', 'framework.name', 'reporting_period']);
+        $query = ComplianceSubmission::query()->with(['framework', 'score', 'tenant:id,name']);
+        $this->applySearch($query, $filters['search'] ?? null, ['title', 'framework.name', 'reporting_period', 'tenant.name']);
         $this->applyFilters($query, $filters, [
             'status' => 'status',
             'framework_id' => 'compliance_framework_id',
+            'tenant_id' => 'tenant_id',
         ]);
         $this->applySort($query, [
             'title' => 'title',
@@ -51,19 +54,24 @@ class ComplianceSubmissionController extends Controller
         if ($this->wantsExport($filters)) {
             $rows = $query->get()->map(fn (ComplianceSubmission $submission) => [
                 $submission->title,
+                $submission->tenant?->name ?: 'Platform',
                 $submission->framework?->name,
                 $submission->reporting_period ?: 'N/A',
                 $submission->score?->overall_score ?: 'Not scored',
                 $submission->status->value,
             ])->all();
 
-            return $this->exportTable('submissions.xlsx', ['Title', 'Framework', 'Period', 'Score', 'Status'], $rows);
+            return $this->exportTable('submissions.xlsx', ['Title', 'Tenant', 'Framework', 'Period', 'Score', 'Status'], $rows);
         }
 
         return Inertia::render('submissions/index', [
             'submissions' => $query->paginate($this->perPage($filters))->withQueryString(),
             'frameworks' => ComplianceFramework::query()->orderBy('name')->get(),
             'filters' => $filters,
+            'isSuperAdmin' => $request->user()?->isSuperAdmin() ?? false,
+            'tenants' => $request->user()?->isSuperAdmin()
+                ? Tenant::query()->orderBy('name')->get(['id', 'name'])
+                : [],
             'stats' => [
                 'total' => ComplianceSubmission::query()->count(),
                 'submitted' => ComplianceSubmission::query()->where('status', 'submitted')->count(),

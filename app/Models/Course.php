@@ -18,16 +18,24 @@ class Course extends Model
         'title',
         'slug',
         'description',
+        'image_path',
         'status',
         'estimated_minutes',
         'created_by',
     ];
+
+    protected $appends = ['image_url'];
 
     protected function casts(): array
     {
         return [
             'status' => CourseStatus::class,
         ];
+    }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->image_path ? \Illuminate\Support\Facades\Storage::disk('public')->url($this->image_path) : null;
     }
 
     public function creator(): BelongsTo

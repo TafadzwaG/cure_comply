@@ -18,10 +18,13 @@ class Question extends Model
         'test_id',
         'question_type',
         'question_text',
+        'image_path',
         'marks',
         'sort_order',
         'is_active',
     ];
+
+    protected $appends = ['image_url'];
 
     protected function casts(): array
     {
@@ -29,6 +32,11 @@ class Question extends Model
             'question_type' => TestQuestionType::class,
             'is_active' => 'boolean',
         ];
+    }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->image_path ? \Illuminate\Support\Facades\Storage::disk('public')->url($this->image_path) : null;
     }
 
     public function test(): BelongsTo

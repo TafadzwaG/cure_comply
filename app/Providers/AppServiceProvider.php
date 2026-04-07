@@ -19,6 +19,15 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(CurrentTenantResolver::class, fn () => new CurrentTenantResolver());
+
+        // Raise PHP execution & memory limits app-wide for long-running web requests,
+        // imports, and exports. CLI (artisan, queue) is left untouched.
+        if (PHP_SAPI !== 'cli') {
+            @set_time_limit(300);
+            @ini_set('max_execution_time', '300');
+            @ini_set('max_input_time', '300');
+            @ini_set('memory_limit', '512M');
+        }
     }
 
     /**

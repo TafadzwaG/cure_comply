@@ -12,7 +12,9 @@
       "Bash(php artisan:*)",
       "Bash(npm run:*)",
       "WebFetch(domain:privacycure.com)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(php -r \"require ''vendor/autoload.php''; $app = require ''bootstrap/app.php''; $app->make\\(Illuminate\\\\Contracts\\\\Console\\\\Kernel::class\\)->bootstrap\\(\\); $q = App\\\\Models\\\\Question::whereNotNull\\(''image_path''\\)->first\\(\\); echo json_encode\\([''id''=>$q->id,''test_id''=>$q->test_id,''image_path''=>$q->image_path,''image_url''=>$q->image_url]\\);\")",
+      "Bash(php check_img.php)"
     ]
   }
 }
