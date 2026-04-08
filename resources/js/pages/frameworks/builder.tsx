@@ -1,4 +1,6 @@
+import { BrandCard } from '@/components/brand-card';
 import InputError from '@/components/input-error';
+import { IconChip } from '@/components/icon-chip';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -6,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
@@ -126,6 +129,12 @@ export function FrameworkBuilder({
 
     const questionsCount =
         framework.sections?.reduce((carry, section) => carry + (section.questions?.length ?? 0), 0) ?? 0;
+    const activeQuestions =
+        framework.sections?.reduce(
+            (carry, section) => carry + (section.questions?.filter((question) => question.is_active).length ?? 0),
+            0,
+        ) ?? 0;
+    const readiness = questionsCount ? Math.round((activeQuestions / questionsCount) * 100) : 0;
 
     useEffect(() => {
         const sectionIds = framework.sections?.map((section) => String(section.id)) ?? [];
@@ -136,77 +145,98 @@ export function FrameworkBuilder({
     return (
         <PlatformLayout>
             <div className="space-y-6">
-                <Card className="overflow-hidden border-0 shadow-none">
-                    <CardContent className="bg-gradient-to-r from-[#0F2E52] via-[#123867] to-[#14417A] p-6 text-white">
-                        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-                            <div className="max-w-3xl space-y-3">
+                <section className="grid gap-4 lg:grid-cols-[1.45fr_0.9fr]">
+                    <BrandCard
+                        title="Framework builder"
+                        description="Shape the framework shell, then organize sections and weighted questions from one workspace."
+                        className="bg-card"
+                        headerRight={<IconChip icon={<BookMarked className="size-4" />} />}
+                    >
+                        <div className="space-y-6">
+                            <div className="space-y-2">
                                 <div className="flex flex-wrap items-center gap-2">
-                                    <Badge className="border-white/20 bg-white/10 text-white hover:bg-white/10">
-                                        PrivacyCure Framework Builder
+                                    <Badge variant="outline" className="rounded-full px-3 py-1 text-[11px] uppercase tracking-[0.22em]">
+                                        PrivacyCure framework builder
                                     </Badge>
                                     <StatusPill value={framework.status} />
-                                    <Badge className="border-white/20 bg-white/10 text-white hover:bg-white/10">
+                                    <Badge variant="outline" className="rounded-full px-3 py-1 text-[11px] uppercase tracking-[0.22em]">
                                         {mode === 'edit' ? 'Edit mode' : 'View mode'}
                                     </Badge>
                                 </div>
+                                <h1 className="text-3xl font-semibold tracking-tight">{framework.name}</h1>
+                                <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+                                    Configure framework metadata, organize sections, and build the compliance question bank with answer types, weights, and evidence rules.
+                                </p>
+                            </div>
 
-                                <div className="space-y-2">
-                                    <h1 className="text-2xl font-semibold tracking-tight">{framework.name}</h1>
-                                    <p className="text-sm text-white/80">
-                                        Framework settings, sections, and questions.
-                                    </p>
-                                </div>
-
-                                <div className="flex flex-wrap items-center gap-2">
-                                    <Badge className="border-white/15 bg-white/10 text-white hover:bg-white/10">
-                                        {framework.sections?.length ?? 0} sections
-                                    </Badge>
-                                    <Badge className="border-white/15 bg-white/10 text-white hover:bg-white/10">
-                                        {questionsCount} questions
-                                    </Badge>
-                                    <Badge className="border-white/15 bg-white/10 text-white hover:bg-white/10">
-                                        {framework.submissions_count ?? 0} submissions
-                                    </Badge>
-                                </div>
+                            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                                <BuilderMetric label="Sections" value={`${framework.sections?.length ?? 0}`} detail="Current section groups" icon={Layers3} />
+                                <BuilderMetric label="Questions" value={`${questionsCount}`} detail="Controls in the bank" icon={ListChecks} />
+                                <BuilderMetric label="Coverage" value={`${readiness}%`} detail={`${activeQuestions} active questions`} icon={ShieldCheck} />
+                                <BuilderMetric label="Submissions" value={`${framework.submissions_count ?? 0}`} detail="Submission records linked" icon={Workflow} />
                             </div>
 
                             <div className="flex flex-wrap gap-3">
                                 {mode === 'edit' ? (
                                     <Button
-                                        onClick={() =>
-                                            frameworkForm.patch(route('frameworks.update', framework.id, false))
-                                        }
-                                        className="bg-white text-[#0F2E52] hover:bg-white/90"
+                                        onClick={() => frameworkForm.patch(route('frameworks.update', framework.id, false))}
                                     >
                                         <Save className="mr-2 h-4 w-4" />
-                                        Save Framework
+                                        Save framework
                                     </Button>
                                 ) : (
-                                    <Button
-                                        asChild
-                                        className="bg-white text-[#0F2E52] hover:bg-white/90"
-                                    >
+                                    <Button asChild>
                                         <Link href={route('frameworks.edit', framework.id, false)}>
                                             <Pencil className="mr-2 h-4 w-4" />
-                                            Open Edit Mode
+                                            Open edit mode
                                         </Link>
                                     </Button>
                                 )}
 
-                                <Button
-                                    asChild
-                                    variant="outline"
-                                    className="border-white/20 bg-white/10 text-white hover:bg-white/15"
-                                >
+                                <Button asChild variant="outline">
                                     <Link href={route('frameworks.index', undefined, false)}>
                                         <ArrowLeft className="mr-2 h-4 w-4" />
-                                        Back to Frameworks
+                                        Back to frameworks
                                     </Link>
                                 </Button>
                             </div>
                         </div>
-                    </CardContent>
-                </Card>
+                    </BrandCard>
+
+                    <BrandCard
+                        title="Builder rail"
+                        description="Keep the framework structured and stable before publishing."
+                        className="bg-muted/20"
+                        headerRight={<IconChip icon={<Sparkles className="size-4" />} className="border border-border/70 bg-background p-2.5 text-foreground" />}
+                    >
+                        <div className="space-y-4">
+                            <GuidanceRow
+                                icon={Layers3}
+                                title="Organize by section"
+                                description="Group related controls together and set section order and weight deliberately."
+                                iconClassName="bg-muted text-muted-foreground"
+                            />
+                            <GuidanceRow
+                                icon={TextSearch}
+                                title="Choose answer types carefully"
+                                description="Use scored and narrative answer types intentionally so scoring and review remain meaningful."
+                                iconClassName="bg-muted text-muted-foreground"
+                            />
+                            <GuidanceRow
+                                icon={HelpCircle}
+                                title="Add guidance text"
+                                description="Guidance text improves answer quality and reduces confusion during tenant submissions."
+                                iconClassName="bg-muted text-muted-foreground"
+                            />
+                            <GuidanceRow
+                                icon={ShieldCheck}
+                                title="Publish only when stable"
+                                description="Published frameworks should be structurally stable because tenant submissions rely on their layout."
+                                iconClassName="bg-muted text-muted-foreground"
+                            />
+                        </div>
+                    </BrandCard>
+                </section>
 
                 <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                     <MetricCard
@@ -236,24 +266,24 @@ export function FrameworkBuilder({
                 </section>
 
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-                    <TabsList className="h-auto w-full justify-start rounded-xl border border-[#14417A]/15 bg-[#14417A]/[0.04] p-1">
+                    <TabsList className="h-auto w-full justify-start rounded-lg border border-border bg-muted/40 p-1">
                         <TabsTrigger
                             value="overview"
-                            className="rounded-lg px-4 py-2.5 data-[state=active]:bg-[#14417A] data-[state=active]:text-white"
+                            className="rounded-md px-4 py-2.5 data-[state=active]:bg-[#14417A] data-[state=active]:text-white"
                         >
                             <BookMarked className="mr-2 size-4" />
                             Overview
                         </TabsTrigger>
                         <TabsTrigger
                             value="sections"
-                            className="rounded-lg px-4 py-2.5 data-[state=active]:bg-[#14417A] data-[state=active]:text-white"
+                            className="rounded-md px-4 py-2.5 data-[state=active]:bg-[#14417A] data-[state=active]:text-white"
                         >
                             <Layers3 className="mr-2 size-4" />
                             Sections & questions
                         </TabsTrigger>
                         <TabsTrigger
                             value="help"
-                            className="rounded-lg px-4 py-2.5 data-[state=active]:bg-[#14417A] data-[state=active]:text-white"
+                            className="rounded-md px-4 py-2.5 data-[state=active]:bg-[#14417A] data-[state=active]:text-white"
                         >
                             <HelpCircle className="mr-2 size-4" />
                             Help
@@ -262,18 +292,12 @@ export function FrameworkBuilder({
 
                     <TabsContent value="overview">
                         <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-                            <Card className="border-[#14417A]/15 shadow-none">
-                                <CardHeader className="border-b border-border/60 bg-gradient-to-r from-[#14417A]/[0.06] to-transparent">
-                                    <CardTitle className="flex items-center gap-2 text-[#0F2E52] dark:text-blue-200">
-                                        <BookMarked className="size-4" />
-                                        Framework details
-                                    </CardTitle>
-                                    <CardDescription>
-                                        Update top-level metadata that identifies and publishes the framework.
-                                    </CardDescription>
-                                </CardHeader>
-
-                                <CardContent className="space-y-5 p-6">
+                            <BrandCard
+                                title="Framework details"
+                                description="Update top-level metadata that identifies and publishes the framework."
+                                headerRight={<IconChip icon={<BookMarked className="size-4" />} />}
+                            >
+                                <div className="space-y-5">
                                     <div className="grid gap-4 md:grid-cols-2">
                                         <Field label="Framework name" error={frameworkForm.errors.name}>
                                             <Input
@@ -294,6 +318,14 @@ export function FrameworkBuilder({
                                                 className="border-[#14417A]/15 focus-visible:ring-[#14417A]"
                                             />
                                         </Field>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between text-sm">
+                                            <span className="text-[#002753] dark:text-white">Question readiness</span>
+                                            <span className="tabular-nums text-muted-foreground">{readiness}%</span>
+                                        </div>
+                                        <Progress className="h-2 bg-[#e6e8ea]" value={readiness} />
                                     </div>
 
                                     <Field label="Description" error={frameworkForm.errors.description}>
@@ -349,21 +381,15 @@ export function FrameworkBuilder({
                                             </Button>
                                         )}
                                     </div>
-                                </CardContent>
-                            </Card>
+                                </div>
+                            </BrandCard>
 
-                            <Card className="border-[#14417A]/15 shadow-none">
-                                <CardHeader className="border-b border-border/60 bg-gradient-to-r from-[#14417A]/[0.06] to-transparent">
-                                    <CardTitle className="flex items-center gap-2 text-[#0F2E52] dark:text-blue-200">
-                                        <Sparkles className="size-4" />
-                                        Builder guidance
-                                    </CardTitle>
-                                    <CardDescription>
-                                        Keep section ordering and question intent explicit before publishing.
-                                    </CardDescription>
-                                </CardHeader>
-
-                                <CardContent className="space-y-4 p-6 text-sm">
+                            <BrandCard
+                                title="Builder guidance"
+                                description="Keep section ordering and question intent explicit before publishing."
+                                headerRight={<IconChip icon={<Sparkles className="size-4" />} />}
+                            >
+                                <div className="space-y-4 text-sm">
                                     <GuidanceRow
                                         icon={Layers3}
                                         title="Organize by section"
@@ -388,8 +414,8 @@ export function FrameworkBuilder({
                                         description="Published frameworks should be stable because submissions depend on their structure."
                                         iconClassName="bg-muted text-muted-foreground"
                                     />
-                                </CardContent>
-                            </Card>
+                                </div>
+                            </BrandCard>
                         </div>
                     </TabsContent>
 
@@ -499,14 +525,12 @@ export function FrameworkBuilder({
                                     <AccordionItem
                                         key={section.id}
                                         value={`section-${section.id}`}
-                                        className="overflow-hidden rounded-xl border border-[#14417A]/15 bg-card px-0 shadow-sm"
+                                        className="overflow-hidden rounded-xl border border-border/70 bg-card px-0 shadow-none"
                                     >
-                                        <AccordionTrigger className="px-5 py-4 hover:no-underline [&[data-state=open]]:border-b [&[data-state=open]]:border-border/60 [&[data-state=open]]:bg-gradient-to-r [&[data-state=open]]:from-[#14417A]/[0.04] [&[data-state=open]]:to-transparent">
+                                        <AccordionTrigger className="px-5 py-4 hover:no-underline [&[data-state=open]]:border-b [&[data-state=open]]:border-border/60 [&[data-state=open]]:bg-muted/20">
                                             <div className="flex flex-1 items-center justify-between gap-4 text-left">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                                                        <FileStack className="h-4 w-4" />
-                                                    </div>
+                                                    <IconChip icon={<FileStack className="h-4 w-4" />} className="h-10 w-10 rounded-lg" />
                                                     <div className="space-y-0.5">
                                                         <div className="text-sm font-semibold text-[#0F2E52] dark:text-blue-200">
                                                             {idx + 1}. {section.name}
@@ -539,7 +563,7 @@ export function FrameworkBuilder({
                     </TabsContent>
 
                     <TabsContent value="help">
-                        <Card className="border-[#14417A]/15 shadow-none">
+                            <Card className="border-[#14417A]/15 shadow-none">
                             <CardHeader className="border-b border-border/60 bg-gradient-to-r from-[#14417A]/[0.06] to-transparent">
                                 <CardTitle className="flex items-center gap-2 text-[#0F2E52] dark:text-blue-200">
                                     <Workflow className="size-4" />
@@ -1118,6 +1142,31 @@ function MetricCard({
                 </div>
             </CardContent>
         </Card>
+    );
+}
+
+function BuilderMetric({
+    label,
+    value,
+    detail,
+    icon: Icon,
+}: {
+    label: string;
+    value: string;
+    detail: string;
+    icon: LucideIcon;
+}) {
+    return (
+        <div className="rounded-xl border border-border/70 bg-muted/20 p-4">
+            <div className="flex items-center gap-3">
+                <IconChip icon={<Icon className="size-4" />} />
+                <div className="space-y-1">
+                    <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">{label}</p>
+                    <p className="text-lg font-semibold text-[#002753] dark:text-white">{value}</p>
+                    <p className="text-xs text-muted-foreground">{detail}</p>
+                </div>
+            </div>
+        </div>
     );
 }
 

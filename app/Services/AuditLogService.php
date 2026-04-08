@@ -30,4 +30,24 @@ class AuditLogService
     {
         return $this->log($action, $model::class, $model->getKey(), $oldValues, $newValues);
     }
+
+    public function logModelCreated(string $action, Model $model): AuditLog
+    {
+        return $this->logModel($action, $model, [], $model->toArray());
+    }
+
+    public function logModelUpdated(string $action, Model $model, array $oldValues): AuditLog
+    {
+        return $this->logModel($action, $model, $oldValues, $model->fresh()?->toArray() ?? $model->toArray());
+    }
+
+    public function logModelDeleted(string $action, Model $model, array $oldValues = []): AuditLog
+    {
+        return $this->logModel($action, $model, $oldValues ?: $model->toArray(), []);
+    }
+
+    public function logExport(string $action, Model $model, array $newValues = []): AuditLog
+    {
+        return $this->log($action, $model::class, $model->getKey(), [], $newValues);
+    }
 }

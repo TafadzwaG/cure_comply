@@ -26,6 +26,7 @@ use App\Models\Test;
 use App\Models\TestAttempt;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
@@ -351,6 +352,18 @@ class DashboardService
             ->latest('submitted_at')
             ->first();
 
+        // KPI: average evidence review time (seconds) across the whole tenant
+        $avgReviewSeconds = $this->averageEvidenceReviewSeconds($tenantId);
+
+        $pendingEvidenceCount = (clone $evidenceQuery)->where('review_status', EvidenceReviewStatus::Pending)->count();
+        $totalEvidenceCount = (clone $evidenceQuery)->count();
+
+        $reviewedLast30 = (int) DB::table('evidence_reviews')
+            ->join('evidence_files', 'evidence_files.id', '=', 'evidence_reviews.evidence_file_id')
+            ->where('evidence_files.tenant_id', $tenantId)
+            ->where('evidence_reviews.reviewed_at', '>=', now()->subDays(30))
+            ->count();
+
         return [
             'hero' => [
                 'score' => round((float) ($latestScore?->overall_score ?? 0), 1),
@@ -358,8 +371,35 @@ class DashboardService
                 'activeSubmissions' => (clone $submissionQuery)
                     ->whereIn('status', [ComplianceSubmissionStatus::Submitted, ComplianceSubmissionStatus::InReview])
                     ->count(),
-                'pendingEvidence' => (clone $evidenceQuery)->where('review_status', EvidenceReviewStatus::Pending)->count(),
+                'pendingEvidence' => $pendingEvidenceCount,
                 'overdueTraining' => $overdueAssignments,
+            ],
+            'kpis' => [
+                'compliance' => [
+                    'score' => round((float) ($latestScore?->overall_score ?? 0), 1),
+                    'rating' => $latestScore?->rating?->value ?? 'Awaiting score',
+                    'updated_at' => optional($latestScore?->calculated_at)->diffForHumans(),
+                ],
+                'overdueAssignments' => [
+                    'count' => $overdueAssignments,
+                    'total' => $totalAssignments,
+                    'percentage' => $this->percentage($overdueAssignments, max(1, $totalAssignments)),
+                ],
+                'evidenceBacklog' => [
+                    'pending' => $pendingEvidenceCount,
+                    'total' => $totalEvidenceCount,
+                    'percentage' => $this->percentage($pendingEvidenceCount, max(1, $totalEvidenceCount)),
+                    'reviewed_last_30_days' => $reviewedLast30,
+                ],
+                'avgReviewTime' => [
+                    'seconds' => (int) round($avgReviewSeconds),
+                    'hours' => round($avgReviewSeconds / 3600, 1),
+                    'human' => $avgReviewSeconds > 0
+                        ? ($avgReviewSeconds >= 3600
+                            ? round($avgReviewSeconds / 3600, 1).' h'
+                            : max(1, (int) round($avgReviewSeconds / 60)).' m')
+                        : '—',
+                ],
             ],
             'stats' => [
                 'employees' => $employeeQuery->count(),
@@ -933,6 +973,25 @@ class DashboardService
             ->take(6)
             ->values()
             ->all();
+    }
+
+    protected function averageEvidenceReviewSeconds(?int $tenantId): float
+    {
+        $query = DB::table('evidence_reviews')
+            ->join('evidence_files', 'evidence_files.id', '=', 'evidence_reviews.evidence_file_id')
+            ->where('evidence_files.tenant_id', $tenantId)
+            ->whereNotNull('evidence_reviews.reviewed_at')
+            ->whereNotNull('evidence_files.uploaded_at');
+
+        $driver = DB::connection()->getDriverName();
+
+        $expression = match ($driver) {
+            'sqlite' => 'AVG((julianday(evidence_reviews.reviewed_at) - julianday(evidence_files.uploaded_at)) * 86400)',
+            'pgsql' => 'AVG(EXTRACT(EPOCH FROM (evidence_reviews.reviewed_at - evidence_files.uploaded_at)))',
+            default => 'AVG(TIMESTAMPDIFF(SECOND, evidence_files.uploaded_at, evidence_reviews.reviewed_at))',
+        };
+
+        return (float) ($query->selectRaw($expression.' as avg_seconds')->value('avg_seconds') ?? 0);
     }
 
     protected function tenantActivity(?int $tenantId, ?int $userId = null, int $limit = 6): array

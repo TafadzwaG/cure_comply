@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem, type SharedData } from '@/types';
 import { Link, router, usePage } from '@inertiajs/react';
@@ -24,6 +25,9 @@ export function NavFooter({
                                 <Link href={item.url} prefetch>
                                     {item.icon && <item.icon className="h-5 w-5" />}
                                     <span>{item.title}</span>
+                                    {item.badgeCount ? (
+                                        <Badge className="ml-auto rounded-full bg-[#083d77] text-white">{item.badgeCount}</Badge>
+                                    ) : null}
                                 </Link>
                             </SidebarMenuButton>
                         </SidebarMenuItem>

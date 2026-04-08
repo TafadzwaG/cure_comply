@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\InteractsWithIndexTables;
 use App\Http\Requests\CourseRequest;
+use App\Enums\CourseStatus;
 use App\Models\Course;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -45,7 +46,7 @@ class CourseController extends Controller
                 $course->status->value,
             ])->all();
 
-            return $this->exportTable('courses.xlsx', ['Title', 'Minutes', 'Modules', 'Tests', 'Status'], $rows);
+            return $this->queueTableExport($request, 'courses.index', $filters, ['Title', 'Minutes', 'Modules', 'Tests', 'Status'], $rows, 'Courses');
         }
 
         return Inertia::render('courses/index', [
@@ -78,13 +79,16 @@ class CourseController extends Controller
             $data['image_path'] = $request->file('image')->store('courses', 'public');
         }
 
-        Course::query()->create([
+        $course = Course::query()->create([
             ...$data,
             'slug' => Str::slug($request->string('title')).'-'.Str::lower(Str::random(6)),
             'created_by' => $request->user()?->id,
         ]);
+        app(\App\Services\AuditLogService::class)->logModelCreated('course_created', $course);
 
-        return back()->with('success', 'Course created.');
+        return redirect()
+            ->route('courses.show', ['course' => $course, 'tab' => 'modules'])
+            ->with('success', 'Course created. Continue building modules and lessons.');
     }
 
     public function show(Course $course): Response
@@ -92,7 +96,11 @@ class CourseController extends Controller
         $this->authorize('view', $course);
 
         return Inertia::render('courses/show', [
-            'course' => $course->load(['modules.lessons', 'tests.questions.options']),
+            'course' => $course->load([
+                'modules' => fn ($query) => $query->orderBy('sort_order'),
+                'modules.lessons' => fn ($query) => $query->orderBy('sort_order'),
+                'tests.questions.options',
+            ]),
             'canManage' => request()->user()?->can('manage courses') ?? false,
         ]);
     }
@@ -115,15 +123,36 @@ class CourseController extends Controller
             $data['image_path'] = null;
         }
 
+        $oldValues = $course->toArray();
         $course->update($data);
+        app(\App\Services\AuditLogService::class)->logModelUpdated('course_updated', $course, $oldValues);
 
         return back()->with('success', 'Course updated.');
+    }
+
+    public function publish(Request $request, Course $course): RedirectResponse
+    {
+        $this->authorize('update', $course);
+
+        if ($course->status === CourseStatus::Published) {
+            return back()->with('success', 'Course is already published.');
+        }
+
+        $oldValues = $course->toArray();
+        $course->update([
+            'status' => CourseStatus::Published,
+        ]);
+        app(\App\Services\AuditLogService::class)->logModelUpdated('course_published', $course, $oldValues);
+
+        return back()->with('success', 'Course published successfully.');
     }
 
     public function destroy(Course $course): RedirectResponse
     {
         $this->authorize('delete', $course);
+        $oldValues = $course->toArray();
         $course->delete();
+        app(\App\Services\AuditLogService::class)->logModelDeleted('course_deleted', $course, $oldValues);
 
         return back()->with('success', 'Course deleted.');
     }

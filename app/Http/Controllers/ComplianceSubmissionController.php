@@ -9,6 +9,8 @@ use App\Models\ComplianceFramework;
 use App\Models\ComplianceResponse;
 use App\Models\ComplianceSubmission;
 use App\Models\Tenant;
+use App\Models\User;
+use App\Services\AppNotificationService;
 use App\Services\ComplianceScoringService;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
@@ -61,7 +63,7 @@ class ComplianceSubmissionController extends Controller
                 $submission->status->value,
             ])->all();
 
-            return $this->exportTable('submissions.xlsx', ['Title', 'Tenant', 'Framework', 'Period', 'Score', 'Status'], $rows);
+            return $this->queueTableExport($request, 'submissions.index', $filters, ['Title', 'Tenant', 'Framework', 'Period', 'Score', 'Status'], $rows, 'Submissions');
         }
 
         return Inertia::render('submissions/index', [
@@ -98,6 +100,7 @@ class ComplianceSubmissionController extends Controller
             ...$request->validated(),
             'status' => $request->input('status', 'draft'),
         ]);
+        app(\App\Services\AuditLogService::class)->logModelCreated('submission_created', $submission);
 
         return redirect()->route('submissions.show', $submission)->with('success', 'Submission created.');
     }
@@ -134,7 +137,9 @@ class ComplianceSubmissionController extends Controller
     public function update(ComplianceSubmissionRequest $request, ComplianceSubmission $complianceSubmission): RedirectResponse
     {
         $this->authorize('update', $complianceSubmission);
+        $oldValues = $complianceSubmission->toArray();
         $complianceSubmission->update($request->validated());
+        app(\App\Services\AuditLogService::class)->logModelUpdated('submission_updated', $complianceSubmission, $oldValues);
 
         return back()->with('success', 'Submission updated.');
     }
@@ -163,6 +168,9 @@ class ComplianceSubmissionController extends Controller
                     );
                 }
             });
+            app(\App\Services\AuditLogService::class)->logModel('submission_draft_saved', $complianceSubmission, [], [
+                'response_count' => count($request->validated('responses')),
+            ]);
         } catch (\Throwable $e) {
             Log::error('Failed to save compliance responses', [
                 'submission_id' => $complianceSubmission->id,
@@ -188,6 +196,23 @@ class ComplianceSubmissionController extends Controller
             ]);
 
             $this->complianceScoringService->scoreSubmission($complianceSubmission->fresh(), request()->user()?->id);
+            app(\App\Services\AuditLogService::class)->logModel('submission_submitted', $complianceSubmission);
+
+            $reviewers = User::query()
+                ->where('tenant_id', $complianceSubmission->tenant_id)
+                ->role('reviewer')
+                ->get();
+
+            foreach ($reviewers as $reviewer) {
+                app(AppNotificationService::class)->sendToUser(
+                    $reviewer,
+                    'submission_submitted',
+                    'A submission is ready for review',
+                    sprintf('%s has been submitted for review.', $complianceSubmission->title),
+                    route('submissions.show', $complianceSubmission, false),
+                    ['submission_id' => $complianceSubmission->id]
+                );
+            }
         } catch (\Throwable $e) {
             Log::error('Compliance submission failed', [
                 'submission_id' => $complianceSubmission->id,
@@ -207,6 +232,7 @@ class ComplianceSubmissionController extends Controller
 
         try {
             $this->complianceScoringService->scoreSubmission($complianceSubmission, request()->user()?->id);
+            app(\App\Services\AuditLogService::class)->logModel('submission_recalculated', $complianceSubmission);
         } catch (\Throwable $e) {
             Log::error('Compliance score recalculation failed', [
                 'submission_id' => $complianceSubmission->id,
@@ -217,5 +243,16 @@ class ComplianceSubmissionController extends Controller
         }
 
         return back()->with('success', 'Compliance score recalculated.');
+    }
+
+    public function exportPdf(Request $request, ComplianceSubmission $complianceSubmission): RedirectResponse
+    {
+        $this->authorize('view', $complianceSubmission);
+        app(\App\Services\AuditLogService::class)->logModel('submission_pdf_requested', $complianceSubmission);
+
+        return $this->queuePdfExport($request, 'submissions.pdf', ['submission_id' => $complianceSubmission->id], [
+            'submission_id' => $complianceSubmission->id,
+            'title' => $complianceSubmission->title,
+        ]);
     }
 }

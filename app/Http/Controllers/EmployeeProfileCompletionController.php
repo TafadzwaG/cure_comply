@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\EmployeeProfileCompletionRequest;
 use App\Models\EmployeeProfile;
+use App\Services\AppNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -44,7 +45,7 @@ class EmployeeProfileCompletionController extends Controller
             'name' => $payload['name'],
         ]);
 
-        $user->employeeProfile()->updateOrCreate(
+        $profile = $user->employeeProfile()->updateOrCreate(
             ['user_id' => $user->id],
             [
                 'tenant_id' => $user->tenant_id,
@@ -55,6 +56,16 @@ class EmployeeProfileCompletionController extends Controller
                 'alternate_phone' => $payload['alternate_phone'] ?? null,
                 'employment_type' => $payload['employment_type'] ?? null,
             ],
+        );
+
+        app(\App\Services\AuditLogService::class)->logModelUpdated('profile_completed', $profile, []);
+        app(AppNotificationService::class)->sendToUser(
+            $user,
+            'profile_completed',
+            'Profile completed',
+            'Your platform profile is now complete and your dashboard is unlocked.',
+            route('dashboard', [], false),
+            ['profile_id' => $profile->id]
         );
 
         return redirect()->route('dashboard')->with('success', 'Your profile has been completed.');

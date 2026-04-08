@@ -4,6 +4,7 @@ import {
     DashboardActionCard,
     DashboardActivityFeed,
     DashboardBreakdownCard,
+    DashboardInlineScore,
     DashboardMetricCard,
     DashboardQuickStat,
     DashboardRingCard,
@@ -19,12 +20,15 @@ import PlatformLayout from '@/layouts/platform-layout';
 import { type BreadcrumbItem, type PendingItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import {
+    AlarmClock,
     BookOpenCheck,
     Building2,
     ClipboardList,
     FileSearch,
     GraduationCap,
+    ShieldAlert,
     ShieldCheck,
+    Timer,
     UserRoundPlus,
     Users,
     Waypoints,
@@ -45,6 +49,12 @@ interface CompanyAdminDashboardProps {
         averageTestScore: number;
         activeSubmissions: number;
         pendingEvidence: number;
+    };
+    kpis: {
+        compliance: { score: number; rating: string; updated_at?: string | null };
+        overdueAssignments: { count: number; total: number; percentage: number };
+        evidenceBacklog: { pending: number; total: number; percentage: number; reviewed_last_30_days: number };
+        avgReviewTime: { seconds: number; hours: number; human: string };
     };
     employeeStatusBreakdown: BreakdownItem[];
     submissionStatusBreakdown: BreakdownItem[];
@@ -127,6 +137,7 @@ export default function CompanyAdminDashboard(props: CompanyAdminDashboardProps)
             value: `${Math.round(props.stats.averageTestScore)}%`,
             detail: 'Average assessment performance across your workforce.',
             icon: <ClipboardList className="size-4" />,
+            donutValue: props.stats.averageTestScore,
         },
         {
             label: 'Active submissions',
@@ -164,7 +175,12 @@ export default function CompanyAdminDashboard(props: CompanyAdminDashboardProps)
                             </div>
 
                             <div className="grid gap-3 sm:grid-cols-2">
-                                <DashboardQuickStat title="Compliance score" value={`${Math.round(props.hero.score)}%`} hint={props.hero.rating} />
+                                <DashboardQuickStat
+                                    title="Compliance score"
+                                    value={`${Math.round(props.hero.score)}%`}
+                                    hint={props.hero.rating}
+                                    donutValue={props.hero.score}
+                                />
                                 <DashboardQuickStat
                                     title="Pending invitations"
                                     value={`${props.operations.pendingInvitations}`}
@@ -186,6 +202,38 @@ export default function CompanyAdminDashboard(props: CompanyAdminDashboardProps)
                             <QuickQueue label="Pending invitations" value={props.operations.pendingInvitations} />
                         </CardContent>
                     </Card>
+                </section>
+
+                <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                    <KpiCard
+                        icon={ShieldCheck}
+                        label="Compliance %"
+                        value={`${Math.round(props.kpis.compliance.score)}%`}
+                        hint={props.kpis.compliance.rating}
+                        accent={props.kpis.compliance.score >= 80 ? 'emerald' : props.kpis.compliance.score >= 50 ? 'amber' : 'rose'}
+                        donutValue={props.kpis.compliance.score}
+                    />
+                    <KpiCard
+                        icon={AlarmClock}
+                        label="Overdue assignments"
+                        value={`${props.kpis.overdueAssignments.count}`}
+                        hint={`${props.kpis.overdueAssignments.percentage}% of ${props.kpis.overdueAssignments.total} total`}
+                        accent="rose"
+                    />
+                    <KpiCard
+                        icon={ShieldAlert}
+                        label="Evidence backlog"
+                        value={`${props.kpis.evidenceBacklog.pending}`}
+                        hint={`${props.kpis.evidenceBacklog.reviewed_last_30_days} reviewed last 30d`}
+                        accent="amber"
+                    />
+                    <KpiCard
+                        icon={Timer}
+                        label="Avg review time"
+                        value={props.kpis.avgReviewTime.human}
+                        hint="Upload → review decision"
+                        accent="brand"
+                    />
                 </section>
 
                 <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -328,7 +376,9 @@ export default function CompanyAdminDashboard(props: CompanyAdminDashboardProps)
                                                             {submission.status.replace('_', ' ')}
                                                         </Badge>
                                                     </TableCell>
-                                                    <TableCell className="text-right font-medium tabular-nums">{submission.score}%</TableCell>
+                                                    <TableCell className="text-right">
+                                                        <DashboardInlineScore value={submission.score} />
+                                                    </TableCell>
                                                 </TableRow>
                                             ))}
                                         </TableBody>
@@ -385,7 +435,9 @@ export default function CompanyAdminDashboard(props: CompanyAdminDashboardProps)
                                                             {attempt.result_status.replace('_', ' ')}
                                                         </Badge>
                                                     </TableCell>
-                                                    <TableCell className="text-right font-medium tabular-nums">{attempt.percentage}%</TableCell>
+                                                    <TableCell className="text-right">
+                                                        <DashboardInlineScore value={attempt.percentage} />
+                                                    </TableCell>
                                                 </TableRow>
                                             ))}
                                         </TableBody>
@@ -497,5 +549,68 @@ function QuickQueue({ label, value }: { label: string; value: number }) {
             <span className="text-sm text-muted-foreground">{label}</span>
             <span className="text-xl font-semibold tabular-nums">{value}</span>
         </div>
+    );
+}
+
+function KpiCard({
+    icon: Icon,
+    label,
+    value,
+    hint,
+    accent,
+    donutValue,
+}: {
+    icon: typeof ShieldCheck;
+    label: string;
+    value: string;
+    hint?: string;
+    accent: 'emerald' | 'amber' | 'rose' | 'brand';
+    donutValue?: number;
+}) {
+    const accentMap: Record<string, string> = {
+        emerald: 'text-emerald-600 dark:text-emerald-400',
+        amber: 'text-amber-600 dark:text-amber-400',
+        rose: 'text-rose-600 dark:text-rose-400',
+        brand: 'text-[#14417A] dark:text-blue-300',
+    };
+
+    const strokeMap: Record<string, string> = {
+        emerald: '#059669',
+        amber: '#d97706',
+        rose: '#e11d48',
+        brand: '#14417A',
+    };
+
+    return (
+        <Card className="border-[#14417A]/15 shadow-none">
+            <CardContent className="flex items-start gap-4 p-5">
+                <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-muted ${accentMap[accent]}`}>
+                    <Icon className="h-5 w-5" />
+                </div>
+                <div className="min-w-0 flex-1 space-y-1">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
+                    <p className="text-2xl font-semibold tabular-nums text-[#0F2E52] dark:text-blue-200">{value}</p>
+                    {hint && <p className="truncate text-xs text-muted-foreground">{hint}</p>}
+                </div>
+                {donutValue !== undefined && (
+                    <div className="relative flex h-14 w-14 shrink-0 items-center justify-center">
+                        <svg width="56" height="56" className="-rotate-90">
+                            <circle cx="28" cy="28" r={22} stroke="currentColor" strokeWidth={5} fill="none" className="text-muted" />
+                            <circle
+                                cx="28"
+                                cy="28"
+                                r={22}
+                                stroke={strokeMap[accent]}
+                                strokeWidth={5}
+                                strokeLinecap="round"
+                                fill="none"
+                                strokeDasharray={2 * Math.PI * 22}
+                                strokeDashoffset={2 * Math.PI * 22 - (Math.max(0, Math.min(100, donutValue)) / 100) * 2 * Math.PI * 22}
+                            />
+                        </svg>
+                    </div>
+                )}
+            </CardContent>
+        </Card>
     );
 }

@@ -1,3 +1,6 @@
+import { BrandCard } from '@/components/brand-card';
+import { EmptyState } from '@/components/empty-state';
+import { IconChip } from '@/components/icon-chip';
 import { PageHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,7 +13,8 @@ import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PlatformLayout from '@/layouts/platform-layout';
-import { router } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
+import { ExportRequestSummary, SharedData } from '@/types';
 import {
     ArrowRight,
     BarChart3,
@@ -47,9 +51,20 @@ interface Props {
         evidenceStatus: Array<Record<string, unknown>>;
     };
     filters: Filters;
+    filterOptions: {
+        tenants: SelectOption[];
+        departments: Array<SelectOption & { tenant_id?: string | null }>;
+        employees: Array<SelectOption & { tenant_id?: string | null; department_id?: string | null }>;
+        frameworks: SelectOption[];
+    };
 }
 
 type ReportKey = keyof Props['reports'];
+
+interface SelectOption {
+    value: string;
+    label: string;
+}
 
 const reportMeta: Record<
     ReportKey,
@@ -106,7 +121,8 @@ const reportMeta: Record<
     },
 };
 
-export default function ReportsIndex({ reports, filters }: Props) {
+export default function ReportsIndex({ reports, filters, filterOptions }: Props) {
+    const { recent_exports = [] } = usePage<SharedData>().props;
     const [form, setForm] = useState<Filters>({
         tenant_id: filters.tenant_id ?? '',
         department_id: filters.department_id ?? '',
@@ -162,6 +178,30 @@ export default function ReportsIndex({ reports, filters }: Props) {
     }, [reports]);
 
     const activeFilters = Object.keys(clean(form)).length;
+    const selectedTenantId = String(form.tenant_id ?? '');
+    const selectedDepartmentId = String(form.department_id ?? '');
+
+    const availableDepartments = useMemo(() => {
+        if (!selectedTenantId) {
+            return filterOptions.departments;
+        }
+
+        return filterOptions.departments.filter((department) => department.tenant_id === selectedTenantId);
+    }, [filterOptions.departments, selectedTenantId]);
+
+    const availableEmployees = useMemo(() => {
+        return filterOptions.employees.filter((employee) => {
+            if (selectedTenantId && employee.tenant_id !== selectedTenantId) {
+                return false;
+            }
+
+            if (selectedDepartmentId && employee.department_id !== selectedDepartmentId) {
+                return false;
+            }
+
+            return true;
+        });
+    }, [filterOptions.employees, selectedDepartmentId, selectedTenantId]);
 
     const submit = (event: FormEvent) => {
         event.preventDefault();
@@ -220,19 +260,13 @@ export default function ReportsIndex({ reports, filters }: Props) {
                         </CardContent>
                     </Card>
 
-                    <Card className="border-border/70 bg-muted/20 shadow-none">
-                        <CardHeader className="space-y-4">
-                            <div className="flex items-center gap-3">
-                                <div className="rounded-lg border border-border/70 bg-background p-2.5">
-                                    <Filter className="size-4" />
-                                </div>
-                                <div>
-                                    <CardTitle className="text-lg font-medium">Filter control rail</CardTitle>
-                                    <CardDescription>Adjust the reporting scope before preview or export.</CardDescription>
-                                </div>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
+                    <BrandCard
+                        title="Filter control rail"
+                        description="Adjust the reporting scope before preview or export."
+                        className="bg-muted/20"
+                        headerRight={<IconChip icon={<Filter className="size-4" />} className="border border-border/70 bg-background p-2.5 text-foreground" />}
+                    >
+                        <div className="space-y-4">
                             <ReportInsight
                                 icon={CheckCircle2}
                                 title="Shared filter state"
@@ -250,8 +284,8 @@ export default function ReportsIndex({ reports, filters }: Props) {
                                 title="Management snapshots"
                                 description="PDF outputs are designed for lightweight oversight and distribution to non-technical stakeholders."
                             />
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </BrandCard>
                 </section>
 
                 <section className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
@@ -261,33 +295,58 @@ export default function ReportsIndex({ reports, filters }: Props) {
                                 <Filter className="size-4 text-muted-foreground" />
                                 <CardTitle className="text-base font-medium">Filters</CardTitle>
                             </div>
-                            <CardDescription>Use direct IDs and status constraints to narrow report datasets precisely.</CardDescription>
+                            <CardDescription>Use tenant-aware dropdowns and status constraints to narrow report datasets precisely.</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <form className="space-y-4" onSubmit={submit}>
-                                <FilterField
-                                    label="Tenant ID"
-                                    value={String(form.tenant_id ?? '')}
-                                    onChange={(value) => setForm((current) => ({ ...current, tenant_id: value }))}
-                                    placeholder="Optional tenant scope"
+                                {filterOptions.tenants.length > 1 ? (
+                                    <SelectField
+                                        label="Tenant"
+                                        value={String(form.tenant_id ?? '__all__')}
+                                        placeholder="Any tenant"
+                                        options={filterOptions.tenants}
+                                        onValueChange={(value) =>
+                                            setForm((current) => ({
+                                                ...current,
+                                                tenant_id: value === '__all__' ? '' : value,
+                                                department_id: '',
+                                                employee_id: '',
+                                            }))
+                                        }
+                                    />
+                                ) : null}
+
+                                <SelectField
+                                    label="Department"
+                                    value={String(form.department_id ?? '__all__')}
+                                    placeholder="Any department"
+                                    options={availableDepartments}
+                                    emptyLabel="No departments available"
+                                    onValueChange={(value) =>
+                                        setForm((current) => ({
+                                            ...current,
+                                            department_id: value === '__all__' ? '' : value,
+                                            employee_id: '',
+                                        }))
+                                    }
                                 />
-                                <FilterField
-                                    label="Department ID"
-                                    value={String(form.department_id ?? '')}
-                                    onChange={(value) => setForm((current) => ({ ...current, department_id: value }))}
-                                    placeholder="Optional department scope"
+
+                                <SelectField
+                                    label="Employee"
+                                    value={String(form.employee_id ?? '__all__')}
+                                    placeholder="Any employee"
+                                    options={availableEmployees}
+                                    emptyLabel="No employees available"
+                                    onValueChange={(value) => setForm((current) => ({ ...current, employee_id: value === '__all__' ? '' : value }))}
                                 />
-                                <FilterField
-                                    label="Employee ID"
-                                    value={String(form.employee_id ?? '')}
-                                    onChange={(value) => setForm((current) => ({ ...current, employee_id: value }))}
-                                    placeholder="Optional employee scope"
-                                />
-                                <FilterField
-                                    label="Framework ID"
-                                    value={String(form.framework_id ?? '')}
-                                    onChange={(value) => setForm((current) => ({ ...current, framework_id: value }))}
-                                    placeholder="Optional framework scope"
+
+                                <SelectField
+                                    label="Framework"
+                                    value={String(form.framework_id ?? '__all__')}
+                                    placeholder="Any framework"
+                                    options={filterOptions.frameworks}
+                                    emptyLabel="No frameworks available"
+                                    onValueChange={(value) => setForm((current) => ({ ...current, framework_id: value === '__all__' ? '' : value }))}
                                 />
 
                                 <div className="space-y-2">
@@ -390,6 +449,43 @@ export default function ReportsIndex({ reports, filters }: Props) {
                         </Tabs>
                     </div>
                 </section>
+
+                <BrandCard
+                    title="Recent export queue"
+                    description="Track the latest queued, completed, and failed report exports from this account."
+                    headerRight={<IconChip icon={<Download className="size-4" />} />}
+                >
+                    {recent_exports.length ? (
+                        <div className="space-y-3">
+                            {recent_exports.map((exportItem) => (
+                                <div key={exportItem.id} className="flex items-center justify-between gap-4 rounded-xl border border-border/70 bg-muted/20 px-4 py-3">
+                                    <div className="min-w-0">
+                                        <p className="truncate text-sm font-medium">{exportItem.file_name ?? exportItem.source}</p>
+                                        <p className="text-xs text-muted-foreground">
+                                            {exportItem.source} · {exportItem.format.toUpperCase()}
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Badge variant="outline" className="rounded-full px-3 py-1">
+                                            {exportItem.status}
+                                        </Badge>
+                                        {exportItem.download_url ? (
+                                            <Button asChild size="sm" variant="outline">
+                                                <a href={exportItem.download_url}>Download</a>
+                                            </Button>
+                                        ) : null}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <EmptyState
+                            icon={Download}
+                            title="No recent exports"
+                            description="Queued report exports will appear here once you request them."
+                        />
+                    )}
+                </BrandCard>
             </div>
         </PlatformLayout>
     );
@@ -498,6 +594,47 @@ function FilterField({
         <div className="space-y-2">
             <Label>{label}</Label>
             <Input type={type} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />
+        </div>
+    );
+}
+
+function SelectField({
+    label,
+    value,
+    placeholder,
+    options,
+    onValueChange,
+    emptyLabel = 'No options available',
+}: {
+    label: string;
+    value: string;
+    placeholder: string;
+    options: SelectOption[];
+    onValueChange: (value: string) => void;
+    emptyLabel?: string;
+}) {
+    return (
+        <div className="space-y-2">
+            <Label>{label}</Label>
+            <Select value={value || '__all__'} onValueChange={onValueChange}>
+                <SelectTrigger>
+                    <SelectValue placeholder={placeholder} />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="__all__">{placeholder}</SelectItem>
+                    {options.length ? (
+                        options.map((option) => (
+                            <SelectItem key={`${label}-${option.value}`} value={option.value}>
+                                {option.label}
+                            </SelectItem>
+                        ))
+                    ) : (
+                        <SelectItem value="__empty__" disabled>
+                            {emptyLabel}
+                        </SelectItem>
+                    )}
+                </SelectContent>
+            </Select>
         </div>
     );
 }

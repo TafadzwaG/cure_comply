@@ -27,7 +27,7 @@ import {
     RotateCcw,
     UserRound,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface Lesson {
     id: number;
@@ -64,6 +64,7 @@ interface Assignment {
     status: string;
     due_date?: string | null;
     assigned_at?: string | null;
+    last_lesson_id?: number | null;
     course: Course;
     assigned_to?: { id: number; name: string; email: string } | null;
     assigned_by?: { id: number; name: string } | null;
@@ -127,7 +128,14 @@ export default function AssignmentShow({ assignment, completedLessonIds, progres
     const { auth } = usePage<SharedData>().props;
     const isLearner = auth?.user?.id === assignment.assigned_to?.id;
 
+    const allLessonIds = assignment.course.modules.flatMap((m) => m.lessons.map((l) => l.id));
+
     const [activeLessonId, setActiveLessonId] = useState<number | null>(() => {
+        // 1. Resume from saved last lesson if still valid
+        if (assignment.last_lesson_id && allLessonIds.includes(assignment.last_lesson_id)) {
+            return assignment.last_lesson_id;
+        }
+        // 2. First uncompleted lesson
         for (const mod of assignment.course.modules) {
             for (const lesson of mod.lessons) {
                 if (!completedLessonIds.includes(lesson.id)) {
@@ -135,10 +143,38 @@ export default function AssignmentShow({ assignment, completedLessonIds, progres
                 }
             }
         }
+        // 3. Fallback to last lesson
         const lastModule = assignment.course.modules[assignment.course.modules.length - 1];
         const lastLesson = lastModule?.lessons[lastModule.lessons.length - 1];
         return lastLesson?.id ?? null;
     });
+
+    // Persist last viewed lesson to the server (learner only) + auto-scroll
+    const contentRef = useRef<HTMLDivElement>(null);
+    const sidebarItemRefs = useRef<Record<number, HTMLButtonElement | null>>({});
+
+    useEffect(() => {
+        if (!activeLessonId) return;
+
+        // Auto-scroll: content area into view + sidebar item into view
+        contentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const sidebarEl = sidebarItemRefs.current[activeLessonId];
+        sidebarEl?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+        // Persist resume position (debounced) — only learners can save
+        if (!isLearner) return;
+        if (assignment.last_lesson_id === activeLessonId) return;
+
+        const handle = setTimeout(() => {
+            router.patch(
+                route('assignments.resume', assignment.id),
+                { lesson_id: activeLessonId },
+                { preserveScroll: true, preserveState: true, only: [] },
+            );
+        }, 500);
+        return () => clearTimeout(handle);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [activeLessonId]);
 
     const [processingLessonId, setProcessingLessonId] = useState<number | null>(null);
 
@@ -324,6 +360,9 @@ export default function AssignmentShow({ assignment, completedLessonIds, progres
                                                 return (
                                                     <button
                                                         key={lesson.id}
+                                                        ref={(el) => {
+                                                            sidebarItemRefs.current[lesson.id] = el;
+                                                        }}
                                                         onClick={() => setActiveLessonId(lesson.id)}
                                                         className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm transition-colors ${
                                                             active
@@ -360,6 +399,7 @@ export default function AssignmentShow({ assignment, completedLessonIds, progres
                         </CardContent>
                     </Card>
 
+                    <div ref={contentRef} className="scroll-mt-24">
                     <Card className="border-border/60 shadow-none">
                         {activeLesson ? (
                             <>
@@ -455,6 +495,7 @@ export default function AssignmentShow({ assignment, completedLessonIds, progres
                             </CardContent>
                         )}
                     </Card>
+                    </div>
                 </div>
             </div>
         </PlatformLayout>

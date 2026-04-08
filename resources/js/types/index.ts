@@ -20,6 +20,7 @@ export interface NavItem {
     url: string;
     icon?: LucideIcon | null;
     isActive?: boolean;
+    badgeCount?: number;
 }
 
 export interface SharedData {
@@ -31,6 +32,9 @@ export interface SharedData {
         impersonator_id?: number | null;
         impersonator_name?: string | null;
     };
+    notifications?: NotificationItem[];
+    notification_unread_count?: number;
+    recent_exports?: ExportRequestSummary[];
     flash: {
         success?: string | null;
         error?: string | null;
@@ -228,4 +232,26 @@ export interface IndexAction {
     onClick?: () => void;
     icon?: LucideIcon | null;
     variant?: 'default' | 'outline' | 'secondary' | 'destructive' | 'ghost' | 'link';
+}
+
+export interface NotificationItem {
+    id: number;
+    type: string;
+    title: string;
+    message: string;
+    action_url?: string | null;
+    is_read: boolean;
+    read_at?: string | null;
+    created_at: string;
+}
+
+export interface ExportRequestSummary {
+    id: number;
+    source: string;
+    format: string;
+    status: string;
+    file_name?: string | null;
+    completed_at?: string | null;
+    created_at: string;
+    download_url?: string | null;
 }

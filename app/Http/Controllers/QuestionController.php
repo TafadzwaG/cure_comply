@@ -16,6 +16,10 @@ class QuestionController extends Controller
     {
         $this->authorize('update', $test);
 
+        if ($request->input('question_type') === 'text') {
+            $request->merge(['options' => []]);
+        }
+
         $validated = $request->validate([
             'question_text' => ['required', 'string'],
             'question_type' => ['required', 'string', 'in:single_choice,text'],
@@ -44,13 +48,15 @@ class QuestionController extends Controller
                 'image_path' => $imagePath,
             ]);
 
-            foreach ($validated['options'] ?? [] as $index => $option) {
-                QuestionOption::query()->create([
-                    'question_id' => $question->id,
-                    'option_text' => $option['option_text'],
-                    'is_correct' => $option['is_correct'] ?? false,
-                    'sort_order' => $index + 1,
-                ]);
+            if (($validated['question_type'] ?? null) === 'single_choice') {
+                foreach ($validated['options'] ?? [] as $index => $option) {
+                    QuestionOption::query()->create([
+                        'question_id' => $question->id,
+                        'option_text' => $option['option_text'],
+                        'is_correct' => $option['is_correct'] ?? false,
+                        'sort_order' => $index + 1,
+                    ]);
+                }
             }
         });
 
@@ -60,6 +66,10 @@ class QuestionController extends Controller
     public function update(Request $request, Test $test, Question $question): RedirectResponse
     {
         $this->authorize('update', $test);
+
+        if ($request->input('question_type') === 'text') {
+            $request->merge(['options' => []]);
+        }
 
         $validated = $request->validate([
             'question_text' => ['required', 'string'],
@@ -93,6 +103,12 @@ class QuestionController extends Controller
                 'is_active' => $validated['is_active'] ?? true,
                 'image_path' => $newImagePath,
             ]);
+
+            if (($validated['question_type'] ?? null) !== 'single_choice') {
+                $question->options()->delete();
+
+                return;
+            }
 
             $incomingOptionIds = collect($validated['options'] ?? [])
                 ->pluck('id')

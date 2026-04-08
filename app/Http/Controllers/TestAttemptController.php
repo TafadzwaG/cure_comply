@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\TestAttemptResultStatus;
 use App\Http\Controllers\Concerns\InteractsWithIndexTables;
+use App\Models\ComplianceFramework;
 use App\Models\Tenant;
 use App\Models\Test;
 use App\Models\TestAnswer;
@@ -112,16 +113,26 @@ class TestAttemptController extends Controller
     {
         $request->validate([
             'answers' => ['required', 'array'],
+            'started_at' => ['nullable', 'date'],
+            'time_spent_seconds' => ['nullable', 'integer', 'min:0'],
         ]);
 
         $attempt = DB::transaction(function () use ($request, $test) {
+            $startedAt = $request->input('started_at') ? \Carbon\Carbon::parse($request->input('started_at')) : now();
+            $submittedAt = now();
+            $timeSpent = $request->input('time_spent_seconds');
+            if ($timeSpent === null) {
+                $timeSpent = max(0, $submittedAt->diffInSeconds($startedAt));
+            }
+
             $attempt = TestAttempt::query()->create([
                 'tenant_id' => $request->user()?->tenant_id,
                 'test_id' => $test->id,
                 'user_id' => $request->user()?->id,
                 'attempt_number' => TestAttempt::query()->where('test_id', $test->id)->where('user_id', $request->user()?->id)->count() + 1,
-                'started_at' => now(),
-                'submitted_at' => now(),
+                'started_at' => $startedAt,
+                'submitted_at' => $submittedAt,
+                'time_spent_seconds' => $timeSpent,
                 'result_status' => TestAttemptResultStatus::PendingReview,
             ]);
 
@@ -158,6 +169,54 @@ class TestAttemptController extends Controller
         });
 
         return to_route('tests.attempts.show', [$test, $attempt])->with('success', 'Test submitted.');
+    }
+
+    public function analytics(Request $request): Response
+    {
+        abort_unless($request->user()?->can('manage tests'), 403);
+
+        // Per-framework roll-up
+        $rows = TestAttempt::query()
+            ->join('tests', 'tests.id', '=', 'test_attempts.test_id')
+            ->leftJoin('compliance_frameworks', 'compliance_frameworks.id', '=', 'tests.compliance_framework_id')
+            ->selectRaw('
+                COALESCE(compliance_frameworks.id, 0) as framework_id,
+                COALESCE(compliance_frameworks.name, "Unassigned") as framework_name,
+                COUNT(test_attempts.id) as total_attempts,
+                SUM(CASE WHEN test_attempts.result_status = "passed" THEN 1 ELSE 0 END) as passed,
+                SUM(CASE WHEN test_attempts.result_status = "failed" THEN 1 ELSE 0 END) as failed,
+                SUM(CASE WHEN test_attempts.result_status = "pending_review" THEN 1 ELSE 0 END) as pending,
+                AVG(test_attempts.percentage) as avg_score,
+                AVG(test_attempts.time_spent_seconds) as avg_time_seconds
+            ')
+            ->whereNotNull('test_attempts.submitted_at')
+            ->groupBy('framework_id', 'framework_name')
+            ->orderByDesc('total_attempts')
+            ->get();
+
+        $overall = [
+            'total' => (int) TestAttempt::query()->count(),
+            'passed' => (int) TestAttempt::query()->where('result_status', 'passed')->count(),
+            'failed' => (int) TestAttempt::query()->where('result_status', 'failed')->count(),
+            'pending' => (int) TestAttempt::query()->where('result_status', 'pending_review')->count(),
+            'avg_score' => round((float) TestAttempt::query()->avg('percentage'), 2),
+            'avg_time_seconds' => (int) round((float) TestAttempt::query()->avg('time_spent_seconds')),
+        ];
+
+        return Inertia::render('test-attempts/analytics', [
+            'frameworks' => $rows->map(fn ($r) => [
+                'framework_id' => (int) $r->framework_id,
+                'framework_name' => $r->framework_name,
+                'total_attempts' => (int) $r->total_attempts,
+                'passed' => (int) $r->passed,
+                'failed' => (int) $r->failed,
+                'pending' => (int) $r->pending,
+                'pass_rate' => $r->total_attempts > 0 ? round(($r->passed / $r->total_attempts) * 100, 1) : 0,
+                'avg_score' => round((float) $r->avg_score, 2),
+                'avg_time_seconds' => (int) round((float) $r->avg_time_seconds),
+            ]),
+            'overall' => $overall,
+        ]);
     }
 
     public function show(Test $test, TestAttempt $testAttempt): Response

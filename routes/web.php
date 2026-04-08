@@ -8,19 +8,23 @@ use App\Http\Controllers\ComplianceSectionController;
 use App\Http\Controllers\ComplianceSubmissionController;
 use App\Http\Controllers\CourseAssignmentController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\CourseModuleController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\EmployeeProfileController;
 use App\Http\Controllers\EmployeeProfileCompletionController;
 use App\Http\Controllers\EvidenceFileController;
 use App\Http\Controllers\EvidenceReviewController;
+use App\Http\Controllers\ExportRequestController;
 use App\Http\Controllers\ImpersonationController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\LessonProgressController;
+use App\Http\Controllers\LessonController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TenantController;
 use App\Http\Controllers\TestAttemptController;
+use App\Http\Controllers\TestAssignmentController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\TenantActivationStatusController;
 use App\Http\Controllers\UserManagementController;
@@ -48,23 +52,38 @@ Route::middleware(['auth', 'throttle:api', 'tenant', 'impersonation.audit'])->gr
     Route::patch('users/{user}', [UserManagementController::class, 'update'])->name('users.update');
     Route::patch('users/{user}/password', [UserManagementController::class, 'updatePassword'])->name('users.password.update');
     Route::patch('users/{user}/access', [UserManagementController::class, 'updateAccess'])->name('users.access.update');
+    Route::get('departments/scorecards', [DepartmentController::class, 'scorecards'])->name('departments.scorecards');
     Route::resource('departments', DepartmentController::class)->only(['index', 'create', 'store', 'update', 'destroy']);
     Route::resource('employees', EmployeeProfileController::class)->only(['index', 'show', 'update', 'destroy']);
     Route::resource('invitations', InvitationController::class)->only(['index', 'create', 'store', 'destroy']);
     Route::resource('courses', CourseController::class)->only(['index', 'create', 'store', 'show', 'update', 'destroy']);
+    Route::post('courses/{course}/publish', [CourseController::class, 'publish'])->name('courses.publish');
+    Route::post('courses/{course}/modules', [CourseModuleController::class, 'store'])->name('courses.modules.store');
+    Route::patch('courses/{course}/modules/{module}', [CourseModuleController::class, 'update'])->name('courses.modules.update');
+    Route::delete('courses/{course}/modules/{module}', [CourseModuleController::class, 'destroy'])->name('courses.modules.destroy');
+    Route::post('courses/{course}/modules/{module}/lessons', [LessonController::class, 'store'])->middleware('throttle:uploads')->name('courses.modules.lessons.store');
+    Route::patch('courses/{course}/modules/{module}/lessons/{lesson}', [LessonController::class, 'update'])->middleware('throttle:uploads')->name('courses.modules.lessons.update');
+    Route::delete('courses/{course}/modules/{module}/lessons/{lesson}', [LessonController::class, 'destroy'])->name('courses.modules.lessons.destroy');
     Route::resource('assignments', CourseAssignmentController::class)->only(['index', 'create', 'store', 'show', 'update', 'destroy']);
     Route::post('assignments/{assignment}/progress', [LessonProgressController::class, 'store'])->name('assignments.progress.store');
     Route::delete('assignments/{assignment}/progress', [LessonProgressController::class, 'destroy'])->name('assignments.progress.destroy');
+    Route::patch('assignments/{assignment}/resume', [CourseAssignmentController::class, 'resume'])->name('assignments.resume');
     Route::resource('tests', TestController::class)->only(['index', 'create', 'store', 'show', 'update', 'destroy']);
+    Route::post('tests/{test}/publish', [TestController::class, 'publish'])->name('tests.publish');
+    Route::post('tests/{test}/assignments', [TestAssignmentController::class, 'store'])->name('tests.assignments.store');
+    Route::delete('tests/{test}/assignments/{assignment}', [TestAssignmentController::class, 'destroy'])->name('tests.assignments.destroy');
     Route::post('tests/{test}/questions', [QuestionController::class, 'store'])->name('tests.questions.store');
     Route::patch('tests/{test}/questions/{question}', [QuestionController::class, 'update'])->name('tests.questions.update');
     Route::delete('tests/{test}/questions/{question}', [QuestionController::class, 'destroy'])->name('tests.questions.destroy');
     Route::get('test-attempts', [TestAttemptController::class, 'index'])->name('test-attempts.index');
+    Route::get('test-attempts/analytics', [TestAttemptController::class, 'analytics'])->name('test-attempts.analytics');
     Route::get('tests/{test}/take', [TestAttemptController::class, 'create'])->name('tests.attempts.create');
     Route::post('tests/{test}/attempts', [TestAttemptController::class, 'store'])->name('tests.attempts.store');
     Route::get('tests/{test}/attempts/{testAttempt}', [TestAttemptController::class, 'show'])->name('tests.attempts.show');
 
     Route::resource('frameworks', ComplianceFrameworkController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']);
+    Route::get('frameworks/{framework}/pdf', [ComplianceFrameworkController::class, 'exportPdf'])->name('frameworks.pdf');
+    Route::get('frameworks/{framework}/heatmap', [ComplianceFrameworkController::class, 'heatmap'])->name('frameworks.heatmap');
     Route::post('frameworks/{framework}/sections', [ComplianceSectionController::class, 'store'])->name('frameworks.sections.store');
     Route::patch('frameworks/{framework}/sections/{section}', [ComplianceSectionController::class, 'update'])->name('frameworks.sections.update');
     Route::delete('frameworks/{framework}/sections/{section}', [ComplianceSectionController::class, 'destroy'])->name('frameworks.sections.destroy');
@@ -77,11 +96,13 @@ Route::middleware(['auth', 'throttle:api', 'tenant', 'impersonation.audit'])->gr
     Route::post('submissions/{complianceSubmission}/responses', [ComplianceSubmissionController::class, 'saveResponses'])->name('submissions.responses.store');
     Route::post('submissions/{complianceSubmission}/submit', [ComplianceSubmissionController::class, 'submit'])->name('submissions.submit');
     Route::post('submissions/{complianceSubmission}/recalculate', [ComplianceSubmissionController::class, 'recalculate'])->name('submissions.recalculate');
+    Route::get('submissions/{complianceSubmission}/pdf', [ComplianceSubmissionController::class, 'exportPdf'])->name('submissions.pdf');
 
     Route::get('evidence', [EvidenceFileController::class, 'index'])->name('evidence.index');
     Route::post('responses/{complianceResponse}/evidence', [EvidenceFileController::class, 'store'])->middleware('throttle:uploads')->name('evidence.store');
     Route::post('submissions/{complianceSubmission}/questions/{complianceQuestion}/evidence', [EvidenceFileController::class, 'storeForQuestion'])->middleware('throttle:uploads')->name('submissions.questions.evidence.store');
     Route::get('evidence/{evidenceFile}/download', [EvidenceFileController::class, 'download'])->name('evidence.download');
+    Route::get('evidence/{evidenceFile}/versions/{version}/download', [EvidenceFileController::class, 'downloadVersion'])->name('evidence.versions.download');
     Route::post('evidence/{evidenceFile}/reviews', [EvidenceReviewController::class, 'store'])->name('evidence.reviews.store');
 
     Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
@@ -92,7 +113,10 @@ Route::middleware(['auth', 'throttle:api', 'tenant', 'impersonation.audit'])->gr
 
     Route::get('audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
     Route::get('notifications', [AppNotificationController::class, 'index'])->name('notifications.index');
+    Route::patch('notifications/read-all', [AppNotificationController::class, 'markAllRead'])->name('notifications.read-all');
+    Route::get('notifications/{appNotification}/open', [AppNotificationController::class, 'open'])->name('notifications.open');
     Route::patch('notifications/{appNotification}', [AppNotificationController::class, 'update'])->name('notifications.update');
+    Route::get('exports/{exportRequest}/download', [ExportRequestController::class, 'download'])->name('exports.download');
 
     Route::post('impersonation/{user}', [ImpersonationController::class, 'start'])->name('impersonation.start');
     Route::delete('impersonation', [ImpersonationController::class, 'stop'])->name('impersonation.stop');

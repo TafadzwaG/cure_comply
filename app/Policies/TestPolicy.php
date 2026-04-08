@@ -13,7 +13,9 @@ class TestPolicy
 
     public function viewAny(User $user): bool
     {
-        return $user->can(Permissions::MANAGE_TESTS) || $user->can(Permissions::TAKE_TESTS);
+        return $user->hasRole('company_admin')
+            || $user->can(Permissions::MANAGE_TESTS)
+            || $user->can(Permissions::TAKE_TESTS);
     }
 
     public function view(User $user, Test $test): bool
@@ -23,16 +25,16 @@ class TestPolicy
 
     public function create(User $user): bool
     {
-        return $user->can(Permissions::MANAGE_TESTS);
+        return $user->hasRole('company_admin') || $user->can(Permissions::MANAGE_TESTS);
     }
 
     public function update(User $user, Test $test): bool
     {
-        return $user->can(Permissions::MANAGE_TESTS);
+        return $user->hasRole('company_admin') || $user->can(Permissions::MANAGE_TESTS);
     }
 
     public function delete(User $user, Test $test): bool
     {
-        return $user->can(Permissions::MANAGE_TESTS);
+        return $user->hasRole('company_admin') || $user->can(Permissions::MANAGE_TESTS);
     }
 }

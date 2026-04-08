@@ -2,6 +2,7 @@ import {
     ActivityItem,
     DashboardActionCard,
     DashboardActivityFeed,
+    DashboardInlineScore,
     DashboardMetricCard,
     DashboardQuickStat,
     DashboardTrendChart,
@@ -125,6 +126,7 @@ export default function EmployeeDashboard(props: EmployeeDashboardProps) {
             value: `${Math.round(props.stats.latestScore)}%`,
             detail: props.latestRating,
             icon: <TimerReset className="size-4" />,
+            donutValue: props.stats.latestScore,
         },
     ];
 
@@ -153,6 +155,7 @@ export default function EmployeeDashboard(props: EmployeeDashboardProps) {
                                     title="Training completion"
                                     value={`${Math.round(props.hero.trainingCompletion)}%`}
                                     hint="Progress across your assigned course work"
+                                    donutValue={props.hero.trainingCompletion}
                                 />
                                 <DashboardQuickStat
                                     title="Compliance tasks"
@@ -301,7 +304,9 @@ export default function EmployeeDashboard(props: EmployeeDashboardProps) {
                                                     <TableCell className="font-medium">{test.title}</TableCell>
                                                     <TableCell>{test.course ?? 'Course'}</TableCell>
                                                     <TableCell className="text-right tabular-nums">{test.attempts}</TableCell>
-                                                    <TableCell className="text-right font-medium tabular-nums">{test.best_score}%</TableCell>
+                                                    <TableCell className="text-right">
+                                                        <DashboardInlineScore value={test.best_score} />
+                                                    </TableCell>
                                                 </TableRow>
                                             ))}
                                         </TableBody>
@@ -333,7 +338,9 @@ export default function EmployeeDashboard(props: EmployeeDashboardProps) {
                                                             {attempt.result_status.replace('_', ' ')}
                                                         </Badge>
                                                     </TableCell>
-                                                    <TableCell className="text-right font-medium tabular-nums">{attempt.percentage}%</TableCell>
+                                                    <TableCell className="text-right">
+                                                        <DashboardInlineScore value={attempt.percentage} />
+                                                    </TableCell>
                                                     <TableCell className="text-right text-muted-foreground">{attempt.submitted_at ?? 'Recently'}</TableCell>
                                                 </TableRow>
                                             ))}
@@ -396,7 +403,9 @@ export default function EmployeeDashboard(props: EmployeeDashboardProps) {
                                                         {item.status.replace('_', ' ')}
                                                     </Badge>
                                                 </TableCell>
-                                                <TableCell className="text-right font-medium tabular-nums">{item.response_score}%</TableCell>
+                                                <TableCell className="text-right">
+                                                    <DashboardInlineScore value={item.response_score} />
+                                                </TableCell>
                                             </TableRow>
                                         ))}
                                     </TableBody>

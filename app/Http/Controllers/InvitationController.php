@@ -68,7 +68,7 @@ class InvitationController extends Controller
                 ];
             })->all();
 
-            return $this->exportTable('invitations.xlsx', ['Name', 'Email', 'Role', 'Department', 'Status'], $rows);
+            return $this->queueTableExport($request, 'invitations.index', $filters, ['Name', 'Email', 'Role', 'Department', 'Status'], $rows, 'Invitations');
         }
 
         return Inertia::render('invitations/index', [
@@ -125,7 +125,9 @@ class InvitationController extends Controller
     public function destroy(Invitation $invitation): RedirectResponse
     {
         $this->authorize('delete', $invitation);
+        $oldValues = $invitation->toArray();
         $invitation->delete();
+        app(\App\Services\AuditLogService::class)->logModelDeleted('invitation_deleted', $invitation, $oldValues);
 
         return back()->with('success', 'Invitation deleted.');
     }

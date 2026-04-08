@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\AppNotification;
+use App\Models\ExportRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -54,7 +55,31 @@ class HandleInertiaRequests extends Middleware
                     : null,
             ],
             'notifications' => fn () => $request->user()
-                ? AppNotification::query()->where('user_id', $request->user()->id)->latest()->limit(5)->get()
+                ? AppNotification::query()
+                    ->where('user_id', $request->user()->id)
+                    ->latest()
+                    ->limit(5)
+                    ->get(['id', 'title', 'message', 'type', 'action_url', 'is_read', 'read_at', 'created_at'])
+                : [],
+            'notification_unread_count' => fn () => $request->user()
+                ? AppNotification::query()->where('user_id', $request->user()->id)->where('is_read', false)->count()
+                : 0,
+            'recent_exports' => fn () => $request->user()
+                ? ExportRequest::query()
+                    ->where('user_id', $request->user()->id)
+                    ->latest()
+                    ->limit(5)
+                    ->get(['id', 'source', 'format', 'status', 'file_name', 'completed_at', 'created_at'])
+                    ->map(fn (ExportRequest $export) => [
+                        'id' => $export->id,
+                        'source' => $export->source,
+                        'format' => $export->format,
+                        'status' => $export->status,
+                        'file_name' => $export->file_name,
+                        'completed_at' => optional($export->completed_at)?->toISOString(),
+                        'created_at' => optional($export->created_at)?->toISOString(),
+                        'download_url' => $export->status === 'completed' ? route('exports.download', $export, false) : null,
+                    ])
                 : [],
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),

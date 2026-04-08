@@ -26,6 +26,7 @@ class TestAttempt extends Model
         'score',
         'percentage',
         'result_status',
+        'time_spent_seconds',
     ];
 
     protected function casts(): array
@@ -34,6 +35,7 @@ class TestAttempt extends Model
             'started_at' => 'datetime',
             'submitted_at' => 'datetime',
             'result_status' => TestAttemptResultStatus::class,
+            'time_spent_seconds' => 'integer',
         ];
     }
 

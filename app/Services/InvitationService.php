@@ -15,7 +15,10 @@ use Illuminate\Support\Str;
 
 class InvitationService
 {
-    public function __construct(protected AuditLogService $auditLogService)
+    public function __construct(
+        protected AuditLogService $auditLogService,
+        protected AppNotificationService $appNotificationService,
+    )
     {
     }
 
@@ -77,6 +80,20 @@ class InvitationService
             ]);
 
             $this->auditLogService->logModel('invitation_accepted', $invitation, [], ['accepted_at' => $invitation->accepted_at]);
+
+            if ($inviter = User::query()->find($invitation->invited_by)) {
+                $this->appNotificationService->sendToUser(
+                    $inviter,
+                    'invitation_accepted',
+                    'Invitation accepted',
+                    sprintf('%s accepted the invitation and now has access.', $user->name),
+                    $inviter->isSuperAdmin() ? route('users.show', $user, false) : route('employees.index', [], false),
+                    ['invitation_id' => $invitation->id, 'user_id' => $user->id],
+                    true,
+                    'Invitation accepted',
+                    'Open account'
+                );
+            }
 
             return $user;
         });

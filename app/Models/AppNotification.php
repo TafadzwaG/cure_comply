@@ -18,6 +18,8 @@ class AppNotification extends Model
         'type',
         'title',
         'message',
+        'action_url',
+        'meta',
         'is_read',
         'read_at',
     ];
@@ -27,6 +29,7 @@ class AppNotification extends Model
         return [
             'is_read' => 'boolean',
             'read_at' => 'datetime',
+            'meta' => 'array',
         ];
     }
 

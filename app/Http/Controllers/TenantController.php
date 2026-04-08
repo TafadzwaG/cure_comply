@@ -55,7 +55,7 @@ class TenantController extends Controller
                 $tenant->status->value,
             ])->all();
 
-            return $this->exportTable('tenants.xlsx', ['Name', 'Industry', 'Size', 'Registration', 'Contact Name', 'Contact Email', 'Status'], $rows);
+            return $this->queueTableExport($request, 'tenants.index', $filters, ['Name', 'Industry', 'Size', 'Registration', 'Contact Name', 'Contact Email', 'Status'], $rows, 'Tenants');
         }
 
         return Inertia::render('tenants/index', [
@@ -173,7 +173,9 @@ class TenantController extends Controller
     {
         $this->authorize('update', $tenant);
 
+        $oldValues = $tenant->toArray();
         $tenant->update($request->validated());
+        app(\App\Services\AuditLogService::class)->logModelUpdated('tenant_updated', $tenant, $oldValues);
 
         return back()->with('success', 'Tenant updated.');
     }
@@ -183,7 +185,9 @@ class TenantController extends Controller
         $this->authorize('delete', $tenant);
 
         try {
+            $oldValues = $tenant->toArray();
             $tenant->delete();
+            app(\App\Services\AuditLogService::class)->logModelDeleted('tenant_deleted', $tenant, $oldValues);
         } catch (\Throwable $e) {
             Log::error('Tenant deletion failed', [
                 'tenant_id' => $tenant->id,

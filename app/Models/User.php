@@ -78,6 +78,11 @@ class User extends Authenticatable
         return $this->hasMany(TestAttempt::class);
     }
 
+    public function assignedTests(): HasMany
+    {
+        return $this->hasMany(TestAssignment::class, 'assigned_to_user_id');
+    }
+
     public function complianceSubmissions(): HasMany
     {
         return $this->hasMany(ComplianceSubmission::class, 'submitted_by');

@@ -64,7 +64,7 @@ class UserManagementController extends Controller
                 'Created' => optional($user->created_at)->toDateTimeString(),
             ])->all();
 
-            return $this->exportTable('users.xlsx', ['Name', 'Email', 'Tenant', 'Status', 'Primary Role', 'Job Title', 'Created'], $rows);
+            return $this->queueTableExport($request, 'users.index', $filters, ['Name', 'Email', 'Tenant', 'Status', 'Primary Role', 'Job Title', 'Created'], $rows, 'Users');
         }
 
         return Inertia::render('users/index', [
@@ -100,7 +100,9 @@ class UserManagementController extends Controller
     {
         $this->authorize('update', $user);
 
+        $oldValues = $user->toArray();
         $user->update($request->validated());
+        app(\App\Services\AuditLogService::class)->logModelUpdated('user_profile_updated', $user, $oldValues);
 
         return back()->with('success', 'User profile updated.');
     }
@@ -109,9 +111,12 @@ class UserManagementController extends Controller
     {
         $this->authorize('update', $user);
 
+        $oldValues = $user->only(['last_password_changed_at']);
         $user->update([
             'password' => $request->validated('password'),
+            'last_password_changed_at' => now(),
         ]);
+        app(\App\Services\AuditLogService::class)->logModelUpdated('user_password_updated', $user, $oldValues);
 
         return back()->with('success', 'User password updated.');
     }
@@ -121,8 +126,13 @@ class UserManagementController extends Controller
         $this->authorize('update', $user);
 
         $payload = $request->validated();
+        $oldValues = [
+            'roles' => $user->roles()->pluck('name')->all(),
+            'permissions' => $user->permissions()->pluck('name')->all(),
+        ];
         $user->syncRoles($payload['roles'] ?? []);
         $user->syncPermissions($payload['permissions'] ?? []);
+        app(\App\Services\AuditLogService::class)->logModelUpdated('user_access_updated', $user, $oldValues);
 
         return back()->with('success', 'User access updated.');
     }

@@ -22,11 +22,14 @@ import { IndexStat, Paginated, TableFilters } from '@/types';
 import { Link, router } from '@inertiajs/react';
 import {
     BookOpen,
+    Eye,
     FileStack,
     FolderKanban,
+    ListOrdered,
     MoreHorizontal,
     PenSquare,
     Plus,
+    Trash2,
 } from 'lucide-react';
 
 interface Course {
@@ -160,6 +163,7 @@ export default function CoursesIndex({
                                             size="sm"
                                             className="border-white/20 bg-white/10 text-white hover:bg-white/15"
                                         >
+                                            <ListOrdered className="mr-2 h-4 w-4" />
                                             {courses.total ?? courses.data.length} Total Courses
                                         </Button>
                                     </div>
@@ -268,6 +272,7 @@ export default function CoursesIndex({
                                                             className="bg-[#14417A] text-white hover:bg-[#0F2E52]"
                                                         >
                                                             <Link href={route('courses.show', course.id)}>
+                                                                <Eye className="mr-2 h-4 w-4" />
                                                                 View
                                                             </Link>
                                                         </Button>
@@ -287,6 +292,7 @@ export default function CoursesIndex({
                                                             <DropdownMenuContent align="end" className="w-44">
                                                                 <DropdownMenuItem asChild>
                                                                     <Link href={route('courses.show', course.id)}>
+                                                                        <Eye className="mr-2 h-4 w-4" />
                                                                         View course
                                                                     </Link>
                                                                 </DropdownMenuItem>
@@ -299,6 +305,7 @@ export default function CoursesIndex({
                                                                         router.delete(route('courses.destroy', course.id))
                                                                     }
                                                                 >
+                                                                    <Trash2 className="mr-2 h-4 w-4" />
                                                                     Delete
                                                                 </DropdownMenuItem>
                                                             </DropdownMenuContent>

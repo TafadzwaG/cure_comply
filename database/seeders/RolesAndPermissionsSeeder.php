@@ -24,6 +24,7 @@ class RolesAndPermissionsSeeder extends Seeder
             Permissions::INVITE_EMPLOYEES,
             Permissions::MANAGE_DEPARTMENTS,
             Permissions::ASSIGN_TRAINING,
+            Permissions::MANAGE_TESTS,
             Permissions::MANAGE_COMPLIANCE_SUBMISSIONS,
             Permissions::ANSWER_COMPLIANCE_QUESTIONS,
             Permissions::UPLOAD_EVIDENCE,

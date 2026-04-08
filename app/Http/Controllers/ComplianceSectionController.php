@@ -13,7 +13,8 @@ class ComplianceSectionController extends Controller
     {
         $this->authorize('update', $framework);
 
-        $framework->sections()->create($request->validated());
+        $section = $framework->sections()->create($request->validated());
+        app(\App\Services\AuditLogService::class)->logModelCreated('framework_section_created', $section);
 
         return back()->with('success', 'Section created.');
     }
@@ -24,7 +25,9 @@ class ComplianceSectionController extends Controller
 
         abort_unless($section->compliance_framework_id === $framework->id, 404);
 
+        $oldValues = $section->toArray();
         $section->update($request->validated());
+        app(\App\Services\AuditLogService::class)->logModelUpdated('framework_section_updated', $section, $oldValues);
 
         return back()->with('success', 'Section updated.');
     }
@@ -35,7 +38,9 @@ class ComplianceSectionController extends Controller
 
         abort_unless($section->compliance_framework_id === $framework->id, 404);
 
+        $oldValues = $section->toArray();
         $section->delete();
+        app(\App\Services\AuditLogService::class)->logModelDeleted('framework_section_deleted', $section, $oldValues);
 
         return back()->with('success', 'Section deleted.');
     }

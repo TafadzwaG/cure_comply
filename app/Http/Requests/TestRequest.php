@@ -9,13 +9,14 @@ class TestRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return (bool) $this->user()?->can(Permissions::MANAGE_TESTS);
+        return (bool) ($this->user()?->hasRole('company_admin') || $this->user()?->can(Permissions::MANAGE_TESTS));
     }
 
     public function rules(): array
     {
         return [
             'course_id' => ['nullable', 'integer'],
+            'compliance_framework_id' => ['nullable', 'integer', 'exists:compliance_frameworks,id'],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'pass_mark' => ['required', 'integer', 'min:0', 'max:100'],

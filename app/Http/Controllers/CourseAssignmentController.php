@@ -10,6 +10,7 @@ use App\Models\CourseAssignment;
 use App\Models\LessonProgress;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Services\AppNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -64,7 +65,7 @@ class CourseAssignmentController extends Controller
                 $assignment->status->value,
             ])->all();
 
-            return $this->exportTable('assignments.xlsx', ['Employee', 'Email', 'Tenant', 'Course', 'Due Date', 'Status'], $rows);
+            return $this->queueTableExport($request, 'assignments.index', $filters, ['Employee', 'Email', 'Tenant', 'Course', 'Due Date', 'Status'], $rows, 'Assignments');
         }
 
         return Inertia::render('assignments/index', [
@@ -143,6 +144,18 @@ class CourseAssignmentController extends Controller
             'assigned_at' => now(),
             'status' => $request->input('status', 'assigned'),
         ]);
+        app(\App\Services\AuditLogService::class)->logModelCreated('assignment_created', $assignment);
+
+        if ($assignedUser = $assignment->assignedTo()->first()) {
+            app(AppNotificationService::class)->sendToUser(
+                $assignedUser,
+                'assignment_created',
+                'New training assignment',
+                sprintf('You have been assigned %s.', $assignment->course()->first()?->title ?? 'a training course'),
+                route('assignments.show', $assignment, false),
+                ['assignment_id' => $assignment->id]
+            );
+        }
 
         $isSelf = (int) $assignment->assigned_to_user_id === (int) $request->user()?->id;
 
@@ -157,10 +170,29 @@ class CourseAssignmentController extends Controller
             ->with('success', 'Assignment created successfully.');
     }
 
+    public function resume(Request $request, CourseAssignment $assignment): RedirectResponse
+    {
+        $this->authorize('view', $assignment);
+
+        abort_unless($request->user()?->id === $assignment->assigned_to_user_id, 403);
+
+        $data = $request->validate([
+            'lesson_id' => ['required', 'integer', 'exists:lessons,id'],
+        ]);
+
+        $oldValues = ['last_lesson_id' => $assignment->last_lesson_id];
+        $assignment->update(['last_lesson_id' => $data['lesson_id']]);
+        app(\App\Services\AuditLogService::class)->logModelUpdated('assignment_resumed', $assignment, $oldValues);
+
+        return back();
+    }
+
     public function update(CourseAssignmentRequest $request, CourseAssignment $courseAssignment): RedirectResponse
     {
         $this->authorize('update', $courseAssignment);
+        $oldValues = $courseAssignment->toArray();
         $courseAssignment->update($request->validated());
+        app(\App\Services\AuditLogService::class)->logModelUpdated('assignment_updated', $courseAssignment, $oldValues);
 
         return back()->with('success', 'Assignment updated.');
     }
@@ -168,7 +200,9 @@ class CourseAssignmentController extends Controller
     public function destroy(CourseAssignment $courseAssignment): RedirectResponse
     {
         $this->authorize('delete', $courseAssignment);
+        $oldValues = $courseAssignment->toArray();
         $courseAssignment->delete();
+        app(\App\Services\AuditLogService::class)->logModelDeleted('assignment_deleted', $courseAssignment, $oldValues);
 
         return back()->with('success', 'Assignment deleted.');
     }

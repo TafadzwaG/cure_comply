@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Concerns\InteractsWithIndexTables;
 use App\Http\Requests\ComplianceFrameworkRequest;
 use App\Models\ComplianceFramework;
+use App\Models\ComplianceResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -42,7 +44,7 @@ class ComplianceFrameworkController extends Controller
                 $framework->status->value,
             ])->all();
 
-            return $this->exportTable('frameworks.xlsx', ['Name', 'Version', 'Sections', 'Status'], $rows);
+            return $this->queueTableExport($request, 'frameworks.index', $filters, ['Name', 'Version', 'Sections', 'Status'], $rows, 'Frameworks');
         }
 
         return Inertia::render('frameworks/index', [
@@ -68,6 +70,7 @@ class ComplianceFrameworkController extends Controller
     {
         $this->authorize('create', ComplianceFramework::class);
         $framework = ComplianceFramework::query()->create($request->validated());
+        app(\App\Services\AuditLogService::class)->logModelCreated('framework_created', $framework);
 
         return redirect()->route('frameworks.show', $framework->id)->with('success', 'Framework created successfully.');
     }
@@ -117,7 +120,9 @@ class ComplianceFrameworkController extends Controller
     public function update(ComplianceFrameworkRequest $request, ComplianceFramework $framework): RedirectResponse
     {
         $this->authorize('update', $framework);
+        $oldValues = $framework->toArray();
         $framework->update($request->validated());
+        app(\App\Services\AuditLogService::class)->logModelUpdated('framework_updated', $framework, $oldValues);
 
         return back()->with('success', 'Framework updated.');
     }
@@ -125,8 +130,75 @@ class ComplianceFrameworkController extends Controller
     public function destroy(ComplianceFramework $framework): RedirectResponse
     {
         $this->authorize('delete', $framework);
+        $oldValues = $framework->toArray();
         $framework->delete();
+        app(\App\Services\AuditLogService::class)->logModelDeleted('framework_deleted', $framework, $oldValues);
 
         return back()->with('success', 'Framework deleted.');
+    }
+
+    public function exportPdf(Request $request, ComplianceFramework $framework): RedirectResponse
+    {
+        $this->authorize('view', $framework);
+        app(\App\Services\AuditLogService::class)->logModel('framework_pdf_requested', $framework);
+
+        return $this->queuePdfExport($request, 'frameworks.pdf', ['framework_id' => $framework->id], [
+            'framework_id' => $framework->id,
+            'title' => $framework->name,
+        ]);
+    }
+
+    public function heatmap(ComplianceFramework $framework): Response
+    {
+        $this->authorize('view', $framework);
+
+        $framework->load([
+            'sections' => fn ($q) => $q->orderBy('sort_order'),
+            'sections.questions' => fn ($q) => $q->orderBy('sort_order'),
+        ]);
+
+        $questionIds = $framework->sections->flatMap->questions->pluck('id');
+
+        // Per-question totals and failures
+        $stats = DB::table('compliance_responses')
+            ->whereIn('compliance_question_id', $questionIds)
+            ->selectRaw("
+                compliance_question_id,
+                COUNT(*) as total,
+                SUM(CASE WHEN LOWER(answer_value) IN ('no','fail','non_compliant','0') OR response_score = 0 THEN 1 ELSE 0 END) as failed
+            ")
+            ->groupBy('compliance_question_id')
+            ->get()
+            ->keyBy('compliance_question_id');
+
+        $sectionsPayload = $framework->sections->map(function ($section) use ($stats) {
+            return [
+                'id' => $section->id,
+                'name' => $section->name,
+                'weight' => $section->weight,
+                'questions' => $section->questions->map(function ($q) use ($stats) {
+                    $row = $stats->get($q->id);
+                    $total = (int) ($row->total ?? 0);
+                    $failed = (int) ($row->failed ?? 0);
+                    $rate = $total > 0 ? round(($failed / $total) * 100, 1) : 0;
+                    return [
+                        'id' => $q->id,
+                        'question_text' => $q->question_text,
+                        'total' => $total,
+                        'failed' => $failed,
+                        'failure_rate' => $rate,
+                    ];
+                })->values()->all(),
+            ];
+        })->values()->all();
+
+        return Inertia::render('frameworks/heatmap', [
+            'framework' => [
+                'id' => $framework->id,
+                'name' => $framework->name,
+                'version' => $framework->version,
+            ],
+            'sections' => $sectionsPayload,
+        ]);
     }
 }

@@ -16,12 +16,13 @@ import {
     SquareKanban,
     UserRoundPlus,
     Users,
+    UsersRound,
     Waypoints,
 } from 'lucide-react';
 import AppLogo from './app-logo';
 
 export function AppSidebar() {
-    const { auth } = usePage<SharedData>().props;
+    const { auth, notification_unread_count } = usePage<SharedData>().props;
     const permissions = auth.permissions ?? [];
     const roles = auth.user?.roles?.map((role) => role.name) ?? [];
 
@@ -41,6 +42,7 @@ export function AppSidebar() {
               { title: 'Courses', url: '/courses', icon: GraduationCap, visible: can('manage courses') },
               { title: 'Assignments', url: '/assignments', icon: SquareKanban, visible: can('assign training') || can('manage courses') },
               { title: 'Assessments ', url: '/tests', icon: ClipboardCheck, visible: can('manage tests') },
+              { title: 'Test Assignments', url: '/tests?tab=assignments', icon: UsersRound, visible: can('manage tests') },
               { title: 'Assessments Attempts', url: '/test-attempts', icon: ClipboardCheck, visible: can('manage tests') },
               { title: 'Compliance Frameworks', url: '/frameworks', icon: ShieldCheck, visible: can('manage compliance frameworks') },
               //   { title: 'Compliance Frameworks', url: '/frameworks', icon: ShieldCheck, visible: can('manage compliance frameworks') },
@@ -60,7 +62,8 @@ export function AppSidebar() {
                 { title: 'Invitations', url: '/invitations', icon: UserRoundPlus, visible: can('invite employees') },
                 { title: 'Courses', url: '/courses', icon: GraduationCap, visible: can('manage courses') },
                 { title: 'Assignments', url: '/assignments', icon: SquareKanban, visible: can('assign training') },
-                { title: 'Tests', url: '/tests', icon: ClipboardCheck, visible: can('manage tests') || can('take tests') },
+                { title: 'Tests', url: '/tests', icon: ClipboardCheck, visible: hasRole('company_admin') || can('manage tests') || can('take tests') },
+                { title: 'Test Assignments', url: '/tests?tab=assignments', icon: UsersRound, visible: hasRole('company_admin') || can('manage tests') },
                 // { title: 'Compliance', url: '/submissions', icon: ShieldCheck, visible: can('manage compliance submissions') || can('answer compliance questions') },
                 {
                     title: 'Compliance Submissions',
@@ -110,15 +113,15 @@ export function AppSidebar() {
         ? makeNav([
               { title: 'Users', url: '/users', icon: Users, visible: can('manage tenants') && can('manage users') },
               { title: 'Reports', url: '/reports', icon: ClipboardCheck, visible: can('view reports') },
-              { title: 'Notifications', url: '/notifications', icon: Bell },
+              { title: 'Notifications', url: '/notifications', icon: Bell, badgeCount: notification_unread_count },
               { title: 'Audit Logs', url: '/audit-logs', icon: FileSearch, visible: can('view audit logs') },
           ])
         : hasRole('company_admin')
           ? makeNav([
                 { title: 'Reports', url: '/reports', icon: ClipboardCheck, visible: can('view reports') },
-                { title: 'Notifications', url: '/notifications', icon: Bell },
+                { title: 'Notifications', url: '/notifications', icon: Bell, badgeCount: notification_unread_count },
             ])
-          : makeNav([{ title: 'Notifications', url: '/notifications', icon: Bell }]);
+          : makeNav([{ title: 'Notifications', url: '/notifications', icon: Bell, badgeCount: notification_unread_count }]);
 
     return (
         <Sidebar collapsible="icon" variant="inset">

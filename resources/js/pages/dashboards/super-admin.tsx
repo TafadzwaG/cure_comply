@@ -1,4 +1,5 @@
 import PendingItemsPanel from '@/components/pending-items-panel';
+import { DashboardInlineScore } from '@/components/dashboard-kit';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -151,8 +152,18 @@ export default function SuperAdminDashboard(props: Props) {
                             </div>
 
                             <div className="grid gap-3 sm:grid-cols-2">
-                                <QuickStat title="Average score" value={`${stats.averageComplianceScore}%`} hint="Across scored submissions" />
-                                <QuickStat title="Green rating share" value={`${stats.greenRate}%`} hint="Tenants landing in strong posture" />
+                                <QuickStat
+                                    title="Average score"
+                                    value={`${stats.averageComplianceScore}%`}
+                                    hint="Across scored submissions"
+                                    donutValue={stats.averageComplianceScore}
+                                />
+                                <QuickStat
+                                    title="Green rating share"
+                                    value={`${stats.greenRate}%`}
+                                    hint="Tenants landing in strong posture"
+                                    donutValue={stats.greenRate}
+                                />
                             </div>
                         </CardHeader>
                     </Card>
@@ -342,7 +353,7 @@ export default function SuperAdminDashboard(props: Props) {
                                                         {tenant.open_submissions_count + tenant.pending_evidence_count}
                                                     </TableCell>
                                                     <TableCell className="text-right">
-                                                        <span className="font-medium tabular-nums">{tenant.average_score}%</span>
+                                                        <DashboardInlineScore value={tenant.average_score} />
                                                     </TableCell>
                                                 </TableRow>
                                             ))}
@@ -438,12 +449,27 @@ export default function SuperAdminDashboard(props: Props) {
     );
 }
 
-function QuickStat({ title, value, hint }: { title: string; value: string; hint: string }) {
+function QuickStat({
+    title,
+    value,
+    hint,
+    donutValue,
+}: {
+    title: string;
+    value: string;
+    hint: string;
+    donutValue?: number;
+}) {
     return (
         <div className="rounded-lg border border-[#c3c6d1]/50 bg-white px-4 py-3">
-            <p className="text-xs uppercase tracking-[0.2em] text-[#434750]">{title}</p>
-            <p className="mt-2 text-2xl font-semibold tracking-tight text-[#002753]">{value}</p>
-            <p className="mt-1 text-xs text-[#434750]">{hint}</p>
+            <div className="flex items-center justify-between gap-4">
+                <div className="min-w-0 flex-1">
+                    <p className="text-xs uppercase tracking-[0.2em] text-[#434750]">{title}</p>
+                    <p className="mt-2 text-2xl font-semibold tracking-tight text-[#002753]">{value}</p>
+                    <p className="mt-1 text-xs text-[#434750]">{hint}</p>
+                </div>
+                {typeof donutValue === 'number' ? <DashboardInlineScore value={donutValue} size="sm" /> : null}
+            </div>
         </div>
     );
 }

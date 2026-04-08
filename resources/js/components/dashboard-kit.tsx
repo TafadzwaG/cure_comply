@@ -2,6 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
+import { ScoreDonut } from '@/components/score-donut';
 import { Link } from '@inertiajs/react';
 import { ArrowRight } from 'lucide-react';
 import type { ReactNode } from 'react';
@@ -26,12 +27,27 @@ export interface TrendSeriesPoint {
     tertiary?: number;
 }
 
-export function DashboardQuickStat({ title, value, hint }: { title: string; value: string; hint: string }) {
+export function DashboardQuickStat({
+    title,
+    value,
+    hint,
+    donutValue,
+}: {
+    title: string;
+    value: string;
+    hint: string;
+    donutValue?: number;
+}) {
     return (
         <div className="rounded-lg border border-[#c3c6d1]/50 bg-white px-4 py-3 shadow-none">
-            <p className="text-xs uppercase tracking-[0.2em] text-[#434750]">{title}</p>
-            <p className="mt-2 text-2xl font-semibold tracking-tight text-[#002753]">{value}</p>
-            <p className="mt-1 text-xs text-[#434750]">{hint}</p>
+            <div className="flex items-center justify-between gap-4">
+                <div className="min-w-0 flex-1">
+                    <p className="text-xs uppercase tracking-[0.2em] text-[#434750]">{title}</p>
+                    <p className="mt-2 text-2xl font-semibold tracking-tight text-[#002753]">{value}</p>
+                    <p className="mt-1 text-xs text-[#434750]">{hint}</p>
+                </div>
+                {typeof donutValue === 'number' ? <DashboardInlineScore value={donutValue} size="sm" /> : null}
+            </div>
         </div>
     );
 }
@@ -41,11 +57,13 @@ export function DashboardMetricCard({
     value,
     detail,
     icon,
+    donutValue,
 }: {
     label: string;
     value: string | number;
     detail: string;
     icon: ReactNode;
+    donutValue?: number;
 }) {
     return (
         <Card className="border-[#c3c6d1]/50 bg-white shadow-none">
@@ -54,9 +72,12 @@ export function DashboardMetricCard({
                     <span className="text-sm text-[#434750]">{label}</span>
                     <div className="rounded-xl bg-[#d6e3ff] p-2 text-[#083d77]">{icon}</div>
                 </div>
-                <div>
-                    <div className="text-3xl font-semibold tracking-tight text-[#002753] tabular-nums">{value}</div>
-                    <p className="mt-1 text-xs leading-5 text-[#434750]">{detail}</p>
+                <div className="flex items-center justify-between gap-4">
+                    <div className="min-w-0 flex-1">
+                        <div className="text-3xl font-semibold tracking-tight text-[#002753] tabular-nums">{value}</div>
+                        <p className="mt-1 text-xs leading-5 text-[#434750]">{detail}</p>
+                    </div>
+                    {typeof donutValue === 'number' ? <DashboardInlineScore value={donutValue} /> : null}
                 </div>
             </CardHeader>
         </Card>
@@ -243,59 +264,71 @@ export function DashboardRingCard({
     subtitle: string;
     items: BreakdownItem[];
 }) {
-    const circumference = 2 * Math.PI * 52;
-    const clamped = Math.max(0, Math.min(100, value));
-    const dashOffset = circumference - (clamped / 100) * circumference;
-
     return (
         <Card className="border-[#c3c6d1]/50 bg-white shadow-none">
             <CardHeader>
                 <CardTitle className="text-base font-medium text-[#002753]">{title}</CardTitle>
                 <CardDescription className="text-[#434750]">{description}</CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-6 lg:grid-cols-[180px_1fr] lg:items-center">
-                <div className="flex items-center justify-center">
-                    <div className="relative flex h-40 w-40 items-center justify-center">
-                        <svg className="h-40 w-40 -rotate-90" viewBox="0 0 140 140">
-                            <circle cx="70" cy="70" r="52" fill="none" stroke="currentColor" strokeWidth="12" className="text-[#e6e8ea]" />
-                            <circle
-                                cx="70"
-                                cy="70"
-                                r="52"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="12"
-                                strokeLinecap="round"
-                                strokeDasharray={circumference}
-                                strokeDashoffset={dashOffset}
-                                className="text-[#083d77]"
-                            />
-                        </svg>
-                        <div className="absolute text-center">
-                            <div className="text-3xl font-semibold text-[#002753] tabular-nums">{Math.round(clamped)}%</div>
-                            <div className="mt-1 text-xs uppercase tracking-[0.18em] text-[#434750]">{subtitle}</div>
-                        </div>
-                    </div>
-                </div>
-                <div className="space-y-4">
-                    {items.length ? (
-                        items.map((item) => (
-                            <div key={item.label} className="space-y-2">
-                                <div className="flex items-center justify-between text-sm">
-                                    <span className="text-[#002753]">{item.label}</span>
-                                    <span className="tabular-nums text-[#434750]">{item.value}%</span>
-                                </div>
-                                <Progress className="h-2 bg-[#e6e8ea]" value={item.value} />
-                            </div>
-                        ))
-                    ) : (
+            <CardContent>
+                {items.length ? (
+                    <ScoreDonut value={value} subtitle={subtitle} items={items} />
+                ) : (
+                    <div className="grid gap-6 lg:grid-cols-[180px_1fr] lg:items-center">
+                        <ScoreDonut value={value} subtitle={subtitle} />
                         <div className="rounded-lg border border-dashed border-[#c3c6d1]/60 bg-[#f2f4f6] p-4 text-sm text-[#434750]">
                             No section scoring is available yet.
                         </div>
-                    )}
-                </div>
+                    </div>
+                )}
             </CardContent>
         </Card>
+    );
+}
+
+export function DashboardInlineScore({ value, size = 'md' }: { value: number; size?: 'sm' | 'md' }) {
+    const clamped = Math.max(0, Math.min(100, value));
+    const radius = size === 'sm' ? 16 : 18;
+    const svgSize = size === 'sm' ? 40 : 44;
+    const strokeWidth = 4;
+    const circumference = 2 * Math.PI * radius;
+    const dashOffset = circumference - (clamped / 100) * circumference;
+
+    return (
+        <div className="inline-flex items-center gap-2">
+            <div
+                className={`relative inline-flex items-center justify-center ${size === 'sm' ? 'h-10 w-10' : 'h-11 w-11'}`}
+                aria-hidden="true"
+            >
+                <svg className="-rotate-90" width={svgSize} height={svgSize} viewBox={`0 0 ${svgSize} ${svgSize}`}>
+                    <circle
+                        cx={svgSize / 2}
+                        cy={svgSize / 2}
+                        r={radius}
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={strokeWidth}
+                        className="text-[#e6e8ea]"
+                    />
+                    <circle
+                        cx={svgSize / 2}
+                        cy={svgSize / 2}
+                        r={radius}
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={strokeWidth}
+                        strokeLinecap="round"
+                        strokeDasharray={circumference}
+                        strokeDashoffset={dashOffset}
+                        className="text-[#083d77]"
+                    />
+                </svg>
+                <span className={`absolute font-semibold tabular-nums text-[#002753] ${size === 'sm' ? 'text-[10px]' : 'text-[11px]'}`}>
+                    {Math.round(clamped)}
+                </span>
+            </div>
+            <span className="font-medium tabular-nums text-[#002753]">{Math.round(clamped)}%</span>
+        </div>
     );
 }
 

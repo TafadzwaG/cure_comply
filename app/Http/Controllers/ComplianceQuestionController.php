@@ -13,11 +13,12 @@ class ComplianceQuestionController extends Controller
     {
         $this->authorize('update', $section->framework);
 
-        $section->questions()->create([
+        $question = $section->questions()->create([
             ...$request->validated(),
             'requires_evidence' => $request->boolean('requires_evidence'),
             'is_active' => $request->boolean('is_active', true),
         ]);
+        app(\App\Services\AuditLogService::class)->logModelCreated('framework_question_created', $question);
 
         return back()->with('success', 'Question created.');
     }
@@ -28,11 +29,13 @@ class ComplianceQuestionController extends Controller
 
         abort_unless($question->compliance_section_id === $section->id, 404);
 
+        $oldValues = $question->toArray();
         $question->update([
             ...$request->validated(),
             'requires_evidence' => $request->boolean('requires_evidence'),
             'is_active' => $request->boolean('is_active', true),
         ]);
+        app(\App\Services\AuditLogService::class)->logModelUpdated('framework_question_updated', $question, $oldValues);
 
         return back()->with('success', 'Question updated.');
     }
@@ -43,7 +46,9 @@ class ComplianceQuestionController extends Controller
 
         abort_unless($question->compliance_section_id === $section->id, 404);
 
+        $oldValues = $question->toArray();
         $question->delete();
+        app(\App\Services\AuditLogService::class)->logModelDeleted('framework_question_deleted', $question, $oldValues);
 
         return back()->with('success', 'Question deleted.');
     }

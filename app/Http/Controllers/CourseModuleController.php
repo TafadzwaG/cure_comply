@@ -2,64 +2,55 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CourseModuleRequest;
+use App\Models\Course;
 use App\Models\CourseModule;
-use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 
 class CourseModuleController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function store(CourseModuleRequest $request, Course $course): RedirectResponse
     {
-        //
+        $this->authorize('update', $course);
+
+        $module = $course->modules()->create([
+            'title' => $request->string('title')->toString(),
+            'description' => $request->input('description'),
+            'sort_order' => $request->integer('sort_order') ?: (($course->modules()->max('sort_order') ?? 0) + 1),
+        ]);
+
+        app(\App\Services\AuditLogService::class)->logModelCreated('course_module_created', $module);
+
+        return redirect()
+            ->route('courses.show', ['course' => $course, 'tab' => 'modules'])
+            ->with('success', 'Module added to the course.');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function update(CourseModuleRequest $request, Course $course, CourseModule $module): RedirectResponse
     {
-        //
+        $this->authorize('update', $course);
+        abort_unless($module->course_id === $course->id, 404);
+
+        $oldValues = $module->toArray();
+        $module->update($request->validated());
+        app(\App\Services\AuditLogService::class)->logModelUpdated('course_module_updated', $module, $oldValues);
+
+        return redirect()
+            ->route('courses.show', ['course' => $course, 'tab' => 'modules'])
+            ->with('success', 'Module updated.');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function destroy(Course $course, CourseModule $module): RedirectResponse
     {
-        //
-    }
+        $this->authorize('update', $course);
+        abort_unless($module->course_id === $course->id, 404);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(CourseModule $courseModule)
-    {
-        //
-    }
+        $oldValues = $module->toArray();
+        $module->delete();
+        app(\App\Services\AuditLogService::class)->logModelDeleted('course_module_deleted', $module, $oldValues);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(CourseModule $courseModule)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, CourseModule $courseModule)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(CourseModule $courseModule)
-    {
-        //
+        return redirect()
+            ->route('courses.show', ['course' => $course, 'tab' => 'modules'])
+            ->with('success', 'Module deleted.');
     }
 }

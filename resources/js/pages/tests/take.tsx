@@ -77,6 +77,7 @@ export default function TestTake({ test, attemptNumber, maxAttempts }: Props) {
     const [showConfirm, setShowConfirm] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [elapsed, setElapsed] = useState(0);
+    const [startedAt] = useState(() => new Date().toISOString());
 
     const currentQuestion = questions[currentIndex];
     const answeredCount = answers.size;
@@ -115,12 +116,12 @@ export default function TestTake({ test, attemptNumber, maxAttempts }: Props) {
 
         router.post(
             route('tests.attempts.store', test.id),
-            { answers: payload },
+            { answers: payload, started_at: startedAt, time_spent_seconds: elapsed },
             {
                 onFinish: () => setSubmitting(false),
             },
         );
-    }, [answers, questions, test.id]);
+    }, [answers, questions, test.id, startedAt, elapsed]);
 
     useEffect(() => {
         if (timeRemaining === 0) {

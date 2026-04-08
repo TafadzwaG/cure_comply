@@ -7,7 +7,18 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import PlatformLayout from '@/layouts/platform-layout';
 import { IndexStat, Paginated, TableFilters } from '@/types';
 import { Link } from '@inertiajs/react';
-import { CheckCircle2, ClipboardCheck, Clock, GraduationCap, XCircle } from 'lucide-react';
+import { BarChart3, CheckCircle2, ClipboardCheck, Clock, GraduationCap, XCircle } from 'lucide-react';
+
+function formatDuration(seconds?: number | null) {
+    if (!seconds) return '—';
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    if (mins >= 60) {
+        const h = Math.floor(mins / 60);
+        return `${h}h ${mins % 60}m`;
+    }
+    return `${mins}m ${secs}s`;
+}
 
 interface Attempt {
     id: number;
@@ -16,6 +27,7 @@ interface Attempt {
     percentage?: number | null;
     result_status: string;
     submitted_at?: string | null;
+    time_spent_seconds?: number | null;
     test?: { id: number; title: string } | null;
     user?: { id: number; name: string; email: string } | null;
     tenant?: { id: number; name: string } | null;
@@ -68,6 +80,9 @@ export default function TestAttemptsIndex({
                     title="Test Attempts"
                     description="See who has taken which test, when, and how they scored."
                     stats={statItems}
+                    actions={[
+                        { label: 'View analytics', href: route('test-attempts.analytics'), icon: BarChart3 },
+                    ]}
                     filters={filters}
                     filterConfigs={[
                         {
@@ -127,6 +142,7 @@ export default function TestAttemptsIndex({
                                         <SortableTableHead label="Attempt" column="attempt_number" filters={filters} />
                                         <SortableTableHead label="Score" column="percentage" filters={filters} />
                                         <TableHead>Result</TableHead>
+                                        <TableHead>Time</TableHead>
                                         <SortableTableHead label="Submitted" column="submitted_at" filters={filters} />
                                         <TableHead className="w-[120px] text-right">Actions</TableHead>
                                     </TableRow>
@@ -162,6 +178,12 @@ export default function TestAttemptsIndex({
                                             <TableCell className="py-4">
                                                 <ResultBadge value={attempt.result_status} />
                                             </TableCell>
+                                            <TableCell className="py-4">
+                                                <div className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                                                    <Clock className="h-3 w-3" />
+                                                    {formatDuration(attempt.time_spent_seconds)}
+                                                </div>
+                                            </TableCell>
                                             <TableCell className="py-4 text-sm text-muted-foreground">
                                                 {attempt.submitted_at
                                                     ? new Date(attempt.submitted_at).toLocaleString('en-GB', {
@@ -193,7 +215,7 @@ export default function TestAttemptsIndex({
                                     {attempts.data.length === 0 && (
                                         <TableRow>
                                             <TableCell
-                                                colSpan={isSuperAdmin ? 8 : 7}
+                                                colSpan={isSuperAdmin ? 9 : 8}
                                                 className="py-12 text-center text-sm text-muted-foreground"
                                             >
                                                 No test attempts match the current filters.

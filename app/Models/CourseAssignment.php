@@ -23,6 +23,7 @@ class CourseAssignment extends Model
         'due_date',
         'status',
         'assigned_at',
+        'last_lesson_id',
     ];
 
     protected function casts(): array

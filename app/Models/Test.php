@@ -16,6 +16,7 @@ class Test extends Model
 
     protected $fillable = [
         'course_id',
+        'compliance_framework_id',
         'title',
         'description',
         'pass_mark',
@@ -37,6 +38,11 @@ class Test extends Model
         return $this->belongsTo(Course::class);
     }
 
+    public function framework(): BelongsTo
+    {
+        return $this->belongsTo(ComplianceFramework::class, 'compliance_framework_id');
+    }
+
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
@@ -50,5 +56,10 @@ class Test extends Model
     public function attempts(): HasMany
     {
         return $this->hasMany(TestAttempt::class);
+    }
+
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(TestAssignment::class);
     }
 }

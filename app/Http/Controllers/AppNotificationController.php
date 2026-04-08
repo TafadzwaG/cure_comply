@@ -61,14 +61,42 @@ class AppNotificationController extends Controller
         ]);
     }
 
+    public function markAllRead(Request $request): RedirectResponse
+    {
+        AppNotification::query()
+            ->where('user_id', $request->user()?->id)
+            ->where('is_read', false)
+            ->update($this->readPayload());
+
+        return back()->with('success', 'All notifications marked as read.');
+    }
+
+    public function open(AppNotification $appNotification): RedirectResponse
+    {
+        $this->authorize('update', $appNotification);
+
+        if (! $appNotification->is_read) {
+            $appNotification->update($this->readPayload());
+        }
+
+        return $appNotification->action_url
+            ? redirect()->to($appNotification->action_url)
+            : redirect()->route('notifications.index');
+    }
+
     public function update(AppNotification $appNotification): RedirectResponse
     {
         $this->authorize('update', $appNotification);
-        $appNotification->update([
-            'is_read' => true,
-            'read_at' => now(),
-        ]);
+        $appNotification->update($this->readPayload());
 
         return back()->with('success', 'Notification marked as read.');
+    }
+
+    protected function readPayload(): array
+    {
+        return [
+            'is_read' => true,
+            'read_at' => now(),
+        ];
     }
 }

@@ -37,7 +37,7 @@ class EvidenceFileController extends Controller
             'framework_id' => ['nullable', 'integer'],
         ]);
 
-        $query = EvidenceFile::query()->with(['response.question', 'submission.framework', 'submission.tenant:id,name', 'tenant:id,name', 'uploader', 'reviews.reviewer']);
+        $query = EvidenceFile::query()->with(['response.question', 'submission.framework', 'submission.tenant:id,name', 'tenant:id,name', 'uploader', 'reviews.reviewer', 'versions.uploader']);
         $this->applySearch($query, $filters['search'] ?? null, ['original_name', 'response.question.question_text', 'submission.framework.name', 'submission.tenant.name']);
         $this->applyFilters($query, $filters, [
             'review_status' => 'review_status',
@@ -61,7 +61,7 @@ class EvidenceFileController extends Controller
                 $file->review_status->value,
             ])->all();
 
-            return $this->exportTable('evidence.xlsx', ['Question', 'File', 'Uploaded', 'Review Status'], $rows);
+            return $this->queueTableExport($request, 'evidence.index', $filters, ['Question', 'File', 'Uploaded', 'Review Status'], $rows, 'Evidence');
         }
 
         $isSuperAdmin = (bool) $request->user()?->hasRole('super_admin');
@@ -87,7 +87,13 @@ class EvidenceFileController extends Controller
         $this->authorize('view', $complianceResponse->submission);
 
         try {
-            $this->evidenceStorageService->store($complianceResponse, $request->file('file'), $request->user()->id);
+            $evidenceFile = $this->evidenceStorageService->store(
+                $complianceResponse,
+                $request->file('file'),
+                $request->user()->id,
+                $request->integer('replaces') ?: null
+            );
+            app(\App\Services\AuditLogService::class)->logModelCreated('evidence_uploaded', $evidenceFile);
         } catch (\RuntimeException $e) {
             Log::error('Evidence upload failed', [
                 'response_id' => $complianceResponse->id,
@@ -130,7 +136,8 @@ class EvidenceFileController extends Controller
                     ]
                 );
 
-                $this->evidenceStorageService->store($response, $request->file('file'), $request->user()->id);
+                $evidenceFile = $this->evidenceStorageService->store($response, $request->file('file'), $request->user()->id);
+                app(\App\Services\AuditLogService::class)->logModelCreated('evidence_uploaded', $evidenceFile);
             });
         } catch (\RuntimeException $e) {
             Log::error('Evidence upload failed', [
@@ -149,7 +156,16 @@ class EvidenceFileController extends Controller
     public function download(EvidenceFile $evidenceFile)
     {
         $this->authorize('view', $evidenceFile);
+        app(\App\Services\AuditLogService::class)->logModel('evidence_downloaded', $evidenceFile);
 
         return $this->evidenceStorageService->download($evidenceFile);
+    }
+
+    public function downloadVersion(EvidenceFile $evidenceFile, \App\Models\EvidenceFileVersion $version)
+    {
+        $this->authorize('view', $evidenceFile);
+        abort_unless($version->evidence_file_id === $evidenceFile->id, 404);
+
+        return $this->evidenceStorageService->downloadVersion($version);
     }
 }

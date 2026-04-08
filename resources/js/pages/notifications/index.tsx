@@ -1,22 +1,27 @@
 import { DataTablePagination } from '@/components/data-table-pagination';
 import { DataTableToolbar } from '@/components/data-table-toolbar';
+import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
 import { RowActionsMenu } from '@/components/row-actions-menu';
 import { SortableTableHead } from '@/components/sortable-table-head';
 import { StatusBadge } from '@/components/status-badge';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import PlatformLayout from '@/layouts/platform-layout';
-import { Paginated, TableFilters, Tenant } from '@/types';
+import { Paginated, SharedData, TableFilters, Tenant } from '@/types';
+import { Link, router, usePage } from '@inertiajs/react';
 import { BellRing, CircleCheck, MailOpen, MessageSquareDot, TimerReset } from 'lucide-react';
+import moment from 'moment';
 
 interface NotificationRow {
     id: number;
     title: string;
     message: string;
     type: string;
+    action_url?: string | null;
     is_read: boolean;
     created_at: string;
     tenant?: Tenant | null;
@@ -33,6 +38,7 @@ export default function NotificationsIndex({
     stats: Record<string, number>;
     types: string[];
 }) {
+    const { notification_unread_count } = usePage<SharedData>().props;
     const unreadRatio = stats.total === 0 ? 0 : Math.round((stats.unread / stats.total) * 100);
 
     return (
@@ -76,17 +82,27 @@ export default function NotificationsIndex({
                             <Separator />
                             <InsightRow
                                 title="Action pattern"
-                                value="Mark as read"
-                                description="Unread items can be acknowledged directly from the action menu in the table."
+                                value={notification_unread_count ?? stats.unread}
+                                description="Unread items can be acknowledged individually or cleared in one action."
                             />
                         </CardContent>
                     </Card>
                 </section>
 
                 <Card className="border-border/70 shadow-none">
-                    <CardHeader>
-                        <CardTitle>Notification feed</CardTitle>
-                        <CardDescription>Filter by read status and notification type, then review the full message payload below.</CardDescription>
+                    <CardHeader className="flex flex-row items-start justify-between gap-4">
+                        <div>
+                            <CardTitle>Notification feed</CardTitle>
+                            <CardDescription>Filter by read status and notification type, then review the full message payload below.</CardDescription>
+                        </div>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => router.patch(route('notifications.read-all'))}
+                            disabled={stats.unread === 0}
+                        >
+                            Mark all read
+                        </Button>
                     </CardHeader>
                     <DataTableToolbar
                         filters={filters}
@@ -107,54 +123,68 @@ export default function NotificationsIndex({
                         ]}
                     />
                     <CardContent className="p-0">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <SortableTableHead label="Notification" column="title" filters={filters} />
-                                    <SortableTableHead label="Type" column="type" filters={filters} />
-                                    <TableHead>Tenant</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <SortableTableHead label="Created" column="created_at" filters={filters} />
-                                    <TableHead className="w-[70px] text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {notifications.data.map((notification) => (
-                                    <TableRow key={notification.id}>
-                                        <TableCell className="align-top">
-                                            <div className="flex items-start gap-3">
-                                                <div className="mt-0.5 rounded-lg border border-border/70 bg-muted/35 p-2">
-                                                    <MessageSquareDot className="size-4" />
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <div className="font-medium">{notification.title}</div>
-                                                    <div className="max-w-xl text-sm leading-6 text-muted-foreground">{notification.message}</div>
-                                                </div>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge variant="outline" className="rounded-full px-3 py-1">
-                                                {notification.type}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell>{notification.tenant?.name ?? 'Platform'}</TableCell>
-                                        <TableCell>
-                                            <StatusBadge value={notification.is_read ? 'read' : 'unread'} />
-                                        </TableCell>
-                                        <TableCell>{notification.created_at}</TableCell>
-                                        <TableCell className="text-right">
-                                            <RowActionsMenu
-                                                actions={
-                                                    notification.is_read
-                                                        ? []
-                                                        : [{ label: 'Mark as read', method: 'patch', href: route('notifications.update', notification.id) }]
-                                                }
-                                            />
-                                        </TableCell>
+                        {notifications.data.length ? (
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <SortableTableHead label="Notification" column="title" filters={filters} />
+                                        <SortableTableHead label="Type" column="type" filters={filters} />
+                                        <TableHead>Tenant</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <SortableTableHead label="Created" column="created_at" filters={filters} />
+                                        <TableHead className="w-[70px] text-right">Actions</TableHead>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                                </TableHeader>
+                                <TableBody>
+                                    {notifications.data.map((notification) => (
+                                        <TableRow key={notification.id}>
+                                            <TableCell className="align-top">
+                                                <div className="flex items-start gap-3">
+                                                    <div className="mt-0.5 rounded-lg border border-border/70 bg-muted/35 p-2">
+                                                        <MessageSquareDot className="size-4" />
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <div className="font-medium">{notification.title}</div>
+                                                        <div className="max-w-xl text-sm leading-6 text-muted-foreground">{notification.message}</div>
+                                                        {notification.action_url ? (
+                                                            <Link href={route('notifications.open', notification.id)} className="text-xs font-medium text-[#083d77] hover:underline">
+                                                                Open related item
+                                                            </Link>
+                                                        ) : null}
+                                                    </div>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge variant="outline" className="rounded-full px-3 py-1">
+                                                    {notification.type}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell>{notification.tenant?.name ?? 'Platform'}</TableCell>
+                                            <TableCell>
+                                                <StatusBadge value={notification.is_read ? 'read' : 'unread'} />
+                                            </TableCell>
+                                            <TableCell>{moment(notification.created_at).format('dddd D MMMM YYYY h:mm A')}</TableCell>
+                                            <TableCell className="text-right">
+                                                <RowActionsMenu
+                                                    actions={[
+                                                        ...(notification.action_url ? [{ label: 'Open', href: route('notifications.open', notification.id) }] : []),
+                                                        ...(!notification.is_read ? [{ label: 'Mark as read', method: 'patch' as const, href: route('notifications.update', notification.id) }] : []),
+                                                    ]}
+                                                />
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        ) : (
+                            <div className="p-6">
+                                <EmptyState
+                                    icon={BellRing}
+                                    title="No notifications match these filters"
+                                    description="Try widening the status or type filters to bring more inbox items back into view."
+                                />
+                            </div>
+                        )}
                     </CardContent>
                     <DataTablePagination paginated={notifications} filters={filters} />
                 </Card>

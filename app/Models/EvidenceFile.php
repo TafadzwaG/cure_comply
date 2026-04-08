@@ -28,6 +28,7 @@ class EvidenceFile extends Model
         'uploaded_by',
         'uploaded_at',
         'review_status',
+        'current_version',
     ];
 
     protected function casts(): array
@@ -56,5 +57,10 @@ class EvidenceFile extends Model
     public function reviews(): HasMany
     {
         return $this->hasMany(EvidenceReview::class);
+    }
+
+    public function versions(): HasMany
+    {
+        return $this->hasMany(EvidenceFileVersion::class)->orderBy('version_number');
     }
 }

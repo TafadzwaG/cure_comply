@@ -46,7 +46,7 @@ export default function CoursesCreate() {
         {
             title: 'Modules can be added later',
             description:
-                'The course detail page remains the place for module and lesson builder work.',
+                'After saving, you will land in the course builder where modules and lessons can be added immediately.',
             icon: Layers3,
         },
         {
@@ -213,8 +213,8 @@ export default function CoursesCreate() {
                                     <div className="space-y-1">
                                         <p className="text-sm font-medium">Quick note</p>
                                         <p className="text-sm text-muted-foreground">
-                                            After creating the course, you can add modules, lessons, and linked tests
-                                            from the course detail page.
+                                            After creating the course, you will be redirected into the builder tabs to
+                                            add modules, lessons, video links, and supporting materials.
                                         </p>
                                     </div>
                                 </div>

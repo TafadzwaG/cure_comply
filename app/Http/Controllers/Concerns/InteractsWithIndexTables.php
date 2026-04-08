@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Concerns;
 
 use App\Exports\ArrayXlsxExport;
+use App\Services\ExportRequestService;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
@@ -107,5 +109,35 @@ trait InteractsWithIndexTables
     protected function exportTable(string $filename, array $headings, array $rows): StreamedResponse
     {
         return (new ArrayXlsxExport($headings, $rows))->download($filename);
+    }
+
+    protected function queueTableExport(Request $request, string $source, array $filters, array $headings, array $rows, ?string $title = null): RedirectResponse
+    {
+        app(ExportRequestService::class)->queue(
+            $request->user(),
+            $source,
+            'xlsx',
+            $filters,
+            [
+                'headings' => $headings,
+                'rows' => $rows,
+                'title' => $title,
+            ]
+        );
+
+        return back()->with('success', 'Export queued. You will be notified when it is ready.');
+    }
+
+    protected function queuePdfExport(Request $request, string $source, array $filters = [], array $payload = []): RedirectResponse
+    {
+        app(ExportRequestService::class)->queue(
+            $request->user(),
+            $source,
+            'pdf',
+            $filters,
+            $payload
+        );
+
+        return back()->with('success', 'PDF export queued. You will be notified when it is ready.');
     }
 }

@@ -14,6 +14,8 @@ class Lesson extends Model
     use HasFactory;
     use SoftDeletes;
 
+    protected $appends = ['file_url', 'embed_url'];
+
     protected $fillable = [
         'course_module_id',
         'title',
@@ -41,5 +43,15 @@ class Lesson extends Model
     public function progress(): HasMany
     {
         return $this->hasMany(LessonProgress::class);
+    }
+
+    public function getFileUrlAttribute(): ?string
+    {
+        return $this->file_path ? \Illuminate\Support\Facades\Storage::disk('public')->url($this->file_path) : null;
+    }
+
+    public function getEmbedUrlAttribute(): ?string
+    {
+        return \App\Support\TrustedVideoEmbed::normalize($this->video_url);
     }
 }
