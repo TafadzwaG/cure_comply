@@ -26,7 +26,7 @@ export function NavFooter({
                                     {item.icon && <item.icon className="h-5 w-5" />}
                                     <span>{item.title}</span>
                                     {item.badgeCount ? (
-                                        <Badge className="ml-auto rounded-full bg-[#083d77] text-white">{item.badgeCount}</Badge>
+                                        <Badge className="ml-auto rounded-full bg-primary text-primary-foreground">{item.badgeCount}</Badge>
                                     ) : null}
                                 </Link>
                             </SidebarMenuButton>
@@ -35,7 +35,7 @@ export function NavFooter({
                 </SidebarMenu>
 
                 {impersonation.active ? (
-                    <div className="mt-4 space-y-3 rounded-2xl bg-[#083D77] p-4 text-white group-data-[collapsible=icon]:hidden">
+                    <div className="mt-4 space-y-3 rounded-2xl bg-primary p-4 text-primary-foreground group-data-[collapsible=icon]:hidden">
                         <div className="flex items-start gap-3">
                             <div className="rounded-xl bg-white/12 p-2.5">
                                 <Eye className="size-4" />
@@ -51,7 +51,7 @@ export function NavFooter({
                         <Button
                             variant="secondary"
                             size="sm"
-                            className="w-full rounded-xl border-0 bg-white text-[#083D77] hover:bg-[#14417A] hover:text-white dark:bg-white dark:text-[#083D77] dark:hover:bg-[#14417A] dark:hover:text-white"
+                            className="w-full rounded-xl border-0 bg-white text-primary hover:bg-white/90 hover:text-primary dark:bg-white dark:text-primary dark:hover:bg-white/90 dark:hover:text-primary"
                             onClick={() => router.delete(route('impersonation.stop'))}
                         >
                             <ShieldX className="size-4" />

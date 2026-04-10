@@ -89,32 +89,71 @@ export default function CompleteProfile({
                 <style>{`
                     body { font-family: 'Inter', sans-serif; }
                     h1, h2, h3, h4, h5 { font-family: 'Plus Jakarta Sans', sans-serif; }
+                    .complete-profile-root { background: #f7f9fb; color: #191c1e; }
+                    .dark .complete-profile-root { background: #020817; color: #f8fafc; }
+                    .dark .complete-profile-root .complete-profile-shell {
+                        background: #020817;
+                        border-color: rgba(148,163,184,0.24);
+                    }
+                    .dark .complete-profile-root .complete-profile-topbar {
+                        background: rgba(15,23,42,0.82);
+                        border-color: rgba(148,163,184,0.2);
+                    }
+                    .dark .complete-profile-root .complete-profile-aside {
+                        background: rgba(15,23,42,0.52);
+                    }
+                    .dark .complete-profile-root .complete-profile-card {
+                        background: #0f172a;
+                        border-color: rgba(148,163,184,0.2);
+                    }
+                    .dark .complete-profile-root h1,
+                    .dark .complete-profile-root h3,
+                    .dark .complete-profile-root h4,
+                    .dark .complete-profile-root h5,
+                    .dark .complete-profile-root label,
+                    .dark .complete-profile-root .complete-profile-brand,
+                    .dark .complete-profile-root .complete-profile-step {
+                        color: #f8fafc !important;
+                    }
+                    .dark .complete-profile-root p,
+                    .dark .complete-profile-root .complete-profile-muted {
+                        color: rgba(226,232,240,0.78) !important;
+                    }
+                    .dark .complete-profile-root h1 span {
+                        color: #93c5fd !important;
+                    }
+                    .dark .complete-profile-root .complete-profile-support-link {
+                        color: rgba(226,232,240,0.78) !important;
+                    }
+                    .dark .complete-profile-root .complete-profile-support-link:hover {
+                        color: #f8fafc !important;
+                    }
                 `}</style>
             </Head>
 
-            <div className="min-h-screen bg-[#f7f9fb] text-[#191c1e]">
+            <div className="complete-profile-root min-h-screen bg-[#f7f9fb] text-[#191c1e]">
                 <div className="mx-auto w-full max-w-[96rem]">
-                    <div className="overflow-hidden border border-[#c3c6d1]/15 bg-[#f7f9fb] shadow-[0_24px_70px_-40px_rgba(0,39,83,0.22)]">
-                        <div className="flex flex-col items-center justify-between gap-6 border-b border-[#c3c6d1]/15 bg-[#f2f4f6]/70 px-8 py-6 md:flex-row">
+                    <div className="complete-profile-shell overflow-hidden border border-[#c3c6d1]/15 bg-[#f7f9fb] shadow-[0_24px_70px_-40px_rgba(0,39,83,0.22)]">
+                        <div className="complete-profile-topbar flex flex-col items-center justify-between gap-6 border-b border-[#c3c6d1]/15 bg-[#f2f4f6]/70 px-8 py-6 md:flex-row">
                             <Link href={route('home')} className="flex items-center gap-3">
                                 <img src={privacyCureLogo} alt="Privacy Cure" className="h-9 w-auto" />
-                                <span className="text-lg font-extrabold tracking-tight text-[#002753]">Privacy Cure</span>
+                                <span className="complete-profile-brand text-lg font-extrabold tracking-tight text-[#002753]">Privacy Cure</span>
                             </Link>
 
                             <div className="flex w-full items-center gap-2 overflow-x-auto pb-2 md:w-auto md:pb-0">
                                 <div className="flex shrink-0 items-center gap-2 rounded-full bg-[#002753]/10 px-3 py-1">
                                     <span className="h-2 w-2 rounded-full bg-[#002753]" />
-                                    <span className="text-[10px] font-bold uppercase tracking-widest text-[#002753]">1. Identity</span>
+                                    <span className="complete-profile-step text-[10px] font-bold uppercase tracking-widest text-[#002753]">1. Identity</span>
                                 </div>
                                 <div className="h-px w-4 bg-[#c3c6d1]/40" />
                                 <div className="flex shrink-0 items-center gap-2 rounded-full bg-[#002753]/10 px-3 py-1">
                                     <span className="h-2 w-2 rounded-full bg-[#002753]" />
-                                    <span className="text-[10px] font-bold uppercase tracking-widest text-[#002753]">2. Profile</span>
+                                    <span className="complete-profile-step text-[10px] font-bold uppercase tracking-widest text-[#002753]">2. Profile</span>
                                 </div>
                                 <div className="h-px w-4 bg-[#c3c6d1]/40" />
                                 <div className="flex shrink-0 items-center gap-2 px-3 py-1">
                                     <span className="h-2 w-2 rounded-full bg-[#c3c6d1]" />
-                                    <span className="text-[10px] font-bold uppercase tracking-widest text-[#434750]">3. Workspace</span>
+                                    <span className="complete-profile-muted text-[10px] font-bold uppercase tracking-widest text-[#434750]">3. Workspace</span>
                                 </div>
                             </div>
                         </div>
@@ -239,7 +278,7 @@ export default function CompleteProfile({
                                     </section>
 
                                     <div className="flex items-center justify-between border-t border-[#c3c6d1]/15 pt-8">
-                                        <div className="flex items-center gap-2 text-sm font-medium text-[#434750]">
+                                        <div className="complete-profile-muted flex items-center gap-2 text-sm font-medium text-[#434750]">
                                             <Sparkles className="size-4 text-[#00b9ce]" />
                                             Complete this once to unlock your dashboard.
                                         </div>
@@ -256,7 +295,7 @@ export default function CompleteProfile({
                                 </form>
                             </div>
 
-                            <div className="space-y-8 bg-[#f2f4f6]/30 p-8 lg:col-span-4">
+                            <div className="complete-profile-aside space-y-8 bg-[#f2f4f6]/30 p-8 lg:col-span-4">
                                 <div className="space-y-4 rounded-2xl overflow-hidden">
                                     <div className="relative aspect-[4/3] overflow-hidden rounded-2xl lg:aspect-square">
                                         <img
@@ -274,7 +313,7 @@ export default function CompleteProfile({
                                     </div>
                                 </div>
 
-                                <div className="space-y-6 rounded-2xl border border-[#c3c6d1]/15 bg-white p-6">
+                                <div className="complete-profile-card space-y-6 rounded-2xl border border-[#c3c6d1]/15 bg-white p-6">
                                     <h5 className="border-b border-[#c3c6d1]/30 pb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#002753]">
                                         Activation milestones
                                     </h5>
@@ -310,11 +349,11 @@ export default function CompleteProfile({
                                 </div>
 
                                 <div className="flex flex-col gap-4 pt-4">
-                                    <div className="flex cursor-pointer items-center gap-3 text-[#434750] transition-colors hover:text-[#002753]">
+                                    <div className="complete-profile-support-link flex cursor-pointer items-center gap-3 text-[#434750] transition-colors hover:text-[#002753]">
                                         <ContactRound className="size-4" />
                                         <span className="text-[10px] font-bold uppercase tracking-widest">Support</span>
                                     </div>
-                                    <div className="flex cursor-pointer items-center gap-3 text-[#434750] transition-colors hover:text-[#002753]">
+                                    <div className="complete-profile-support-link flex cursor-pointer items-center gap-3 text-[#434750] transition-colors hover:text-[#002753]">
                                         <ShieldCheck className="size-4" />
                                         <span className="text-[10px] font-bold uppercase tracking-widest">Access policy</span>
                                     </div>
@@ -362,7 +401,7 @@ function InfoRow({
     description: string;
 }) {
     return (
-        <div className="rounded-2xl border border-[#c3c6d1]/15 bg-white p-5">
+        <div className="complete-profile-card rounded-2xl border border-[#c3c6d1]/15 bg-white p-5">
             <div className="mb-3 inline-flex rounded-xl border border-[#c3c6d1]/15 bg-[#f2f4f6] p-2.5">
                 <Icon className="size-4 text-[#002753]" />
             </div>

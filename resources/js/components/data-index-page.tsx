@@ -19,6 +19,7 @@ interface Props {
     tableTitle: string;
     tableDescription: string;
     exportable?: boolean;
+    tableToolbarAddon?: React.ReactNode;
     children: React.ReactNode;
 }
 
@@ -34,6 +35,7 @@ export function DataIndexPage({
     tableTitle,
     tableDescription,
     exportable = false,
+    tableToolbarAddon,
     children,
 }: Props) {
     return (
@@ -79,6 +81,7 @@ export function DataIndexPage({
                     <CardDescription>{tableDescription}</CardDescription>
                 </CardHeader>
                 <DataTableToolbar filters={filters} filterConfigs={filterConfigs} sortOptions={sortOptions} exportable={exportable} />
+                {tableToolbarAddon ? <div className="px-6 pb-4">{tableToolbarAddon}</div> : null}
                 <CardContent className="p-0">{children}</CardContent>
                 <DataTablePagination paginated={paginated} filters={filters} />
             </Card>

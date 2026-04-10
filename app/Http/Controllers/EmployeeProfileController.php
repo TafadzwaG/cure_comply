@@ -10,6 +10,8 @@ use App\Models\CourseAssignment;
 use App\Models\Department;
 use App\Models\EmployeeProfile;
 use App\Models\EvidenceFile;
+use App\Models\LessonProgress;
+use App\Models\TestAssignment;
 use App\Models\TestAttempt;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -129,11 +131,11 @@ class EmployeeProfileController extends Controller
         ]);
     }
 
-    public function show(EmployeeProfile $employeeProfile): Response
+    public function show(EmployeeProfile $employee): Response
     {
-        $this->authorize('view', $employeeProfile);
+        $this->authorize('view', $employee);
 
-        $employeeProfile->load([
+        $employee->load([
             'user.roles.permissions',
             'user.permissions',
             'user.tenant:id,name',
@@ -143,11 +145,23 @@ class EmployeeProfileController extends Controller
             'directReports.user:id,name,email',
         ]);
 
-        $user = $employeeProfile->user;
-        $userId = $employeeProfile->user_id;
+        $user = $employee->user;
+        $userId = $employee->user_id;
 
         $assignments = CourseAssignment::query()
             ->with('course:id,title')
+            ->where('assigned_to_user_id', $userId)
+            ->latest('assigned_at')
+            ->get();
+
+        $lessonProgress = LessonProgress::query()
+            ->with('lesson:id,title')
+            ->where('user_id', $userId)
+            ->latest('completed_at')
+            ->get();
+
+        $testAssignments = TestAssignment::query()
+            ->with('test:id,title')
             ->where('assigned_to_user_id', $userId)
             ->latest('assigned_at')
             ->get();
@@ -180,30 +194,52 @@ class EmployeeProfileController extends Controller
             ->limit(10)
             ->get();
 
+        $completedCourses = $assignments->filter(
+            fn (CourseAssignment $assignment) => $assignment->status?->value === 'completed'
+        )->count();
+
+        $overdueCourses = $assignments->filter(
+            fn (CourseAssignment $assignment) => $assignment->due_date && $assignment->due_date->isPast() && $assignment->status?->value !== 'completed'
+        )->count();
+
+        $completedLessons = $lessonProgress->filter(
+            fn (LessonProgress $progress) => $progress->status?->value === 'completed'
+        )->count();
+
+        $pendingTests = $testAssignments->filter(
+            fn (TestAssignment $assignment) => ($assignment->status ?? 'assigned') !== 'completed'
+        )->count();
+
+        $roleNames = $user?->roles?->pluck('name')->values()->all() ?? [];
+        $permissionNames = $user?->getAllPermissions()->pluck('name')->values()->all() ?? [];
+
         return Inertia::render('employees/show', [
             'employee' => [
-                ...$employeeProfile->toArray(),
+                ...$employee->toArray(),
                 'user' => $user ? $user->toArray() : [
                     'id' => $userId,
-                    'tenant_id' => $employeeProfile->tenant_id,
+                    'tenant_id' => $employee->tenant_id,
                     'name' => 'Missing user record',
                     'email' => 'Unavailable',
-                    'status' => $employeeProfile->status?->value ?? $employeeProfile->status,
+                    'status' => $employee->status?->value ?? $employee->status,
                     'roles' => [],
                     'permissions' => [],
-                    'tenant' => $employeeProfile->tenant ? [
-                        'id' => $employeeProfile->tenant->id,
-                        'name' => $employeeProfile->tenant->name,
+                    'tenant' => $employee->tenant ? [
+                        'id' => $employee->tenant->id,
+                        'name' => $employee->tenant->name,
                     ] : null,
                     'last_login_at' => null,
                     'last_password_changed_at' => null,
-                    'created_at' => $employeeProfile->created_at,
-                    'updated_at' => $employeeProfile->updated_at,
+                    'created_at' => $employee->created_at,
+                    'updated_at' => $employee->updated_at,
                 ],
                 'summary' => [
                     'assigned_courses' => $assignments->count(),
-                    'completed_courses' => $assignments->filter(fn (CourseAssignment $assignment) => $assignment->status?->value === 'completed')->count(),
-                    'overdue_courses' => $assignments->filter(fn (CourseAssignment $assignment) => $assignment->due_date && $assignment->due_date->isPast() && $assignment->status?->value !== 'completed')->count(),
+                    'completed_courses' => $completedCourses,
+                    'overdue_courses' => $overdueCourses,
+                    'completed_lessons' => $completedLessons,
+                    'assigned_tests' => $testAssignments->count(),
+                    'pending_tests' => $pendingTests,
                     'tests_taken' => $testAttempts->count(),
                     'best_test_score' => $testAttempts->max('percentage'),
                     'latest_test_score' => $testAttempts->first()?->percentage,
@@ -211,12 +247,29 @@ class EmployeeProfileController extends Controller
                     'evidence_uploaded' => $evidenceUploads->count(),
                     'flagged_responses' => $responses->filter(fn (ComplianceResponse $response) => $response->status?->value === 'flagged')->count(),
                 ],
+                'access' => [
+                    'role_names' => $roleNames,
+                    'permission_names' => $permissionNames,
+                ],
                 'assignments' => $assignments->map(fn (CourseAssignment $assignment) => [
                     'id' => $assignment->id,
                     'course' => $assignment->course?->title,
                     'status' => $assignment->status?->value,
                     'due_date' => $assignment->due_date,
                     'assigned_at' => $assignment->assigned_at,
+                ])->values(),
+                'lesson_progress' => $lessonProgress->map(fn (LessonProgress $progress) => [
+                    'id' => $progress->id,
+                    'lesson' => $progress->lesson?->title,
+                    'status' => $progress->status?->value,
+                    'completed_at' => $progress->completed_at,
+                ])->values(),
+                'test_assignments' => $testAssignments->map(fn (TestAssignment $assignment) => [
+                    'id' => $assignment->id,
+                    'test' => $assignment->test?->title,
+                    'status' => $assignment->status,
+                    'assigned_at' => $assignment->assigned_at,
+                    'due_date' => $assignment->due_date,
                 ])->values(),
                 'test_attempts' => $testAttempts->map(fn (TestAttempt $attempt) => [
                     'id' => $attempt->id,
@@ -258,26 +311,26 @@ class EmployeeProfileController extends Controller
                 ])->values(),
             ],
             'departments' => Department::query()->orderBy('name')->get(['id', 'name']),
-            'managers' => User::query()->where('tenant_id', $employeeProfile->tenant_id)->orderBy('name')->get(['id', 'name', 'email']),
+            'managers' => User::query()->where('tenant_id', $employee->tenant_id)->orderBy('name')->get(['id', 'name', 'email']),
         ]);
     }
 
-    public function update(EmployeeProfileRequest $request, EmployeeProfile $employeeProfile): RedirectResponse
+    public function update(EmployeeProfileRequest $request, EmployeeProfile $employee): RedirectResponse
     {
-        $this->authorize('update', $employeeProfile);
+        $this->authorize('update', $employee);
 
-        $employeeProfile->user->update($request->safe()->only(['name', 'email', 'status']));
-        $employeeProfile->update($request->safe()->except(['name', 'email', 'status']));
+        $employee->user->update($request->safe()->only(['name', 'email', 'status']));
+        $employee->update($request->safe()->except(['name', 'email', 'status']));
 
         return back()->with('success', 'Employee updated.');
     }
 
-    public function destroy(EmployeeProfile $employeeProfile): RedirectResponse
+    public function destroy(EmployeeProfile $employee): RedirectResponse
     {
-        $this->authorize('delete', $employeeProfile);
+        $this->authorize('delete', $employee);
 
-        $employeeProfile->delete();
-        User::query()->whereKey($employeeProfile->user_id)->delete();
+        $employee->delete();
+        User::query()->whereKey($employee->user_id)->delete();
 
         return back()->with('success', 'Employee removed.');
     }

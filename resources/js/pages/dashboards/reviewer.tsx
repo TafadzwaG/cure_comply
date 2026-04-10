@@ -351,9 +351,9 @@ export default function ReviewerDashboard(props: ReviewerDashboardProps) {
                                 description="Weekly movement across approvals, rejections, and incoming pending evidence."
                                 points={props.weeklyTrend}
                                 legends={[
-                                    { label: 'Approved reviews', tone: 'bg-[#083d77]' },
-                                    { label: 'Rejected reviews', tone: 'bg-[#194781]' },
-                                    { label: 'Pending evidence', tone: 'bg-[#00b9ce]' },
+                                    { label: 'Approved reviews', tone: 'bg-primary' },
+                                    { label: 'Rejected reviews', tone: 'bg-primary/70' },
+                                    { label: 'Pending evidence', tone: 'bg-primary/40' },
                                 ]}
                             />
                         </section>

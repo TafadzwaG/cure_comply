@@ -21,7 +21,7 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                     <Link href={route('notifications.index')}>
                         <BellRing className="size-4" />
                         {notification_unread_count > 0 ? (
-                            <Badge className="absolute -right-1.5 -top-1.5 min-w-5 rounded-full border border-background bg-[#14417A] px-1.5 text-[10px] font-semibold text-white shadow-none">
+                            <Badge className="absolute -right-1.5 -top-1.5 min-w-5 rounded-full border border-background bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground shadow-none">
                                 {notification_unread_count > 99 ? '99+' : notification_unread_count}
                             </Badge>
                         ) : null}

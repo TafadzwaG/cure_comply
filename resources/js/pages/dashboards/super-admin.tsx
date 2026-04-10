@@ -136,15 +136,15 @@ export default function SuperAdminDashboard(props: Props) {
 
             <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
                 <section className="grid gap-4 xl:grid-cols-[1.8fr_1fr]">
-                    <Card className="border-[#c3c6d1]/50 bg-white shadow-none">
+                    <Card className="border-border/70 bg-card shadow-none">
                         <CardHeader className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                             <div className="space-y-2">
-                                <Badge variant="outline" className="rounded-full border-[#c3c6d1]/60 bg-[#d6e3ff]/40 px-3 py-1 text-[11px] uppercase tracking-[0.24em] text-[#002753]">
+                                <Badge variant="outline" className="rounded-full border-primary/20 bg-primary/10 px-3 py-1 text-[11px] uppercase tracking-[0.24em] text-primary">
                                     Platform command center
                                 </Badge>
                                 <div className="space-y-2">
-                                    <CardTitle className="text-3xl font-semibold tracking-tight text-[#002753] sm:text-4xl">Super Admin Overview</CardTitle>
-                                    <CardDescription className="max-w-2xl text-sm leading-6 text-[#434750]">
+                                    <CardTitle className="text-3xl font-semibold tracking-tight sm:text-4xl">Super Admin Overview</CardTitle>
+                                    <CardDescription className="max-w-2xl text-sm leading-6 text-muted-foreground">
                                         Monitor tenant growth, operational bottlenecks, evidence review queues, and compliance quality from one
                                         monochrome control surface.
                                     </CardDescription>
@@ -168,20 +168,20 @@ export default function SuperAdminDashboard(props: Props) {
                         </CardHeader>
                     </Card>
 
-                    <Card className="border-[#c3c6d1]/50 bg-[#f2f4f6] shadow-none">
+                    <Card className="border-border/70 bg-muted/30 shadow-none">
                         <CardHeader>
-                            <CardTitle className="text-base font-medium text-[#002753]">Attention Queue</CardTitle>
-                            <CardDescription className="text-[#434750]">Fast operational signals that need platform action first.</CardDescription>
+                            <CardTitle className="text-base font-medium">Attention Queue</CardTitle>
+                            <CardDescription className="text-muted-foreground">Fast operational signals that need platform action first.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             {props.attentionItems.map((item) => (
-                                <div key={item.title} className="space-y-2 rounded-lg border border-[#c3c6d1]/50 bg-white p-4">
+                                <div key={item.title} className="space-y-2 rounded-lg border border-border/70 bg-background/80 p-4">
                                     <div className="flex items-start justify-between gap-4">
                                         <div>
-                                            <p className="text-sm font-medium text-[#002753]">{item.title}</p>
-                                            <p className="mt-1 text-xs text-[#434750]">{item.description}</p>
+                                            <p className="text-sm font-medium">{item.title}</p>
+                                            <p className="mt-1 text-xs text-muted-foreground">{item.description}</p>
                                         </div>
-                                        <span className="text-2xl font-semibold text-[#002753] tabular-nums">{item.value}</span>
+                                        <span className="text-2xl font-semibold tabular-nums">{item.value}</span>
                                     </div>
                                 </div>
                             ))}
@@ -194,17 +194,17 @@ export default function SuperAdminDashboard(props: Props) {
                         const Icon = item.icon;
 
                         return (
-                            <Card key={item.label} className="border-[#c3c6d1]/50 bg-white shadow-none">
+                            <Card key={item.label} className="border-border/70 bg-card shadow-none">
                                 <CardHeader className="space-y-4">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-sm text-[#434750]">{item.label}</span>
-                                        <div className="rounded-xl bg-[#d6e3ff] p-2 text-[#083d77]">
+                                        <span className="text-sm text-muted-foreground">{item.label}</span>
+                                        <div className="rounded-xl bg-primary/10 p-2 text-primary">
                                             <Icon className="size-4" />
                                         </div>
                                     </div>
                                     <div>
-                                        <div className="text-3xl font-semibold tracking-tight text-[#002753] tabular-nums">{item.value}</div>
-                                        <p className="mt-1 text-xs leading-5 text-[#434750]">{item.detail}</p>
+                                        <div className="text-3xl font-semibold tracking-tight tabular-nums">{item.value}</div>
+                                        <p className="mt-1 text-xs leading-5 text-muted-foreground">{item.detail}</p>
                                     </div>
                                 </CardHeader>
                             </Card>
@@ -215,7 +215,7 @@ export default function SuperAdminDashboard(props: Props) {
                 <PendingItemsPanel items={props.pendingItems} />
 
                 <Tabs defaultValue="overview" className="space-y-4">
-                    <TabsList className="h-auto w-full justify-start rounded-lg border border-[#c3c6d1]/50 bg-[#f2f4f6] p-1">
+                    <TabsList className="h-auto w-full justify-start rounded-lg border border-border bg-muted/40 p-1">
                         <TabsTrigger value="overview" className="rounded-md px-4 py-2">
                             Overview
                         </TabsTrigger>
@@ -461,12 +461,12 @@ function QuickStat({
     donutValue?: number;
 }) {
     return (
-        <div className="rounded-lg border border-[#c3c6d1]/50 bg-white px-4 py-3">
+        <div className="rounded-lg border border-border/70 bg-card px-4 py-3">
             <div className="flex items-center justify-between gap-4">
                 <div className="min-w-0 flex-1">
-                    <p className="text-xs uppercase tracking-[0.2em] text-[#434750]">{title}</p>
-                    <p className="mt-2 text-2xl font-semibold tracking-tight text-[#002753]">{value}</p>
-                    <p className="mt-1 text-xs text-[#434750]">{hint}</p>
+                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{title}</p>
+                    <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{value}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
                 </div>
                 {typeof donutValue === 'number' ? <DashboardInlineScore value={donutValue} size="sm" /> : null}
             </div>
@@ -476,9 +476,9 @@ function QuickStat({
 
 function LegendItem({ label, value }: { label: string; value: number }) {
     return (
-        <div className="rounded-lg border border-[#c3c6d1]/50 bg-[#f2f4f6] p-4">
-            <div className="text-xs uppercase tracking-[0.18em] text-[#434750]">{label}</div>
-            <div className="mt-2 text-xl font-semibold text-[#002753] tabular-nums">{value}</div>
+        <div className="rounded-lg border border-border/70 bg-muted/30 p-4">
+            <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{label}</div>
+            <div className="mt-2 text-xl font-semibold tabular-nums">{value}</div>
         </div>
     );
 }
@@ -491,10 +491,10 @@ function MetricList({ items }: { items: BreakdownItem[] }) {
             {items.map((item) => (
                 <div key={item.label} className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                        <span className="text-[#002753]">{item.label}</span>
-                        <span className="tabular-nums text-[#434750]">{item.value}</span>
+                        <span>{item.label}</span>
+                        <span className="tabular-nums text-muted-foreground">{item.value}</span>
                     </div>
-                    <Progress className="h-2 bg-[#e6e8ea]" value={(item.value / total) * 100} />
+                    <Progress className="h-2 bg-muted" value={(item.value / total) * 100} />
                 </div>
             ))}
         </div>
@@ -515,24 +515,24 @@ function BreakdownCard({
     const total = items.reduce((sum, item) => sum + item.value, 0) || 1;
 
     return (
-        <Card className="border-[#c3c6d1]/50 bg-white shadow-none">
+        <Card className="border-border/70 bg-card shadow-none">
             <CardHeader>
                 <div className="flex items-center justify-between gap-4">
                     <div>
-                        <CardTitle className="text-base font-medium text-[#002753]">{title}</CardTitle>
-                        <CardDescription className="text-[#434750]">{description}</CardDescription>
+                        <CardTitle className="text-base font-medium">{title}</CardTitle>
+                        <CardDescription className="text-muted-foreground">{description}</CardDescription>
                     </div>
-                    <div className="rounded-xl bg-[#d6e3ff] p-2 text-[#083d77]">{icon}</div>
+                    <div className="rounded-xl bg-primary/10 p-2 text-primary">{icon}</div>
                 </div>
             </CardHeader>
             <CardContent className="space-y-4">
                 {items.map((item) => (
                     <div key={item.label} className="space-y-2">
                         <div className="flex items-center justify-between text-sm">
-                            <span className="text-[#002753]">{item.label}</span>
-                            <span className="tabular-nums text-[#434750]">{item.value}</span>
+                            <span>{item.label}</span>
+                            <span className="tabular-nums text-muted-foreground">{item.value}</span>
                         </div>
-                        <Progress className="h-2 bg-[#e6e8ea]" value={(item.value / total) * 100} />
+                        <Progress className="h-2 bg-muted" value={(item.value / total) * 100} />
                     </div>
                 ))}
             </CardContent>
@@ -542,12 +542,12 @@ function BreakdownCard({
 
 function QueueCard({ label, value, icon }: { label: string; value: number; icon: React.ReactNode }) {
     return (
-        <div className="flex items-center justify-between rounded-lg border border-[#c3c6d1]/50 bg-[#f2f4f6] p-4">
+        <div className="flex items-center justify-between rounded-lg border border-border/70 bg-muted/30 p-4">
             <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-[#d6e3ff] p-2 text-[#083d77]">{icon}</div>
-                <span className="text-sm font-medium text-[#002753]">{label}</span>
+                <div className="rounded-xl bg-primary/10 p-2 text-primary">{icon}</div>
+                <span className="text-sm font-medium">{label}</span>
             </div>
-            <span className="text-xl font-semibold text-[#002753] tabular-nums">{value}</span>
+            <span className="text-xl font-semibold tabular-nums">{value}</span>
         </div>
     );
 }
@@ -565,15 +565,15 @@ function ActionCard({
 }) {
     return (
         <Link href={href} className="block">
-            <Card className="h-full border-[#c3c6d1]/50 bg-white shadow-none transition-colors hover:bg-[#d6e3ff]/20">
+            <Card className="h-full border-border/70 bg-card shadow-none transition-colors hover:bg-muted/40">
                 <CardHeader>
                     <div className="flex items-center justify-between gap-4">
-                        <div className="rounded-xl bg-[#d6e3ff] p-2 text-[#083d77]">{icon}</div>
-                        <ArrowRight className="size-4 text-[#434750]" />
+                        <div className="rounded-xl bg-primary/10 p-2 text-primary">{icon}</div>
+                        <ArrowRight className="size-4 text-muted-foreground" />
                     </div>
                     <div className="space-y-1">
-                        <CardTitle className="text-base font-medium text-[#002753]">{title}</CardTitle>
-                        <CardDescription className="text-[#434750]">{description}</CardDescription>
+                        <CardTitle className="text-base font-medium">{title}</CardTitle>
+                        <CardDescription className="text-muted-foreground">{description}</CardDescription>
                     </div>
                 </CardHeader>
             </Card>
@@ -587,7 +587,7 @@ function TrendChart({ points }: { points: TrendPoint[] }) {
 
     return (
         <div className="space-y-4">
-            <div className="grid h-64 grid-cols-6 items-end gap-3 rounded-lg border border-[#c3c6d1]/50 bg-[#f2f4f6] p-4">
+            <div className="grid h-64 grid-cols-6 items-end gap-3 rounded-lg border border-border/70 bg-muted/30 p-4">
                 {points.map((point) => (
                     <div key={point.label} className="flex h-full flex-col justify-end gap-2">
                         <div className="flex h-full items-end justify-center gap-1.5">
@@ -595,21 +595,21 @@ function TrendChart({ points }: { points: TrendPoint[] }) {
                             <Bar value={point.users} max={max} />
                             <Bar value={point.submissions} max={max} />
                         </div>
-                        <div className="text-center text-xs text-[#434750]">{point.label}</div>
+                        <div className="text-center text-xs text-muted-foreground">{point.label}</div>
                     </div>
                 ))}
             </div>
-            <div className="flex flex-wrap gap-4 text-xs text-[#434750]">
+            <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
                 <span className="inline-flex items-center gap-2">
-                    <span className="size-2 rounded-full bg-[#083d77]" />
+                    <span className="size-2 rounded-full bg-primary" />
                     Tenants
                 </span>
                 <span className="inline-flex items-center gap-2">
-                    <span className="size-2 rounded-full bg-[#194781]" />
+                    <span className="size-2 rounded-full bg-primary/70" />
                     Users
                 </span>
                 <span className="inline-flex items-center gap-2">
-                    <span className="size-2 rounded-full bg-[#00b9ce]" />
+                    <span className="size-2 rounded-full bg-primary/40" />
                     Submissions
                 </span>
             </div>
@@ -620,7 +620,7 @@ function TrendChart({ points }: { points: TrendPoint[] }) {
 function Bar({ value, max }: { value: number; max: number }) {
     const height = Math.max((value / max) * 100, value > 0 ? 8 : 2);
 
-    return <div className="w-3 rounded-sm bg-[#083d77]" style={{ height: `${height}%`, opacity: Math.max(0.32, value / max) }} />;
+    return <div className="w-3 rounded-sm bg-primary" style={{ height: `${height}%`, opacity: Math.max(0.32, value / max) }} />;
 }
 
 function sumTrend(points: TrendPoint[], key: 'tenants' | 'users' | 'submissions') {

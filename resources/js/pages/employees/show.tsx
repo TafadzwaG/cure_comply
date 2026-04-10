@@ -62,6 +62,8 @@ export default function EmployeeShow({
     const userRecord = employee.user as User | undefined;
     const linkedUserId = userRecord?.id ?? employee.user_id ?? null;
     const primaryRole = userRecord?.roles?.[0]?.name?.replaceAll('_', ' ') ?? 'No role';
+    const roleNames = employee.access?.role_names?.length ? employee.access.role_names.map((role) => role.replaceAll('_', ' ')) : [];
+    const permissionNames = employee.access?.permission_names ?? [];
     const trainingCompletion = employee.summary?.assigned_courses
         ? Math.round(((employee.summary?.completed_courses ?? 0) / employee.summary.assigned_courses) * 100)
         : 0;
@@ -243,6 +245,11 @@ export default function EmployeeShow({
                                     <SnapshotRow label="Primary role" value={primaryRole} />
                                     <SnapshotRow label="Department" value={employee.department?.name ?? 'Unassigned'} />
                                     <SnapshotRow label="Manager" value={employee.manager?.name ?? 'Not assigned'} />
+                                    <SnapshotRow label="Branch" value={employee.branch ?? 'Not set'} />
+                                    <SnapshotRow label="Employee number" value={employee.employee_number ?? 'Not set'} />
+                                    <SnapshotRow label="Employment type" value={employee.employment_type ?? 'Not set'} />
+                                    <SnapshotRow label="Tenant" value={userRecord?.tenant?.name ?? 'Platform'} />
+                                    <SnapshotRow label="Start date" value={formatLongDateTime(employee.start_date)} />
                                     <SnapshotRow label="Last login" value={formatLongDateTime(userRecord?.last_login_at)} />
                                     <SnapshotRow label="Last password update" value={formatLongDateTime(userRecord?.last_password_changed_at)} />
                                     <SnapshotRow label="Created" value={formatLongDateTime(userRecord?.created_at)} />
@@ -266,75 +273,155 @@ export default function EmployeeShow({
                     </TabsContent>
 
                     <TabsContent value="training" className="space-y-4">
-                        <Card className="border-border/70 shadow-none">
-                            <CardHeader>
-                                <CardTitle>Training assignments</CardTitle>
-                                <CardDescription>Assigned courses, completion state, and due-date pressure for this employee.</CardDescription>
-                            </CardHeader>
-                            <CardContent className="p-0">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Course</TableHead>
-                                            <TableHead>Status</TableHead>
-                                            <TableHead>Assigned</TableHead>
-                                            <TableHead>Due date</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {employee.assignments?.length ? (
-                                            employee.assignments.map((assignment) => (
-                                                <TableRow key={assignment.id}>
-                                                    <TableCell className="font-medium">{assignment.course ?? 'Untitled course'}</TableCell>
-                                                    <TableCell><StatusBadge value={assignment.status} /></TableCell>
-                                                    <TableCell>{formatLongDateTime(assignment.assigned_at)}</TableCell>
-                                                    <TableCell>{formatLongDateTime(assignment.due_date)}</TableCell>
-                                                </TableRow>
-                                            ))
-                                        ) : (
-                                            <EmptyRow colSpan={4} message="No course assignments are linked to this employee yet." />
-                                        )}
-                                    </TableBody>
-                                </Table>
-                            </CardContent>
-                        </Card>
+                        <div className="grid gap-4 md:grid-cols-3">
+                            <MetricCard label="Assigned courses" value={employee.summary?.assigned_courses ?? 0} detail={`${employee.summary?.completed_courses ?? 0} completed courses`} icon={GraduationCap} />
+                            <MetricCard label="Completed lessons" value={employee.summary?.completed_lessons ?? 0} detail={`${employee.lesson_progress?.length ?? 0} lesson progress records`} icon={BadgeCheck} />
+                            <MetricCard label="Overdue learning" value={employee.summary?.overdue_courses ?? 0} detail="Assignments past due and still incomplete" icon={Activity} />
+                        </div>
+
+                        <div className="grid gap-6 xl:grid-cols-2">
+                            <Card className="border-border/70 shadow-none">
+                                <CardHeader>
+                                    <CardTitle>Training assignments</CardTitle>
+                                    <CardDescription>Assigned courses, completion state, and due-date pressure for this employee.</CardDescription>
+                                </CardHeader>
+                                <CardContent className="p-0">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Course</TableHead>
+                                                <TableHead>Status</TableHead>
+                                                <TableHead>Assigned</TableHead>
+                                                <TableHead>Due date</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {employee.assignments?.length ? (
+                                                employee.assignments.map((assignment) => (
+                                                    <TableRow key={assignment.id}>
+                                                        <TableCell className="font-medium">{assignment.course ?? 'Untitled course'}</TableCell>
+                                                        <TableCell><StatusBadge value={assignment.status} /></TableCell>
+                                                        <TableCell>{formatLongDateTime(assignment.assigned_at)}</TableCell>
+                                                        <TableCell>{formatLongDateTime(assignment.due_date)}</TableCell>
+                                                    </TableRow>
+                                                ))
+                                            ) : (
+                                                <EmptyRow colSpan={4} message="No course assignments are linked to this employee yet." />
+                                            )}
+                                        </TableBody>
+                                    </Table>
+                                </CardContent>
+                            </Card>
+
+                            <Card className="border-border/70 shadow-none">
+                                <CardHeader>
+                                    <CardTitle>Lesson progress</CardTitle>
+                                    <CardDescription>Tracked lesson-level movement across assigned courses.</CardDescription>
+                                </CardHeader>
+                                <CardContent className="p-0">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Lesson</TableHead>
+                                                <TableHead>Status</TableHead>
+                                                <TableHead>Completed</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {employee.lesson_progress?.length ? (
+                                                employee.lesson_progress.map((progress) => (
+                                                    <TableRow key={progress.id}>
+                                                        <TableCell className="font-medium">{progress.lesson ?? 'Untitled lesson'}</TableCell>
+                                                        <TableCell><StatusBadge value={progress.status} /></TableCell>
+                                                        <TableCell>{formatLongDateTime(progress.completed_at)}</TableCell>
+                                                    </TableRow>
+                                                ))
+                                            ) : (
+                                                <EmptyRow colSpan={3} message="No lesson progress has been recorded for this employee yet." />
+                                            )}
+                                        </TableBody>
+                                    </Table>
+                                </CardContent>
+                            </Card>
+                        </div>
                     </TabsContent>
 
                     <TabsContent value="assessments" className="space-y-4">
-                        <Card className="border-border/70 shadow-none">
-                            <CardHeader>
-                                <CardTitle>Assessment performance</CardTitle>
-                                <CardDescription>Latest attempts, best performance, and result state for linked tests.</CardDescription>
-                            </CardHeader>
-                            <CardContent className="p-0">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Test</TableHead>
-                                            <TableHead>Attempt</TableHead>
-                                            <TableHead>Score</TableHead>
-                                            <TableHead>Result</TableHead>
-                                            <TableHead>Submitted</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {employee.test_attempts?.length ? (
-                                            employee.test_attempts.map((attempt) => (
-                                                <TableRow key={attempt.id}>
-                                                    <TableCell className="font-medium">{attempt.test ?? 'Untitled test'}</TableCell>
-                                                    <TableCell>Attempt {attempt.attempt_number}</TableCell>
-                                                    <TableCell>{attempt.percentage ?? 'N/A'}{attempt.percentage !== null && attempt.percentage !== undefined ? '%' : ''}</TableCell>
-                                                    <TableCell><StatusBadge value={attempt.result_status} /></TableCell>
-                                                    <TableCell>{formatLongDateTime(attempt.submitted_at)}</TableCell>
-                                                </TableRow>
-                                            ))
-                                        ) : (
-                                            <EmptyRow colSpan={5} message="This employee has not completed any test attempts yet." />
-                                        )}
-                                    </TableBody>
-                                </Table>
-                            </CardContent>
-                        </Card>
+                        <div className="grid gap-4 md:grid-cols-3">
+                            <MetricCard label="Assigned tests" value={employee.summary?.assigned_tests ?? 0} detail={`${employee.summary?.pending_tests ?? 0} still pending`} icon={BadgeCheck} />
+                            <MetricCard label="Tests taken" value={employee.summary?.tests_taken ?? 0} detail={employee.summary?.latest_test_score !== null && employee.summary?.latest_test_score !== undefined ? `Latest score ${employee.summary.latest_test_score}%` : 'No submitted attempts yet'} icon={FileCheck2} />
+                            <MetricCard label="Best score" value={employee.summary?.best_test_score !== null && employee.summary?.best_test_score !== undefined ? `${employee.summary.best_test_score}%` : 'N/A'} detail="Highest recorded assessment result" icon={Shield} />
+                        </div>
+
+                        <div className="grid gap-6 xl:grid-cols-2">
+                            <Card className="border-border/70 shadow-none">
+                                <CardHeader>
+                                    <CardTitle>Assigned tests</CardTitle>
+                                    <CardDescription>Open and completed test assignments associated with this employee.</CardDescription>
+                                </CardHeader>
+                                <CardContent className="p-0">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Test</TableHead>
+                                                <TableHead>Status</TableHead>
+                                                <TableHead>Assigned</TableHead>
+                                                <TableHead>Due date</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {employee.test_assignments?.length ? (
+                                                employee.test_assignments.map((assignment) => (
+                                                    <TableRow key={assignment.id}>
+                                                        <TableCell className="font-medium">{assignment.test ?? 'Untitled test'}</TableCell>
+                                                        <TableCell><StatusBadge value={assignment.status} /></TableCell>
+                                                        <TableCell>{formatLongDateTime(assignment.assigned_at)}</TableCell>
+                                                        <TableCell>{formatLongDateTime(assignment.due_date)}</TableCell>
+                                                    </TableRow>
+                                                ))
+                                            ) : (
+                                                <EmptyRow colSpan={4} message="No test assignments are linked to this employee yet." />
+                                            )}
+                                        </TableBody>
+                                    </Table>
+                                </CardContent>
+                            </Card>
+
+                            <Card className="border-border/70 shadow-none">
+                                <CardHeader>
+                                    <CardTitle>Assessment performance</CardTitle>
+                                    <CardDescription>Latest attempts, best performance, and result state for linked tests.</CardDescription>
+                                </CardHeader>
+                                <CardContent className="p-0">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Test</TableHead>
+                                                <TableHead>Attempt</TableHead>
+                                                <TableHead>Score</TableHead>
+                                                <TableHead>Result</TableHead>
+                                                <TableHead>Submitted</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {employee.test_attempts?.length ? (
+                                                employee.test_attempts.map((attempt) => (
+                                                    <TableRow key={attempt.id}>
+                                                        <TableCell className="font-medium">{attempt.test ?? 'Untitled test'}</TableCell>
+                                                        <TableCell>Attempt {attempt.attempt_number}</TableCell>
+                                                        <TableCell>{attempt.percentage ?? 'N/A'}{attempt.percentage !== null && attempt.percentage !== undefined ? '%' : ''}</TableCell>
+                                                        <TableCell><StatusBadge value={attempt.result_status} /></TableCell>
+                                                        <TableCell>{formatLongDateTime(attempt.submitted_at)}</TableCell>
+                                                    </TableRow>
+                                                ))
+                                            ) : (
+                                                <EmptyRow colSpan={5} message="This employee has not completed any test attempts yet." />
+                                            )}
+                                        </TableBody>
+                                    </Table>
+                                </CardContent>
+                            </Card>
+                        </div>
                     </TabsContent>
 
                     <TabsContent value="compliance" className="space-y-4">
@@ -431,10 +518,39 @@ export default function EmployeeShow({
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <SnapshotRow label="Primary role" value={primaryRole} />
-                                    <SnapshotRow label="Permissions" value={`${userRecord?.permissions?.length ?? 0} direct permissions`} />
+                                    <SnapshotRow label="Role count" value={`${roleNames.length || 1} role assignment${roleNames.length === 1 ? '' : 's'}`} />
+                                    <SnapshotRow label="Permissions" value={`${permissionNames.length} effective permissions`} />
                                     <SnapshotRow label="Tenant access" value={userRecord?.tenant?.name ?? 'Platform'} />
                                     <SnapshotRow label="Last login" value={formatLongDateTime(userRecord?.last_login_at)} />
                                     <SnapshotRow label="Password changed" value={formatLongDateTime(userRecord?.last_password_changed_at)} />
+                                    <Separator />
+                                    <div className="space-y-2">
+                                        <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Assigned roles</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {roleNames.length ? roleNames.map((role) => (
+                                                <Badge key={role} variant="outline" className="rounded-full px-3 py-1">
+                                                    {role}
+                                                </Badge>
+                                            )) : (
+                                                <span className="text-sm text-muted-foreground">No roles recorded.</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Effective permissions</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {permissionNames.length ? permissionNames.slice(0, 12).map((permission) => (
+                                                <Badge key={permission} variant="secondary" className="rounded-full px-3 py-1">
+                                                    {permission}
+                                                </Badge>
+                                            )) : (
+                                                <span className="text-sm text-muted-foreground">No permissions are attached to this account.</span>
+                                            )}
+                                        </div>
+                                        {permissionNames.length > 12 ? (
+                                            <p className="text-xs text-muted-foreground">Showing 12 of {permissionNames.length} permissions.</p>
+                                        ) : null}
+                                    </div>
                                 </CardContent>
                             </Card>
 

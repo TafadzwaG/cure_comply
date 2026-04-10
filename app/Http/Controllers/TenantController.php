@@ -9,6 +9,7 @@ use App\Models\ComplianceSubmission;
 use App\Models\EvidenceFile;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Services\TenantLifecycleService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -65,6 +66,7 @@ class TenantController extends Controller
                 'total' => Tenant::query()->count(),
                 'pending' => Tenant::query()->where('status', TenantStatus::Pending)->count(),
                 'active' => Tenant::query()->where('status', TenantStatus::Active)->count(),
+                'inactive' => Tenant::query()->where('status', TenantStatus::Inactive)->count(),
                 'suspended' => Tenant::query()->where('status', TenantStatus::Suspended)->count(),
             ],
             'industries' => Tenant::query()->whereNotNull('industry')->distinct()->orderBy('industry')->pluck('industry')->values(),
@@ -111,6 +113,11 @@ class TenantController extends Controller
 
         return Inertia::render('tenants/show', [
             'tenant' => $tenant,
+            'abilities' => [
+                'canEdit' => request()->user()?->can('update', $tenant) ?? false,
+                'canActivate' => request()->user()?->can('activate', $tenant) ?? false,
+                'canDeactivate' => request()->user()?->can('deactivate', $tenant) ?? false,
+            ],
             'stats' => [
                 'users' => $tenant->users_count,
                 'activeUsers' => $tenant->users->filter(fn (User $user) => $user->status?->value === 'active')->count(),
@@ -178,6 +185,40 @@ class TenantController extends Controller
         app(\App\Services\AuditLogService::class)->logModelUpdated('tenant_updated', $tenant, $oldValues);
 
         return back()->with('success', 'Tenant updated.');
+    }
+
+    public function activate(Request $request, Tenant $tenant, TenantLifecycleService $tenantLifecycleService): RedirectResponse
+    {
+        $this->authorize('activate', $tenant);
+
+        if ($tenant->status === TenantStatus::Active) {
+            return back()->with('success', 'Tenant is already active.');
+        }
+
+        $oldValues = $tenant->toArray();
+        $tenant->update(['status' => TenantStatus::Active]);
+
+        app(\App\Services\AuditLogService::class)->logModelUpdated('tenant_activated', $tenant, $oldValues);
+        $tenantLifecycleService->notifyActivated($tenant->fresh());
+
+        return back()->with('success', 'Tenant activated successfully.');
+    }
+
+    public function deactivate(Request $request, Tenant $tenant, TenantLifecycleService $tenantLifecycleService): RedirectResponse
+    {
+        $this->authorize('deactivate', $tenant);
+
+        if ($tenant->status === TenantStatus::Inactive) {
+            return back()->with('success', 'Tenant is already inactive.');
+        }
+
+        $oldValues = $tenant->toArray();
+        $tenant->update(['status' => TenantStatus::Inactive]);
+
+        app(\App\Services\AuditLogService::class)->logModelUpdated('tenant_deactivated', $tenant, $oldValues);
+        $tenantLifecycleService->notifyDeactivated($tenant->fresh());
+
+        return back()->with('success', 'Tenant deactivated successfully.');
     }
 
     public function destroy(Tenant $tenant): RedirectResponse

@@ -326,6 +326,10 @@ export default function Welcome() {
                     }
 
                     @media (max-width: 1023px) {
+                        .welcome-section {
+                            padding-top: 88px !important;
+                            padding-bottom: 88px !important;
+                        }
                         .hero-content-wrap {
                             transform: none !important;
                             padding-bottom: 88px !important;
@@ -372,17 +376,216 @@ export default function Welcome() {
                     }
 
                     @media (max-width: 767px) {
+                        .welcome-header-shell {
+                            flex-direction: row !important;
+                            align-items: center !important;
+                            justify-content: space-between !important;
+                            gap: 12px !important;
+                        }
+                        .welcome-header-actions {
+                            width: auto;
+                            flex: 0 0 auto;
+                            min-width: 0;
+                        }
+                        .welcome-header-cta {
+                            flex: 0 0 auto;
+                            min-width: 0;
+                            gap: 10px !important;
+                        }
+                        .welcome-header-brand-text {
+                            display: none;
+                        }
+                        .welcome-footer-shell {
+                            flex-direction: column !important;
+                            align-items: flex-start !important;
+                            justify-content: flex-start !important;
+                            gap: 20px !important;
+                        }
+                        .welcome-footer-links {
+                            width: 100%;
+                            gap: 16px !important;
+                        }
+                        .welcome-footer-links a {
+                            font-size: 10px !important;
+                            letter-spacing: 0.08em !important;
+                        }
                         .float-card,
                         .shield-ring {
                             display: none !important;
                         }
                         .hero-section {
                             min-height: auto !important;
+                            padding-top: 72px !important;
+                        }
+                        .hero-tag-anim {
+                            margin-bottom: 20px !important;
+                        }
+                        .hero-h1-anim {
+                            font-size: clamp(38px, 12vw, 64px) !important;
+                            line-height: 0.98 !important;
+                            max-width: 100% !important;
+                            margin-bottom: 20px !important;
+                        }
+                        .hero-sub-anim {
+                            max-width: 100% !important;
+                            font-size: 15px !important;
+                            margin-bottom: 28px !important;
+                        }
+                        .hero-cta-anim {
+                            flex-direction: column !important;
+                            align-items: stretch !important;
+                            margin-bottom: 40px !important;
+                        }
+                        .hero-cta-anim > a {
+                            width: 100%;
+                            text-align: center;
                         }
                         .hero-stat-item {
                             min-width: 100%;
                         }
+                        .product-intro,
+                        .role-intro-grid,
+                        .reporting-main-grid {
+                            gap: 20px !important;
+                        }
+                        .bento-card,
+                        .role-card,
+                        .reporting-card {
+                            padding: 24px !important;
+                        }
+                        .workflow-step {
+                            gap: 16px !important;
+                        }
+                        .workflow-step-badge {
+                            width: 88px !important;
+                            height: 88px !important;
+                        }
+                        .cta-copy {
+                            max-width: 100% !important;
+                        }
+                        .cta-panel > div:last-of-type a {
+                            width: 100%;
+                            text-align: center;
+                        }
                     }
+
+                    @media (max-width: 479px) {
+                        .hero-content-wrap,
+                        .welcome-section,
+                        .welcome-header-shell,
+                        .welcome-footer-shell {
+                            padding-left: 20px !important;
+                            padding-right: 20px !important;
+                        }
+                        .welcome-header-cta a:last-child {
+                            padding-left: 16px !important;
+                            padding-right: 16px !important;
+                        }
+                        .hero-stat-row {
+                            padding-top: 24px !important;
+                        }
+                        .cta-panel {
+                            padding: 40px 20px !important;
+                            border-radius: 22px !important;
+                        }
+                    }
+
+                    /* ── Dark Mode ── */
+                    .dark body, .dark .wc-root {
+                        background: #0d1117;
+                        color: #e5e7eb;
+                    }
+                    .dark .welcome-header {
+                        background: rgba(13,17,23,0.92) !important;
+                        border-bottom-color: rgba(45,55,72,0.4) !important;
+                    }
+                    .dark .welcome-header-brand-text { color: #f8fafc !important; }
+                    .dark .nav-link { color: #9ca3af !important; }
+                    .dark .nav-link:hover { color: #f8fafc !important; }
+                    .dark .welcome-header-cta a:not(.btn-primary) { color: #f8fafc !important; }
+                    .dark .hero-bottom-fade {
+                        background: linear-gradient(to bottom, transparent, #0d1117) !important;
+                    }
+                    .dark .bento-cyan {
+                        background: #0f172a !important;
+                        color: #f8fafc !important;
+                    }
+                    .dark .bento-cyan h3 {
+                        color: #f8fafc !important;
+                    }
+                    .dark .bento-cyan p {
+                        color: #cbd5e1 !important;
+                    }
+                    .dark .bento-cyan > div:first-child {
+                        color: rgba(248,250,252,0.08) !important;
+                    }
+                    .dark .bento-cyan > div:nth-child(2) {
+                        background: rgba(148,163,184,0.14) !important;
+                    }
+                    .dark .bento-cyan > div:nth-child(2) svg {
+                        color: #f8fafc !important;
+                        stroke: #f8fafc !important;
+                    }
+                    .dark .bento-light {
+                        background: #1c2333 !important;
+                        color: #e5e7eb;
+                    }
+                    .dark .bento-light h3 { color: #e5e7eb !important; }
+                    .dark .bento-light p { color: #9ca3af !important; }
+                    .dark .workflow-bg {
+                        background: #111827 !important;
+                    }
+                    .dark .workflow-step-badge {
+                        background: #1c2333 !important;
+                        border-color: #111827 !important;
+                        box-shadow: 0 16px 40px rgba(0,0,0,0.5) !important;
+                    }
+                    .dark .step-icon-wrap {
+                        background: #1c2333 !important;
+                        color: #7cb3e8 !important;
+                    }
+                    .dark .role-card {
+                        background: #161b2e !important;
+                        border-color: rgba(45,55,72,0.5) !important;
+                    }
+                    .dark .welcome-footer {
+                        background: #0d1117 !important;
+                        border-top-color: rgba(45,55,72,0.3) !important;
+                    }
+                    .dark .role-card h4,
+                    .dark .workflow-step h4,
+                    .dark .welcome-footer span {
+                        color: #f8fafc !important;
+                    }
+                    .dark .role-card p,
+                    .dark .workflow-step p,
+                    .dark .welcome-footer a,
+                    .dark .welcome-footer p {
+                        color: #cbd5e1 !important;
+                    }
+                    .dark .role-card > div:last-child {
+                        border-top-color: rgba(148,163,184,0.18) !important;
+                    }
+                    .dark .role-card > div:last-child > div {
+                        color: #f8fafc !important;
+                    }
+                    .dark .platform-intro-copy,
+                    .dark .role-intro-copy {
+                        color: #e2e8f0 !important;
+                    }
+                    .dark .welcome-footer a:hover {
+                        color: #f8fafc !important;
+                    }
+                    /* Text color overrides via attribute selectors */
+                    .dark [style*="color: #002753"] { color: #f8fafc !important; }
+                    .dark [style*="color: #434750"] { color: #cbd5e1 !important; }
+                    .dark [style*="color: #083d77"] { color: #e2e8f0 !important; }
+                    .dark [style*="background: #f2f4f6"] { background: #111827 !important; }
+                    .dark [style*="background: #fff"] { background: #0d1117 !important; }
+                    .dark [style*="background: white"] { background: #0d1117 !important; }
+                    .dark [style*="background: '#fff'"] { background: #0d1117 !important; }
+                    .dark [style*="color: rgba(0,39,83"] { color: #9ca3af !important; }
+                    .dark [style*="background: #d6e3ff"] { background: #1c2333 !important; }
                 `}</style>
             </Head>
 
@@ -390,6 +593,7 @@ export default function Welcome() {
 
                 {/* ─── HEADER ─────────────────────────────────────────────── */}
                 <header
+                    className="welcome-header"
                     style={{
                         position: 'sticky', top: 0, zIndex: 50,
                         background: 'rgba(247,249,251,0.92)',
@@ -398,17 +602,17 @@ export default function Welcome() {
                     }}
                 >
                     <div
+                        className="welcome-header-shell px-6 lg:px-16"
                         style={{
                             maxWidth: 1440, margin: '0 auto',
                             paddingTop: 18,
                             paddingBottom: 18,
                             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                         }}
-                        className="px-6 lg:px-16"
                     >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                            <img src={privacyCureLogo} alt="Privacy Cure" style={{ height: 32, width: 'auto' }} />
-                            <span style={{ fontWeight: 700, fontSize: 15, color: '#002753', letterSpacing: '-0.01em' }}>
+                        <div className="welcome-header-actions" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <img src={privacyCureLogo} alt="Privacy Cure" style={{ height: 40, width: 'auto' }} />
+                            <span className="welcome-header-brand-text" style={{ fontWeight: 700, fontSize: 15, color: '#002753', letterSpacing: '-0.01em' }}>
                                 Privacy Cure
                             </span>
                         </div>
@@ -428,7 +632,7 @@ export default function Welcome() {
                             ))}
                         </nav>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <div className="welcome-header-cta" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                             {auth.user ? (
                                 <Link
                                     href={route('dashboard')}
@@ -502,7 +706,7 @@ export default function Welcome() {
                                 Training Score
                             </div>
                             <div className="fc-value">94%</div>
-                            <div className="fc-sub">↑ 8% this month</div>
+                            <div className="fc-sub">Up 8% this month</div>
                         </div>
 
                         <div className="float-card fc-2" style={{ zIndex: 3 }}>
@@ -529,7 +733,7 @@ export default function Welcome() {
                                 Controls Active
                             </div>
                             <div className="fc-value">450+</div>
-                            <div className="fc-sub">SOC 2 · GDPR · ISO</div>
+                            <div className="fc-sub">SOC 2 / GDPR / ISO</div>
                         </div>
 
                         {/* Content */}
@@ -627,7 +831,7 @@ export default function Welcome() {
                         </div>
 
                         {/* Hero bottom gradient into next section */}
-                        <div style={{
+                        <div className="hero-bottom-fade" style={{
                             position: 'absolute', bottom: 0, left: 0, right: 0, height: 80,
                             background: 'linear-gradient(to bottom, transparent, #f7f9fb)',
                             pointerEvents: 'none',
@@ -661,20 +865,20 @@ export default function Welcome() {
                     </div>
 
                     {/* ─── PLATFORM (BENTO) ───────────────────────────────── */}
-                    <section id="product" style={{ padding: '120px 0' }} className="px-6 lg:px-16">
+                    <section id="product" style={{ padding: '120px 0' }} className="welcome-section px-6 lg:px-16">
                         <div style={{ maxWidth: 1440, margin: '0 auto' }}>
 
-                            <div data-reveal style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between', gap: 24, marginBottom: 56 }}>
+                            <div data-reveal className="product-intro" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between', gap: 24, marginBottom: 56 }}>
                                 <div>
                                     <div className="sec-label">
                                         <div className="sec-label-line" />
-                                        <span className="sec-label-text">01 — Platform</span>
+                                        <span className="sec-label-text">01 - Platform</span>
                                     </div>
                                     <h2 style={{ fontWeight: 700, fontSize: 'clamp(36px,4.5vw,64px)', lineHeight: 0.95, letterSpacing: '-0.03em', color: '#002753' }}>
                                         The Architecture<br />of Trust
                                     </h2>
                                 </div>
-                                <p style={{ maxWidth: 300, fontSize: 14, lineHeight: 1.7, color: '#434750' }}>
+                                <p className="platform-intro-copy" style={{ maxWidth: 300, fontSize: 14, lineHeight: 1.7, color: '#434750' }}>
                                     A modular platform designed to scale with your organization's
                                     security and privacy maturity.
                                 </p>
@@ -690,7 +894,7 @@ export default function Welcome() {
                                 }}
                             >
                                 {/* Tile 1 */}
-                                <div data-reveal data-delay="1" className="card-lift bento-dark" style={{ gridColumn: 'span 5', padding: 40, position: 'relative', overflow: 'hidden' }}>
+                                <div data-reveal data-delay="1" className="bento-card card-lift bento-dark" style={{ gridColumn: 'span 5', padding: 40, position: 'relative', overflow: 'hidden' }}>
                                     <div style={{ fontWeight: 900, fontSize: 120, color: '#fff', opacity: 0.04, position: 'absolute', top: -16, right: 8, lineHeight: 1, userSelect: 'none' }}>01</div>
                                     <div style={{ width: 52, height: 52, background: 'rgba(255,255,255,0.07)', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
                                         <Building2 size={24} color="#fff" />
@@ -707,7 +911,7 @@ export default function Welcome() {
                                 </div>
 
                                 {/* Tile 2 */}
-                                <div data-reveal data-delay="2" className="card-lift bento-cyan" style={{ gridColumn: 'span 4', padding: 40, position: 'relative', overflow: 'hidden' }}>
+                                <div data-reveal data-delay="2" className="bento-card card-lift bento-cyan" style={{ gridColumn: 'span 4', padding: 40, position: 'relative', overflow: 'hidden' }}>
                                     <div style={{ fontWeight: 900, fontSize: 120, color: '#002753', opacity: 0.05, position: 'absolute', top: -16, right: 8, lineHeight: 1, userSelect: 'none' }}>02</div>
                                     <div style={{ width: 52, height: 52, background: 'rgba(0,39,83,0.1)', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
                                         <GraduationCap size={24} color="#002753" />
@@ -719,7 +923,7 @@ export default function Welcome() {
                                 </div>
 
                                 {/* Tile 3 */}
-                                <div data-reveal data-delay="3" className="card-lift bento-light" style={{ gridColumn: 'span 3', padding: 32, position: 'relative', overflow: 'hidden' }}>
+                                <div data-reveal data-delay="3" className="bento-card card-lift bento-light" style={{ gridColumn: 'span 3', padding: 32, position: 'relative', overflow: 'hidden' }}>
                                     <div style={{ fontWeight: 900, fontSize: 120, color: '#002753', opacity: 0.04, position: 'absolute', top: -16, right: 8, lineHeight: 1, userSelect: 'none' }}>03</div>
                                     <div style={{ width: 48, height: 48, background: '#00b9ce', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
                                         <ClipboardCheck size={22} color="#fff" />
@@ -731,7 +935,7 @@ export default function Welcome() {
                                 </div>
 
                                 {/* Tile 4 */}
-                                <div data-reveal data-delay="1" className="card-lift bento-mid" style={{ gridColumn: 'span 7', padding: 40, position: 'relative', overflow: 'hidden' }}>
+                                <div data-reveal data-delay="1" className="bento-card card-lift bento-mid" style={{ gridColumn: 'span 7', padding: 40, position: 'relative', overflow: 'hidden' }}>
                                     <div style={{ fontWeight: 900, fontSize: 120, color: '#fff', opacity: 0.04, position: 'absolute', top: -16, right: 8, lineHeight: 1, userSelect: 'none' }}>04</div>
                                     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between' }}>
                                         <div>
@@ -758,12 +962,12 @@ export default function Welcome() {
                     </section>
 
                     {/* ─── WORKFLOW ───────────────────────────────────────── */}
-                    <section id="solutions" style={{ background: '#f2f4f6', padding: '120px 0' }} className="px-6 lg:px-16">
+                    <section id="solutions" style={{ background: '#f2f4f6', padding: '120px 0' }} className="welcome-section workflow-bg px-6 lg:px-16">
                         <div style={{ maxWidth: 1440, margin: '0 auto' }}>
                             <div data-reveal style={{ marginBottom: 72 }}>
                                 <div className="sec-label">
                                     <div className="sec-label-line" />
-                                    <span className="sec-label-text">02 — Process</span>
+                                    <span className="sec-label-text">02 - Process</span>
                                 </div>
                                 <h2 style={{ fontWeight: 700, fontSize: 'clamp(36px,4.5vw,64px)', lineHeight: 0.95, letterSpacing: '-0.03em', color: '#002753' }}>
                                     End-to-end workflow
@@ -777,9 +981,9 @@ export default function Welcome() {
                                     { n: '03', icon: <CloudUpload size={20} />, title: 'Collect',    desc: 'Upload evidence files and initiate stakeholder review protocols.' },
                                     { n: '04', icon: <FolderCog size={20} />, title: 'Score',        desc: 'Generate compliance scores and audit-ready reports in one click.' },
                                 ].map((step, i) => (
-                                    <div key={step.n} data-reveal data-delay={`${i + 1}` as any} style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 24 }}>
+                                    <div key={step.n} data-reveal data-delay={`${i + 1}` as any} className="workflow-step" style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 24 }}>
                                         {i < 3 && <div className="step-line hidden lg:block" />}
-                                        <div style={{
+                                        <div className="workflow-step-badge" style={{
                                             width: 104, height: 104,
                                             borderRadius: '50%',
                                             background: '#002753',
@@ -790,7 +994,7 @@ export default function Welcome() {
                                             <span style={{ fontWeight: 700, fontSize: 28, color: '#fff', letterSpacing: '-0.02em' }}>{step.n}</span>
                                         </div>
                                         <div>
-                                            <div style={{ width: 40, height: 40, background: '#d6e3ff', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12, color: '#083d77' }}>
+                                            <div className="step-icon-wrap" style={{ width: 40, height: 40, background: '#d6e3ff', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12, color: '#083d77' }}>
                                                 {step.icon}
                                             </div>
                                             <h4 style={{ fontWeight: 700, fontSize: 20, color: '#002753', letterSpacing: '-0.01em', marginBottom: 8 }}>{step.title}</h4>
@@ -803,21 +1007,21 @@ export default function Welcome() {
                     </section>
 
                     {/* ─── ROLE WORKSPACES ────────────────────────────────── */}
-                    <section style={{ padding: '120px 0' }} className="px-6 lg:px-16">
+                    <section style={{ padding: '120px 0' }} className="welcome-section px-6 lg:px-16">
                         <div style={{ maxWidth: 1440, margin: '0 auto' }}>
                             <div data-reveal style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, marginBottom: 64 }} className="role-intro-grid grid-cols-1 lg:grid-cols-2">
                                 <div>
                                     <div className="sec-label">
                                         <div className="sec-label-line" />
-                                        <span className="sec-label-text">03 — Design System</span>
+                                        <span className="sec-label-text">03 - Design System</span>
                                     </div>
                                     <h2 style={{ fontWeight: 700, fontSize: 'clamp(36px,4.5vw,64px)', lineHeight: 0.95, letterSpacing: '-0.03em', color: '#002753' }}>
                                         Every role, its own sanctuary
                                     </h2>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-                                    <p style={{ fontSize: 15, lineHeight: 1.7, color: '#434750' }}>
-                                        No clutter — just the data each role needs to act.
+                                    <p className="role-intro-copy" style={{ fontSize: 15, lineHeight: 1.7, color: '#434750' }}>
+                                        No clutter - just the data each role needs to act.
                                         Four distinct workspaces, one unified system.
                                     </p>
                                 </div>
@@ -834,7 +1038,7 @@ export default function Welcome() {
                                         key={role.title}
                                         data-reveal
                                         data-delay={`${i + 1}` as any}
-                                        className="card-lift"
+                                        className="role-card card-lift"
                                         style={{
                                             background: '#fff',
                                             borderRadius: 20,
@@ -865,12 +1069,12 @@ export default function Welcome() {
                     </section>
 
                     {/* ─── REPORTING ──────────────────────────────────────── */}
-                    <section style={{ background: '#002753', padding: '120px 0', color: '#fff' }} className="px-6 lg:px-16">
+                    <section style={{ background: '#002753', padding: '120px 0', color: '#fff' }} className="welcome-section px-6 lg:px-16">
                         <div style={{ maxWidth: 1440, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80 }} className="reporting-main-grid grid-cols-1 lg:grid-cols-2">
                             <div data-reveal>
                                 <div className="sec-label">
                                     <div className="sec-label-line" />
-                                    <span className="sec-label-text" style={{ color: 'rgba(0,218,243,0.55)' }}>04 — Reporting</span>
+                                    <span className="sec-label-text" style={{ color: 'rgba(0,218,243,0.55)' }}>04 - Reporting</span>
                                 </div>
                                 <h2 style={{ fontWeight: 700, fontSize: 'clamp(36px,4.5vw,64px)', lineHeight: 0.95, letterSpacing: '-0.03em', marginBottom: 20 }}>
                                     Built for<br />
@@ -902,13 +1106,13 @@ export default function Welcome() {
                             <div data-reveal data-delay="2" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                                 <div className="reporting-stats-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                                     {[{ v: '450+', l: 'Controls Tracked' }, { v: '12', l: 'Countries' }].map((s) => (
-                                        <div key={s.l} style={{ background: '#083d77', borderRadius: 20, padding: 32 }}>
+                                        <div key={s.l} className="reporting-card" style={{ background: '#083d77', borderRadius: 20, padding: 32 }}>
                                             <div style={{ fontWeight: 700, fontSize: 56, color: '#00daf3', letterSpacing: '-0.03em', lineHeight: 1 }}>{s.v}</div>
                                             <div style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginTop: 8 }}>{s.l}</div>
                                         </div>
                                     ))}
                                 </div>
-                                <div style={{ background: 'rgba(8,61,119,0.4)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 20, padding: 32 }}>
+                                <div className="reporting-card" style={{ background: 'rgba(8,61,119,0.4)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 20, padding: 32 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
                                         <span style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)' }}>Live Status</span>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -946,7 +1150,7 @@ export default function Welcome() {
                     </section>
 
                     {/* ─── CTA ────────────────────────────────────────────── */}
-                    <section style={{ padding: '120px 0' }} className="px-6 lg:px-16">
+                    <section style={{ padding: '120px 0' }} className="welcome-section px-6 lg:px-16">
                         <div style={{ maxWidth: 1440, margin: '0 auto' }}>
                             <div
                                 data-reveal
@@ -975,7 +1179,7 @@ export default function Welcome() {
                                     </h2>
                                 </div>
                                 <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 20 }}>
-                                    <p style={{ maxWidth: 300, fontSize: 14, lineHeight: 1.7, color: 'rgba(214,227,255,0.5)' }}>
+                                    <p className="cta-copy" style={{ maxWidth: 300, fontSize: 14, lineHeight: 1.7, color: 'rgba(214,227,255,0.5)' }}>
                                         Join the architectural sanctuary of modern compliance.
                                         Setup takes less than 10 minutes.
                                     </p>
@@ -995,13 +1199,13 @@ export default function Welcome() {
                 </main>
 
                 {/* ─── FOOTER ─────────────────────────────────────────────── */}
-                <footer style={{ background: '#fff', borderTop: '1px solid rgba(195,198,209,0.2)', padding: '48px 0' }} className="px-6 lg:px-16">
-                    <div style={{ maxWidth: 1440, margin: '0 auto', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 32 }}>
+                <footer style={{ background: '#fff', borderTop: '1px solid rgba(195,198,209,0.2)', padding: '48px 0' }} className="welcome-footer px-6 lg:px-16">
+                    <div className="welcome-footer-shell" style={{ maxWidth: 1440, margin: '0 auto', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 32 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                             <img src={privacyCureLogo} alt="Privacy Cure Compliance" style={{ height: 28, width: 'auto' }} />
                             <span style={{ fontWeight: 700, fontSize: 14, color: '#002753' }}>Privacy Cure Compliance</span>
                         </div>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 32 }}>
+                        <div className="welcome-footer-links" style={{ display: 'flex', flexWrap: 'wrap', gap: 32 }}>
                             {['Privacy Policy', 'Terms of Service', 'Support'].map((l) => (
                                 <a
                                     key={l}
@@ -1014,10 +1218,11 @@ export default function Welcome() {
                                 </a>
                             ))}
                         </div>
-                        <p style={{ fontSize: 12, color: '#434750' }}>© 2026 Privacy Cure Compliance. All rights reserved.</p>
+                        <p style={{ fontSize: 12, color: '#434750' }}>(c) 2026 Privacy Cure Compliance. All rights reserved.</p>
                     </div>
                 </footer>
             </div>
         </>
     );
 }
+

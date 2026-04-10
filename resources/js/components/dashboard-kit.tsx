@@ -39,12 +39,12 @@ export function DashboardQuickStat({
     donutValue?: number;
 }) {
     return (
-        <div className="rounded-lg border border-[#c3c6d1]/50 bg-white px-4 py-3 shadow-none">
+        <div className="rounded-lg border border-border/70 bg-card px-4 py-3 shadow-none">
             <div className="flex items-center justify-between gap-4">
                 <div className="min-w-0 flex-1">
-                    <p className="text-xs uppercase tracking-[0.2em] text-[#434750]">{title}</p>
-                    <p className="mt-2 text-2xl font-semibold tracking-tight text-[#002753]">{value}</p>
-                    <p className="mt-1 text-xs text-[#434750]">{hint}</p>
+                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{title}</p>
+                    <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{value}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
                 </div>
                 {typeof donutValue === 'number' ? <DashboardInlineScore value={donutValue} size="sm" /> : null}
             </div>
@@ -66,16 +66,16 @@ export function DashboardMetricCard({
     donutValue?: number;
 }) {
     return (
-        <Card className="border-[#c3c6d1]/50 bg-white shadow-none">
+        <Card className="border-border/70 bg-card shadow-none">
             <CardHeader className="space-y-4">
                 <div className="flex items-center justify-between">
-                    <span className="text-sm text-[#434750]">{label}</span>
-                    <div className="rounded-xl bg-[#d6e3ff] p-2 text-[#083d77]">{icon}</div>
+                    <span className="text-sm text-muted-foreground">{label}</span>
+                    <div className="rounded-xl bg-primary/10 p-2 text-primary">{icon}</div>
                 </div>
                 <div className="flex items-center justify-between gap-4">
                     <div className="min-w-0 flex-1">
-                        <div className="text-3xl font-semibold tracking-tight text-[#002753] tabular-nums">{value}</div>
-                        <p className="mt-1 text-xs leading-5 text-[#434750]">{detail}</p>
+                        <div className="text-3xl font-semibold tracking-tight text-foreground tabular-nums">{value}</div>
+                        <p className="mt-1 text-xs leading-5 text-muted-foreground">{detail}</p>
                     </div>
                     {typeof donutValue === 'number' ? <DashboardInlineScore value={donutValue} /> : null}
                 </div>
@@ -98,24 +98,24 @@ export function DashboardBreakdownCard({
     const total = items.reduce((sum, item) => sum + item.value, 0) || 1;
 
     return (
-        <Card className="border-[#c3c6d1]/50 bg-white shadow-none">
+        <Card className="border-border/70 bg-card shadow-none">
             <CardHeader>
                 <div className="flex items-center justify-between gap-4">
                     <div>
-                        <CardTitle className="text-base font-medium text-[#002753]">{title}</CardTitle>
-                        <CardDescription className="text-[#434750]">{description}</CardDescription>
+                        <CardTitle className="text-base font-medium">{title}</CardTitle>
+                        <CardDescription className="text-muted-foreground">{description}</CardDescription>
                     </div>
-                    <div className="rounded-xl bg-[#d6e3ff] p-2 text-[#083d77]">{icon}</div>
+                    <div className="rounded-xl bg-primary/10 p-2 text-primary">{icon}</div>
                 </div>
             </CardHeader>
             <CardContent className="space-y-4">
                 {items.map((item) => (
                     <div key={item.label} className="space-y-2">
                         <div className="flex items-center justify-between text-sm">
-                            <span className="text-[#002753]">{item.label}</span>
-                            <span className="tabular-nums text-[#434750]">{item.value}</span>
+                            <span className="text-foreground">{item.label}</span>
+                            <span className="tabular-nums text-muted-foreground">{item.value}</span>
                         </div>
-                        <Progress className="h-2 bg-[#e6e8ea]" value={(item.value / total) * 100} />
+                        <Progress className="h-2 bg-muted" value={(item.value / total) * 100} />
                     </div>
                 ))}
             </CardContent>
@@ -138,18 +138,18 @@ export function DashboardActionCard({
 }) {
     return (
         <Link href={href} className="block">
-            <Card className="h-full border-[#c3c6d1]/50 bg-white shadow-none transition-colors hover:bg-[#d6e3ff]/20">
+            <Card className="h-full border-border/70 bg-card shadow-none transition-colors hover:bg-muted/40">
                 <CardHeader className="space-y-4">
                     <div className="flex items-center justify-between gap-4">
-                        <div className="rounded-xl bg-[#d6e3ff] p-2 text-[#083d77]">{icon}</div>
+                        <div className="rounded-xl bg-primary/10 p-2 text-primary">{icon}</div>
                         <div className="flex items-center gap-2">
                             {badge ? <Badge variant="outline">{badge}</Badge> : null}
-                            <ArrowRight className="size-4 text-[#434750]" />
+                            <ArrowRight className="size-4 text-muted-foreground" />
                         </div>
                     </div>
                     <div className="space-y-1">
-                        <CardTitle className="text-base font-medium text-[#002753]">{title}</CardTitle>
-                        <CardDescription className="text-[#434750]">{description}</CardDescription>
+                        <CardTitle className="text-base font-medium">{title}</CardTitle>
+                        <CardDescription className="text-muted-foreground">{description}</CardDescription>
                     </div>
                 </CardHeader>
             </Card>
@@ -169,10 +169,10 @@ export function DashboardActivityFeed({
     emptyMessage: string;
 }) {
     return (
-        <Card className="border-[#c3c6d1]/50 bg-white shadow-none">
+        <Card className="border-border/70 bg-card shadow-none">
             <CardHeader>
-                <CardTitle className="text-base font-medium text-[#002753]">{title}</CardTitle>
-                <CardDescription className="text-[#434750]">{description}</CardDescription>
+                <CardTitle className="text-base font-medium">{title}</CardTitle>
+                <CardDescription className="text-muted-foreground">{description}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
                 {items.length ? (
@@ -180,19 +180,19 @@ export function DashboardActivityFeed({
                         <div key={item.id}>
                             <div className="flex items-start justify-between gap-4 py-1">
                                 <div className="min-w-0 flex-1 space-y-1">
-                                    <p className="text-sm font-medium text-[#002753]">{item.title}</p>
-                                    <p className="text-xs leading-5 text-[#434750]">{item.description}</p>
-                                    {item.meta ? <p className="text-[11px] uppercase tracking-[0.18em] text-[#434750]">{item.meta}</p> : null}
+                                    <p className="text-sm font-medium text-foreground">{item.title}</p>
+                                    <p className="text-xs leading-5 text-muted-foreground">{item.description}</p>
+                                    {item.meta ? <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">{item.meta}</p> : null}
                                 </div>
                                 {item.created_at ? (
-                                    <div className="whitespace-nowrap text-xs text-[#434750]">{item.created_at}</div>
+                                    <div className="whitespace-nowrap text-xs text-muted-foreground">{item.created_at}</div>
                                 ) : null}
                             </div>
                             {index < items.length - 1 ? <Separator /> : null}
                         </div>
                     ))
                 ) : (
-                    <div className="rounded-lg border border-dashed border-[#c3c6d1]/60 bg-[#f2f4f6] p-4 text-sm text-[#434750]">
+                    <div className="rounded-lg border border-dashed border-border/70 bg-muted/30 p-4 text-sm text-muted-foreground">
                         {emptyMessage}
                     </div>
                 )}
@@ -216,29 +216,29 @@ export function DashboardTrendChart({
     const max = Math.max(...values, 1);
 
     return (
-        <Card className="border-[#c3c6d1]/50 bg-white shadow-none">
+        <Card className="border-border/70 bg-card shadow-none">
             <CardHeader>
-                <CardTitle className="text-base font-medium text-[#002753]">{title}</CardTitle>
-                <CardDescription className="text-[#434750]">{description}</CardDescription>
+                <CardTitle className="text-base font-medium">{title}</CardTitle>
+                <CardDescription className="text-muted-foreground">{description}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-5">
-                <div className="grid h-64 grid-cols-6 items-end gap-3 rounded-lg border border-[#c3c6d1]/50 bg-[#f2f4f6] p-4">
+                <div className="grid h-64 grid-cols-6 items-end gap-3 rounded-lg border border-border/70 bg-muted/30 p-4">
                     {points.map((point) => (
                         <div key={point.label} className="flex h-full flex-col justify-end gap-2">
                             <div className="flex h-full items-end justify-center gap-1.5">
-                                <TrendBar value={point.primary} max={max} className="bg-[#083d77]" />
+                                <TrendBar value={point.primary} max={max} className="bg-primary" />
                                 {typeof point.secondary === 'number' ? (
-                                    <TrendBar value={point.secondary} max={max} className="bg-[#194781]" />
+                                    <TrendBar value={point.secondary} max={max} className="bg-primary/70" />
                                 ) : null}
                                 {typeof point.tertiary === 'number' ? (
-                                    <TrendBar value={point.tertiary} max={max} className="bg-[#00b9ce]" />
+                                    <TrendBar value={point.tertiary} max={max} className="bg-primary/40" />
                                 ) : null}
                             </div>
-                            <div className="text-center text-xs text-[#434750]">{point.label}</div>
+                            <div className="text-center text-xs text-muted-foreground">{point.label}</div>
                         </div>
                     ))}
                 </div>
-                <div className="flex flex-wrap gap-4 text-xs text-[#434750]">
+                <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
                     {legends.map((legend) => (
                         <span key={legend.label} className="inline-flex items-center gap-2">
                             <span className={`size-2 rounded-full ${legend.tone}`} />
@@ -265,10 +265,10 @@ export function DashboardRingCard({
     items: BreakdownItem[];
 }) {
     return (
-        <Card className="border-[#c3c6d1]/50 bg-white shadow-none">
+        <Card className="border-border/70 bg-card shadow-none">
             <CardHeader>
-                <CardTitle className="text-base font-medium text-[#002753]">{title}</CardTitle>
-                <CardDescription className="text-[#434750]">{description}</CardDescription>
+                <CardTitle className="text-base font-medium">{title}</CardTitle>
+                <CardDescription className="text-muted-foreground">{description}</CardDescription>
             </CardHeader>
             <CardContent>
                 {items.length ? (
@@ -276,7 +276,7 @@ export function DashboardRingCard({
                 ) : (
                     <div className="grid gap-6 lg:grid-cols-[180px_1fr] lg:items-center">
                         <ScoreDonut value={value} subtitle={subtitle} />
-                        <div className="rounded-lg border border-dashed border-[#c3c6d1]/60 bg-[#f2f4f6] p-4 text-sm text-[#434750]">
+                        <div className="rounded-lg border border-dashed border-border/70 bg-muted/30 p-4 text-sm text-muted-foreground">
                             No section scoring is available yet.
                         </div>
                     </div>
@@ -308,7 +308,7 @@ export function DashboardInlineScore({ value, size = 'md' }: { value: number; si
                         fill="none"
                         stroke="currentColor"
                         strokeWidth={strokeWidth}
-                        className="text-[#e6e8ea]"
+                        className="text-border"
                     />
                     <circle
                         cx={svgSize / 2}
@@ -320,14 +320,14 @@ export function DashboardInlineScore({ value, size = 'md' }: { value: number; si
                         strokeLinecap="round"
                         strokeDasharray={circumference}
                         strokeDashoffset={dashOffset}
-                        className="text-[#083d77]"
+                        className="text-primary"
                     />
                 </svg>
-                <span className={`absolute font-semibold tabular-nums text-[#002753] ${size === 'sm' ? 'text-[10px]' : 'text-[11px]'}`}>
+                <span className={`absolute font-semibold tabular-nums text-foreground ${size === 'sm' ? 'text-[10px]' : 'text-[11px]'}`}>
                     {Math.round(clamped)}
                 </span>
             </div>
-            <span className="font-medium tabular-nums text-[#002753]">{Math.round(clamped)}%</span>
+            <span className="font-medium tabular-nums text-foreground">{Math.round(clamped)}%</span>
         </div>
     );
 }

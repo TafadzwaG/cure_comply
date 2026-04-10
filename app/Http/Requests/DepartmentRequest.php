@@ -13,13 +13,34 @@ class DepartmentRequest extends FormRequest
         return (bool) $this->user()?->can(Permissions::MANAGE_DEPARTMENTS);
     }
 
+    protected function prepareForValidation(): void
+    {
+        $user = $this->user();
+
+        if (! $user) {
+            return;
+        }
+
+        if ($user->isSuperAdmin()) {
+            $tenantId = $this->input('tenant_id');
+
+            $this->merge([
+                'tenant_id' => filled($tenantId) ? (int) $tenantId : null,
+            ]);
+
+            return;
+        }
+
+        $this->merge([
+            'tenant_id' => $user->tenant_id,
+        ]);
+    }
+
     public function rules(): array
     {
-        $isSuperAdmin = $this->user()?->isSuperAdmin();
-
         return [
             'tenant_id' => [
-                $isSuperAdmin ? 'required' : 'nullable',
+                'required',
                 'integer',
                 Rule::exists('tenants', 'id'),
             ],

@@ -211,9 +211,9 @@ export default function EmployeeDashboard(props: EmployeeDashboardProps) {
                                 description="Six-month movement across lessons completed, tests submitted, and compliance responses answered."
                                 points={props.monthlyTrend}
                                 legends={[
-                                    { label: 'Lessons completed', tone: 'bg-[#083d77]' },
-                                    { label: 'Test attempts', tone: 'bg-[#194781]' },
-                                    { label: 'Responses answered', tone: 'bg-[#00b9ce]' },
+                                    { label: 'Lessons completed', tone: 'bg-primary' },
+                                    { label: 'Test attempts', tone: 'bg-primary/70' },
+                                    { label: 'Responses answered', tone: 'bg-primary/40' },
                                 ]}
                             />
                             <DashboardActivityFeed

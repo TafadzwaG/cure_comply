@@ -11,10 +11,12 @@ import { Building, Building2, Layers3, Plus, ShieldCheck, Users } from 'lucide-r
 
 export default function DepartmentsCreate({
     tenants = [],
+    isSuperAdmin = false,
 }: {
     tenants?: Array<{ id: number; name: string }>;
+    isSuperAdmin?: boolean;
 }) {
-    const isSuperAdminFlow = tenants.length > 0;
+    const isSuperAdminFlow = isSuperAdmin;
 
     const form = useForm({
         tenant_id: '',
@@ -101,7 +103,15 @@ export default function DepartmentsCreate({
                             </CardDescription>
                         </CardHeader>
 
-                        <CardContent className="space-y-5 p-6">
+                        <CardContent className="p-6">
+                            <form
+                                className="space-y-5"
+                                onSubmit={(event) => {
+                                    event.preventDefault();
+
+                                    form.post(route('departments.store'));
+                                }}
+                            >
                             {isSuperAdminFlow ? (
                                 <div className="space-y-2">
                                     <Label htmlFor="tenant_id">Tenant</Label>
@@ -193,21 +203,7 @@ export default function DepartmentsCreate({
                             </div>
 
                             <div className="flex flex-wrap items-center gap-3 pt-1">
-                                <Button
-                                    type="button"
-                                    disabled={form.processing}
-                                    onClick={() =>
-                                        form
-                                            .transform((data) => ({
-                                                ...data,
-                                                tenant_id: data.tenant_id
-                                                    ? Number(data.tenant_id)
-                                                    : undefined,
-                                            }))
-                                            .post(route('departments.store'))
-                                    }
-                                    className="rounded-md bg-[#14417A] text-white hover:bg-[#0F2E52]"
-                                >
+                                <Button type="submit" disabled={form.processing} className="rounded-md bg-[#14417A] text-white hover:bg-[#0F2E52]">
                                     <Plus className="mr-2 h-4 w-4" />
                                     {form.processing ? 'Saving...' : 'Save Department'}
                                 </Button>
@@ -216,6 +212,7 @@ export default function DepartmentsCreate({
                                     <Link href={route('departments.index')}>Cancel</Link>
                                 </Button>
                             </div>
+                            </form>
                         </CardContent>
                     </Card>
 

@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use App\Enums\TenantStatus;
+use App\Support\TenantBranding;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Tenant extends Model
 {
@@ -21,7 +23,14 @@ class Tenant extends Model
         'contact_name',
         'contact_email',
         'contact_phone',
+        'logo_path',
+        'primary_color',
         'status',
+    ];
+
+    protected $appends = [
+        'logo_url',
+        'branding',
     ];
 
     protected function casts(): array
@@ -54,5 +63,19 @@ class Tenant extends Model
     public function submissions(): HasMany
     {
         return $this->hasMany(ComplianceSubmission::class);
+    }
+
+    public function getLogoUrlAttribute(): ?string
+    {
+        if (blank($this->logo_path)) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($this->logo_path);
+    }
+
+    public function getBrandingAttribute(): array
+    {
+        return TenantBranding::payload($this);
     }
 }

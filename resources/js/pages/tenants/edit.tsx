@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import PlatformLayout from '@/layouts/platform-layout';
 import { Tenant } from '@/types';
 import { useForm } from '@inertiajs/react';
@@ -21,13 +20,15 @@ export default function TenantEdit({ tenant }: { tenant: Tenant }) {
         contact_name: tenant.contact_name ?? '',
         contact_email: tenant.contact_email ?? '',
         contact_phone: tenant.contact_phone ?? '',
-        status: tenant.status ?? 'active',
     });
 
     return (
         <PlatformLayout>
             <div className="space-y-6">
-                <PageHeader title={`Edit ${tenant.name}`} description="Update tenant profile information, contact data, and workspace lifecycle status." />
+                <PageHeader
+                    title={`Edit ${tenant.name}`}
+                    description="Update tenant profile information and contact data. Activation and deactivation now happen through dedicated tenant actions."
+                />
                 <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
                     <Card className="border-border/70 shadow-none">
                         <CardHeader>
@@ -64,32 +65,19 @@ export default function TenantEdit({ tenant }: { tenant: Tenant }) {
                                 </Field>
                             </div>
 
-                            <div className="grid gap-4 md:grid-cols-2">
-                                <Field label="Contact phone" error={form.errors.contact_phone}>
-                                    <Input value={form.data.contact_phone} onChange={(event) => form.setData('contact_phone', event.target.value)} />
-                                </Field>
-                                <Field label="Status" error={form.errors.status}>
-                                    <Select value={form.data.status} onValueChange={(value) => form.setData('status', value)}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select status" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="pending">Pending</SelectItem>
-                                            <SelectItem value="active">Active</SelectItem>
-                                            <SelectItem value="inactive">Inactive</SelectItem>
-                                            <SelectItem value="suspended">Suspended</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </Field>
-                            </div>
+                            <Field label="Contact phone" error={form.errors.contact_phone}>
+                                <Input value={form.data.contact_phone} onChange={(event) => form.setData('contact_phone', event.target.value)} />
+                            </Field>
 
-                            <Button onClick={() => form.patch(route('tenants.update', tenant.id))}>Save Tenant Changes</Button>
+                            <Button onClick={() => form.patch(route('tenants.update', tenant.id))} disabled={form.processing}>
+                                Save Tenant Changes
+                            </Button>
                         </CardContent>
                     </Card>
 
                     <CreateGuidancePanel
                         title="What happens next"
-                        description="Tenant updates affect visibility, support workflows, and the company’s operational posture."
+                        description="Tenant updates affect visibility, support workflows, and the company's operational posture."
                         items={[
                             {
                                 title: 'Company profile is refreshed',
@@ -97,8 +85,8 @@ export default function TenantEdit({ tenant }: { tenant: Tenant }) {
                                 icon: Building2,
                             },
                             {
-                                title: 'Lifecycle status is enforced',
-                                description: 'Suspended or inactive tenants can be distinguished clearly from active workspaces.',
+                                title: 'Lifecycle actions stay explicit',
+                                description: 'Activation and deactivation now run through dedicated confirmation dialogs so status changes are deliberate.',
                                 icon: ShieldCheck,
                             },
                             {

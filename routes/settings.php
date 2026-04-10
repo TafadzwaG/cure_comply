@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\Settings\PlatformSettingsController;
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\ProfileController;
+use App\Http\Controllers\Settings\TenantBrandingController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -18,4 +20,10 @@ Route::middleware('auth')->group(function () {
     Route::get('settings/appearance', function () {
         return Inertia::render('settings/appearance');
     })->name('appearance');
+
+    Route::get('settings/branding', [TenantBrandingController::class, 'edit'])->name('settings.branding.edit');
+    Route::match(['post', 'put'], 'settings/branding', [TenantBrandingController::class, 'update'])->name('settings.branding.update');
+
+    Route::get('settings/platform', [PlatformSettingsController::class, 'edit'])->name('settings.platform.edit');
+    Route::put('settings/platform', [PlatformSettingsController::class, 'update'])->name('settings.platform.update');
 });

@@ -41,7 +41,7 @@ export function AppSidebar() {
               { title: 'Employees', url: '/employees', icon: Users, visible: can('manage users') },
               { title: 'Courses', url: '/courses', icon: GraduationCap, visible: can('manage courses') },
               { title: 'Assignments', url: '/assignments', icon: SquareKanban, visible: can('assign training') || can('manage courses') },
-              { title: 'Assessments ', url: '/tests', icon: ClipboardCheck, visible: can('manage tests') },
+            //   { title: 'Assessments ', url: '/tests', icon: ClipboardCheck, visible: can('manage tests') },
               { title: 'Test Assignments', url: '/tests?tab=assignments', icon: UsersRound, visible: can('manage tests') },
               { title: 'Assessments Attempts', url: '/test-attempts', icon: ClipboardCheck, visible: can('manage tests') },
               { title: 'Compliance Frameworks', url: '/frameworks', icon: ShieldCheck, visible: can('manage compliance frameworks') },
@@ -62,7 +62,7 @@ export function AppSidebar() {
                 { title: 'Invitations', url: '/invitations', icon: UserRoundPlus, visible: can('invite employees') },
                 { title: 'Courses', url: '/courses', icon: GraduationCap, visible: can('manage courses') },
                 { title: 'Assignments', url: '/assignments', icon: SquareKanban, visible: can('assign training') },
-                { title: 'Tests', url: '/tests', icon: ClipboardCheck, visible: hasRole('company_admin') || can('manage tests') || can('take tests') },
+                // { title: 'Tests', url: '/tests', icon: ClipboardCheck, visible: hasRole('company_admin') || can('manage tests') || can('take tests') },
                 { title: 'Test Assignments', url: '/tests?tab=assignments', icon: UsersRound, visible: hasRole('company_admin') || can('manage tests') },
                 // { title: 'Compliance', url: '/submissions', icon: ShieldCheck, visible: can('manage compliance submissions') || can('answer compliance questions') },
                 {

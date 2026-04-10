@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Models\AppNotification;
 use App\Models\ExportRequest;
 use App\Models\User;
+use App\Support\TenantBranding;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -47,6 +48,7 @@ class HandleInertiaRequests extends Middleware
                 'permissions' => $request->user()?->getAllPermissions()->pluck('name') ?? [],
             ],
             'tenant' => current_tenant(),
+            'branding' => fn () => TenantBranding::payload(current_tenant()),
             'impersonation' => [
                 'active' => session()->has('impersonated_by'),
                 'impersonator_id' => $impersonatorId,

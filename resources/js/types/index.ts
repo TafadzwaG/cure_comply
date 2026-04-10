@@ -27,6 +27,7 @@ export interface SharedData {
     name: string;
     auth: Auth;
     tenant?: Tenant | null;
+    branding?: TenantBranding | null;
     impersonation: {
         active: boolean;
         impersonator_id?: number | null;
@@ -73,6 +74,29 @@ export interface Tenant {
     contact_name?: string | null;
     contact_email?: string | null;
     contact_phone?: string | null;
+    logo_url?: string | null;
+    logo_path?: string | null;
+    primary_color?: string | null;
+    branding?: TenantBranding | null;
+    created_at?: string;
+}
+
+export interface TenantBranding {
+    tenant_id?: number | null;
+    tenant_name?: string | null;
+    logo_url?: string | null;
+    primary_color: string;
+    primary_foreground: string;
+    primary_hsl: string;
+    soft_color: string;
+    soft_border_color: string;
+    sidebar_primary: string;
+    sidebar_primary_foreground: string;
+    sidebar_accent: string;
+    sidebar_accent_foreground: string;
+    sidebar_border: string;
+    ring_color: string;
+    is_customized: boolean;
 }
 
 export interface Department {
@@ -112,6 +136,9 @@ export interface EmployeeProfile {
         assigned_courses: number;
         completed_courses: number;
         overdue_courses: number;
+        completed_lessons: number;
+        assigned_tests: number;
+        pending_tests: number;
         tests_taken: number;
         best_test_score: number | null;
         latest_test_score: number | null;
@@ -119,12 +146,29 @@ export interface EmployeeProfile {
         evidence_uploaded: number;
         flagged_responses: number;
     };
+    access?: {
+        role_names: string[];
+        permission_names: string[];
+    };
     assignments?: Array<{
         id: number;
         course: string | null;
         status: string | null;
         due_date: string | null;
         assigned_at: string | null;
+    }>;
+    lesson_progress?: Array<{
+        id: number;
+        lesson: string | null;
+        status: string | null;
+        completed_at: string | null;
+    }>;
+    test_assignments?: Array<{
+        id: number;
+        test: string | null;
+        status: string | null;
+        assigned_at: string | null;
+        due_date: string | null;
     }>;
     test_attempts?: Array<{
         id: number;

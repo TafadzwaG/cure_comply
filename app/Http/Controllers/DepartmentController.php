@@ -168,6 +168,7 @@ class DepartmentController extends Controller
         $this->authorize('create', Department::class);
 
         return Inertia::render('departments/create', [
+            'isSuperAdmin' => request()->user()?->isSuperAdmin() ?? false,
             'tenants' => request()->user()?->isSuperAdmin()
                 ? Tenant::query()->orderBy('name')->get(['id', 'name'])
                 : [],
@@ -178,16 +179,10 @@ class DepartmentController extends Controller
     {
         $this->authorize('create', Department::class);
 
-        $payload = $request->validated();
-
-        if (! $request->user()?->isSuperAdmin()) {
-            $payload['tenant_id'] = current_tenant()?->id;
-        }
-
-        $department = Department::query()->create($payload);
+        $department = Department::query()->create($request->validated());
         app(\App\Services\AuditLogService::class)->logModelCreated('department_created', $department);
 
-        return back()->with('success', 'Department created.');
+        return redirect()->route('departments.index')->with('success', 'Department created.');
     }
 
     public function update(DepartmentRequest $request, Department $department): RedirectResponse

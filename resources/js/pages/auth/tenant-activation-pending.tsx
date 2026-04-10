@@ -40,32 +40,70 @@ export default function TenantActivationPending() {
                 <style>{`
                     body { font-family: 'Inter', sans-serif; }
                     h1, h2, h3, h4, h5 { font-family: 'Plus Jakarta Sans', sans-serif; }
+                    .tenant-activation-root { background: #f7f9fb; color: #191c1e; }
+                    .dark .tenant-activation-root { background: #020817; color: #f8fafc; }
+                    .dark .tenant-activation-root .tenant-activation-shell {
+                        background: #020817;
+                        border-color: rgba(148,163,184,0.24);
+                    }
+                    .dark .tenant-activation-root .tenant-activation-topbar {
+                        background: rgba(15,23,42,0.82);
+                        border-color: rgba(148,163,184,0.2);
+                    }
+                    .dark .tenant-activation-root .tenant-activation-aside {
+                        background: rgba(15,23,42,0.52);
+                    }
+                    .dark .tenant-activation-root .tenant-activation-card {
+                        background: #0f172a;
+                        border-color: rgba(148,163,184,0.2);
+                    }
+                    .dark .tenant-activation-root h1,
+                    .dark .tenant-activation-root h3,
+                    .dark .tenant-activation-root h4,
+                    .dark .tenant-activation-root h5,
+                    .dark .tenant-activation-root .tenant-activation-brand,
+                    .dark .tenant-activation-root .tenant-activation-link,
+                    .dark .tenant-activation-root .tenant-activation-step {
+                        color: #f8fafc !important;
+                    }
+                    .dark .tenant-activation-root p,
+                    .dark .tenant-activation-root li,
+                    .dark .tenant-activation-root .tenant-activation-muted,
+                    .dark .tenant-activation-root .tenant-activation-step-muted {
+                        color: rgba(226,232,240,0.78) !important;
+                    }
+                    .dark .tenant-activation-root .tenant-activation-flash {
+                        color: #e0f2fe !important;
+                    }
+                    .dark .tenant-activation-root h1 span {
+                        color: #93c5fd !important;
+                    }
                 `}</style>
             </Head>
 
-            <div className="min-h-screen bg-[#f7f9fb] px-0 py-0 text-[#191c1e]">
+            <div className="tenant-activation-root min-h-screen bg-[#f7f9fb] px-0 py-0 text-[#191c1e]">
                 <div className="mx-auto w-full max-w-[96rem]">
-                    <div className="overflow-hidden rounded-2xl border border-[#c3c6d1]/20 bg-[#f7f9fb] shadow-[0_24px_70px_-40px_rgba(0,39,83,0.22)]">
-                        <div className="flex flex-col items-center justify-between gap-6 border-b border-[#c3c6d1]/15 bg-[#f2f4f6]/70 px-8 py-6 md:flex-row">
+                    <div className="tenant-activation-shell overflow-hidden rounded-2xl border border-[#c3c6d1]/20 bg-[#f7f9fb] shadow-[0_24px_70px_-40px_rgba(0,39,83,0.22)]">
+                        <div className="tenant-activation-topbar flex flex-col items-center justify-between gap-6 border-b border-[#c3c6d1]/15 bg-[#f2f4f6]/70 px-8 py-6 md:flex-row">
                             <Link href={route('home')} className="flex items-center gap-3">
                                 <img src={privacyCureLogo} alt="Privacy Cure" className="h-9 w-auto" />
-                                <span className="text-lg font-extrabold tracking-tight text-[#002753]">Privacy Cure</span>
+                                <span className="tenant-activation-brand text-lg font-extrabold tracking-tight text-[#002753]">Privacy Cure</span>
                             </Link>
 
                             <div className="flex w-full items-center gap-2 overflow-x-auto pb-2 md:w-auto md:pb-0">
                                 <div className="flex shrink-0 items-center gap-2 rounded-full bg-[#002753]/10 px-3 py-1">
                                     <span className="h-2 w-2 rounded-full bg-[#002753]" />
-                                    <span className="text-[10px] font-bold uppercase tracking-widest text-[#002753]">1. Registration submitted</span>
+                                    <span className="tenant-activation-step text-[10px] font-bold uppercase tracking-widest text-[#002753]">1. Registration submitted</span>
                                 </div>
                                 <div className="h-px w-4 bg-[#c3c6d1]/40" />
                                 <div className="flex shrink-0 items-center gap-2 rounded-full bg-[#002753]/10 px-3 py-1">
                                     <span className="h-2 w-2 rounded-full bg-[#002753]" />
-                                    <span className="text-[10px] font-bold uppercase tracking-widest text-[#002753]">2. Review in progress</span>
+                                    <span className="tenant-activation-step text-[10px] font-bold uppercase tracking-widest text-[#002753]">2. Review in progress</span>
                                 </div>
                                 <div className="h-px w-4 bg-[#c3c6d1]/40" />
                                 <div className="flex shrink-0 items-center gap-2 px-3 py-1">
                                     <span className="h-2 w-2 rounded-full bg-[#c3c6d1]" />
-                                    <span className="text-[10px] font-bold uppercase tracking-widest text-[#434750]">3. Workspace activation</span>
+                                    <span className="tenant-activation-step-muted text-[10px] font-bold uppercase tracking-widest text-[#434750]">3. Workspace activation</span>
                                 </div>
                             </div>
                         </div>
@@ -105,12 +143,12 @@ export default function TenantActivationPending() {
                                 </div>
 
                                 {flash.success && (
-                                    <div className="mt-8 rounded-2xl border border-[#00b9ce]/20 bg-[#00b9ce]/10 p-5 text-sm text-[#002753]">
+                                    <div className="tenant-activation-flash mt-8 rounded-2xl border border-[#00b9ce]/20 bg-[#00b9ce]/10 p-5 text-sm text-[#002753]">
                                         {flash.success}
                                     </div>
                                 )}
 
-                                <div className="mt-10 rounded-2xl border border-[#c3c6d1]/15 bg-white p-6">
+                                <div className="tenant-activation-card mt-10 rounded-2xl border border-[#c3c6d1]/15 bg-white p-6">
                                     <h3 className="text-lg font-bold text-[#002753]">What you can expect</h3>
                                     <ul className="mt-5 space-y-4 text-sm leading-6 text-[#434750]">
                                         <li className="flex gap-3">
@@ -129,7 +167,7 @@ export default function TenantActivationPending() {
                                 </div>
 
                                 <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-[#c3c6d1]/15 pt-8">
-                                    <Link href={route('home')} className="text-sm font-bold text-[#002753] hover:underline">
+                                    <Link href={route('home')} className="tenant-activation-link text-sm font-bold text-[#002753] hover:underline">
                                         Back to home
                                     </Link>
 
@@ -142,7 +180,7 @@ export default function TenantActivationPending() {
                                 </div>
                             </div>
 
-                            <div className="space-y-8 bg-[#f2f4f6]/30 p-8 lg:col-span-4">
+                            <div className="tenant-activation-aside space-y-8 bg-[#f2f4f6]/30 p-8 lg:col-span-4">
                                 <div className="relative aspect-[4/3] overflow-hidden rounded-2xl lg:aspect-square">
                                     <img
                                         className="absolute inset-0 h-full w-full object-cover grayscale brightness-50"
@@ -158,7 +196,7 @@ export default function TenantActivationPending() {
                                     </div>
                                 </div>
 
-                                <div className="space-y-6 rounded-2xl border border-[#c3c6d1]/15 bg-white p-6">
+                                <div className="tenant-activation-card space-y-6 rounded-2xl border border-[#c3c6d1]/15 bg-white p-6">
                                     <h5 className="border-b border-[#c3c6d1]/30 pb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#002753]">
                                         Activation milestones
                                     </h5>
@@ -201,7 +239,7 @@ function InfoStat({
     description: string;
 }) {
     return (
-        <div className="rounded-2xl border border-[#c3c6d1]/15 bg-white p-6">
+        <div className="tenant-activation-card rounded-2xl border border-[#c3c6d1]/15 bg-white p-6">
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#d6e3ff] text-[#083d77]">{icon}</div>
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#434750]">{label}</p>
             <p className="mt-3 text-lg font-bold text-[#002753]">{value}</p>

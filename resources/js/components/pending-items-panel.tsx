@@ -93,12 +93,12 @@ export default function PendingItemsPanel({ items }: PendingItemsPanelProps) {
     });
 
     return (
-        <Card className="rounded-md border-border/60 shadow-none">
+        <Card className="rounded-md border-border/60 bg-card shadow-none">
             <CardHeader className="pb-4">
                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                     <div className="space-y-1">
                         <CardTitle className="flex items-center gap-2 text-base font-medium">
-                            <AlertTriangle className="size-4 text-[#14417A]" />
+                            <AlertTriangle className="size-4 text-primary" />
                             Action Required
                         </CardTitle>
                         <CardDescription>
@@ -155,8 +155,8 @@ export default function PendingItemsPanel({ items }: PendingItemsPanelProps) {
                                             className="flex items-center justify-between rounded-md border border-border/60 px-3 py-2"
                                         >
                                             <div className="flex min-w-0 items-center gap-2">
-                                                <div className="flex h-7 w-7 items-center justify-center rounded-md border border-[#14417A]/15 bg-[#14417A]/5">
-                                                    <Icon className="size-3.5 text-[#14417A]" />
+                                                <div className="flex h-7 w-7 items-center justify-center rounded-md border border-primary/15 bg-primary/10">
+                                                    <Icon className="size-3.5 text-primary" />
                                                 </div>
                                                 <span className="truncate text-sm">{config.label}</span>
                                             </div>
@@ -172,7 +172,7 @@ export default function PendingItemsPanel({ items }: PendingItemsPanelProps) {
 
                         <div className="rounded-md border border-border/60 bg-muted/20 p-3">
                             <div className="flex items-start gap-2">
-                                <CheckCircle2 className="mt-0.5 size-4 text-[#14417A]" />
+                                <CheckCircle2 className="mt-0.5 size-4 text-primary" />
                                 <div className="space-y-1">
                                     <p className="text-sm font-medium">Queue guidance</p>
                                     <p className="text-xs leading-5 text-muted-foreground">
@@ -206,8 +206,8 @@ export default function PendingItemsPanel({ items }: PendingItemsPanelProps) {
                                             className="group block bg-background px-4 py-3 transition-colors hover:bg-muted/30"
                                         >
                                             <div className="flex items-start gap-3">
-                                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[#14417A]/15 bg-[#14417A]/5">
-                                                    <Icon className="size-4 text-[#14417A]" />
+                                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-primary/15 bg-primary/10">
+                                                    <Icon className="size-4 text-primary" />
                                                 </div>
 
                                                 <div className="min-w-0 flex-1 space-y-1.5">
@@ -237,7 +237,7 @@ export default function PendingItemsPanel({ items }: PendingItemsPanelProps) {
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    className="h-8 w-8 shrink-0 rounded-md text-[#14417A] hover:bg-[#14417A]/5 hover:text-[#14417A]"
+                                                    className="h-8 w-8 shrink-0 rounded-md text-primary hover:bg-primary/10 hover:text-primary"
                                                 >
                                                     <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
                                                 </Button>

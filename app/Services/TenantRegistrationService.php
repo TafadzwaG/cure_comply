@@ -11,13 +11,16 @@ use Illuminate\Support\Facades\Hash;
 
 class TenantRegistrationService
 {
-    public function __construct(protected AuditLogService $auditLogService)
+    public function __construct(
+        protected AuditLogService $auditLogService,
+        protected TenantLifecycleService $tenantLifecycleService,
+    )
     {
     }
 
     public function register(array $data): User
     {
-        return DB::transaction(function () use ($data) {
+        [$tenant, $user] = DB::transaction(function () use ($data) {
             $tenant = Tenant::query()->create([
                 'name' => $data['company_name'],
                 'registration_number' => $data['registration_number'] ?? null,
@@ -41,7 +44,11 @@ class TenantRegistrationService
 
             $this->auditLogService->log('tenant_registered', Tenant::class, $tenant->id, [], $tenant->toArray());
 
-            return $user;
+            return [$tenant, $user];
         });
+
+        $this->tenantLifecycleService->notifyRegistrationSubmitted($tenant);
+
+        return $user;
     }
 }

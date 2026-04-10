@@ -1,7 +1,7 @@
-import { RowActionsMenu } from '@/components/row-actions-menu';
 import { PageHeader } from '@/components/page-header';
+import { RowActionsMenu } from '@/components/row-actions-menu';
 import { StatusBadge } from '@/components/status-badge';
-import { Badge } from '@/components/ui/badge';
+import { TenantStatusActionDialog } from '@/components/tenant-status-action-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -10,7 +10,7 @@ import PlatformLayout from '@/layouts/platform-layout';
 import { formatLongDateTime } from '@/lib/date';
 import { SharedData, Tenant } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { AlertCircle, BarChart3, Building2, CheckCircle2, FolderKanban, Mail, Phone, PieChart, ShieldCheck, Users2 } from 'lucide-react';
+import { AlertCircle, BarChart3, Building2, CheckCircle2, FolderKanban, Mail, PenSquare, Phone, PieChart, ShieldCheck, Users2 } from 'lucide-react';
 
 interface TenantUser {
     id: number;
@@ -54,8 +54,14 @@ export default function TenantShow({
     compliance,
     roleMix,
     recentSubmissions,
+    abilities,
 }: {
     tenant: TenantShowData;
+    abilities: {
+        canEdit: boolean;
+        canActivate: boolean;
+        canDeactivate: boolean;
+    };
     stats: {
         users: number;
         activeUsers: number;
@@ -97,9 +103,30 @@ export default function TenantShow({
                 >
                     <div className="flex flex-wrap items-center gap-2">
                         <StatusBadge value={tenant.status} />
-                        <Button variant="outline" asChild>
-                            <Link href={route('tenants.edit', tenant.id)}>Edit tenant</Link>
-                        </Button>
+                        {abilities.canActivate && (tenant.status === 'pending' || tenant.status === 'inactive') && (
+                            <TenantStatusActionDialog
+                                tenantId={tenant.id}
+                                tenantName={tenant.name}
+                                action="activate"
+                                triggerClassName="border-white/20 bg-white text-[#0F2E52] hover:bg-white/90 hover:text-[#0F2E52]"
+                            />
+                        )}
+                        {abilities.canDeactivate && tenant.status === 'active' && (
+                            <TenantStatusActionDialog
+                                tenantId={tenant.id}
+                                tenantName={tenant.name}
+                                action="deactivate"
+                                triggerClassName="border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+                            />
+                        )}
+                        {abilities.canEdit && (
+                            <Button variant="outline" asChild className="border-white/20 bg-white text-[#0F2E52] hover:bg-white/90 hover:text-[#0F2E52]">
+                                <Link href={route('tenants.edit', tenant.id)}>
+                                    <PenSquare className="size-4" />
+                                    Edit tenant
+                                </Link>
+                            </Button>
+                        )}
                     </div>
                 </PageHeader>
 

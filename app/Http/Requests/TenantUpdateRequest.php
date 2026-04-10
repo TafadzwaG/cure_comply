@@ -4,7 +4,6 @@ namespace App\Http\Requests;
 
 use App\Support\Permissions;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class TenantUpdateRequest extends FormRequest
 {
@@ -23,7 +22,6 @@ class TenantUpdateRequest extends FormRequest
             'contact_name' => ['nullable', 'string', 'max:255'],
             'contact_email' => ['nullable', 'email', 'max:255'],
             'contact_phone' => ['nullable', 'string', 'max:255'],
-            'status' => ['required', Rule::in(['pending', 'active', 'inactive', 'suspended'])],
         ];
     }
 }

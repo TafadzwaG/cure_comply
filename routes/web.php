@@ -47,6 +47,8 @@ Route::middleware(['auth', 'throttle:api', 'tenant', 'impersonation.audit'])->gr
     Route::get('dashboard', DashboardController::class)->name('dashboard');
 
     Route::resource('tenants', TenantController::class)->only(['index', 'show', 'edit', 'update', 'destroy']);
+    Route::post('tenants/{tenant}/activate', [TenantController::class, 'activate'])->name('tenants.activate');
+    Route::post('tenants/{tenant}/deactivate', [TenantController::class, 'deactivate'])->name('tenants.deactivate');
     Route::get('users', [UserManagementController::class, 'index'])->name('users.index');
     Route::get('users/{user}', [UserManagementController::class, 'show'])->name('users.show');
     Route::patch('users/{user}', [UserManagementController::class, 'update'])->name('users.update');

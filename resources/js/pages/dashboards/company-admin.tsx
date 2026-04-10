@@ -267,9 +267,9 @@ export default function CompanyAdminDashboard(props: CompanyAdminDashboardProps)
                                 description="Six-month view of completed assignments, submitted tests, and compliance cycle activity."
                                 points={props.monthlyTrend}
                                 legends={[
-                                    { label: 'Completed assignments', tone: 'bg-[#083d77]' },
-                                    { label: 'Test attempts', tone: 'bg-[#194781]' },
-                                    { label: 'Submissions', tone: 'bg-[#00b9ce]' },
+                                    { label: 'Completed assignments', tone: 'bg-primary' },
+                                    { label: 'Test attempts', tone: 'bg-primary/70' },
+                                    { label: 'Submissions', tone: 'bg-primary/40' },
                                 ]}
                             />
                             <DashboardActivityFeed
@@ -571,41 +571,35 @@ function KpiCard({
         emerald: 'text-emerald-600 dark:text-emerald-400',
         amber: 'text-amber-600 dark:text-amber-400',
         rose: 'text-rose-600 dark:text-rose-400',
-        brand: 'text-[#14417A] dark:text-blue-300',
-    };
-
-    const strokeMap: Record<string, string> = {
-        emerald: '#059669',
-        amber: '#d97706',
-        rose: '#e11d48',
-        brand: '#14417A',
+        brand: 'text-primary',
     };
 
     return (
-        <Card className="border-[#14417A]/15 shadow-none">
+        <Card className="border-border/70 bg-card shadow-none">
             <CardContent className="flex items-start gap-4 p-5">
                 <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-muted ${accentMap[accent]}`}>
                     <Icon className="h-5 w-5" />
                 </div>
                 <div className="min-w-0 flex-1 space-y-1">
                     <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
-                    <p className="text-2xl font-semibold tabular-nums text-[#0F2E52] dark:text-blue-200">{value}</p>
+                    <p className="text-2xl font-semibold tabular-nums text-foreground">{value}</p>
                     {hint && <p className="truncate text-xs text-muted-foreground">{hint}</p>}
                 </div>
                 {donutValue !== undefined && (
                     <div className="relative flex h-14 w-14 shrink-0 items-center justify-center">
                         <svg width="56" height="56" className="-rotate-90">
-                            <circle cx="28" cy="28" r={22} stroke="currentColor" strokeWidth={5} fill="none" className="text-muted" />
+                            <circle cx="28" cy="28" r={22} stroke="currentColor" strokeWidth={5} fill="none" className="text-border" />
                             <circle
                                 cx="28"
                                 cy="28"
                                 r={22}
-                                stroke={strokeMap[accent]}
+                                stroke="currentColor"
                                 strokeWidth={5}
                                 strokeLinecap="round"
                                 fill="none"
                                 strokeDasharray={2 * Math.PI * 22}
                                 strokeDashoffset={2 * Math.PI * 22 - (Math.max(0, Math.min(100, donutValue)) / 100) * 2 * Math.PI * 22}
+                                className={accentMap[accent]}
                             />
                         </svg>
                     </div>

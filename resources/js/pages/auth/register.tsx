@@ -7,7 +7,111 @@ import privacyCureLogo from '@/images/privacycure-logo.png';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, Check, LockKeyhole, Rocket } from 'lucide-react';
 
-const industries = ['Financial Services', 'Healthcare', 'Telecommunications', 'Education', 'Legal', 'Technology', 'Retail'];
+const industries = [
+    'Agriculture',
+    'Agribusiness',
+    'Animal Health',
+    'Apparel & Fashion',
+    'Architecture & Planning',
+    'Arts & Culture',
+    'Automotive',
+    'Aviation & Aerospace',
+    'Banking',
+    'Biotechnology',
+    'Building Materials',
+    'Business Consulting',
+    'Capital Markets',
+    'Chemicals',
+    'Civic & Social Organization',
+    'Civil Engineering',
+    'Commercial Real Estate',
+    'Computer Hardware',
+    'Computer Networking',
+    'Construction',
+    'Consumer Electronics',
+    'Consumer Goods',
+    'Consumer Services',
+    'Cybersecurity',
+    'Data & Analytics',
+    'Defense & Space',
+    'Design',
+    'E-commerce',
+    'Education',
+    'Electrical & Electronic Manufacturing',
+    'Energy',
+    'Engineering Services',
+    'Entertainment',
+    'Environmental Services',
+    'Events Services',
+    'Facilities Services',
+    'Farming',
+    'Financial Services',
+    'Fintech',
+    'Food & Beverage',
+    'Food Production',
+    'Forestry',
+    'Government Administration',
+    'Government Relations',
+    'Graphic Design',
+    'Healthcare',
+    'Higher Education',
+    'Hospitality',
+    'Human Resources',
+    'Import & Export',
+    'Industrial Automation',
+    'Information Services',
+    'Information Technology',
+    'Insurance',
+    'Internet Services',
+    'Investment Management',
+    'Judiciary',
+    'Legal Services',
+    'Leisure, Travel & Tourism',
+    'Logistics & Supply Chain',
+    'Luxury Goods & Jewelry',
+    'Machinery',
+    'Management Consulting',
+    'Manufacturing',
+    'Marine & Maritime',
+    'Market Research',
+    'Marketing & Advertising',
+    'Media Production',
+    'Medical Devices',
+    'Mining & Metals',
+    'Motion Pictures & Film',
+    'Museums & Institutions',
+    'Nanotechnology',
+    'Nonprofit Organization Management',
+    'Oil & Gas',
+    'Outsourcing & Offshoring',
+    'Packaging & Containers',
+    'Pharmaceuticals',
+    'Professional Training & Coaching',
+    'Public Policy',
+    'Public Relations & Communications',
+    'Public Safety',
+    'Publishing',
+    'Real Estate',
+    'Religious Institutions',
+    'Renewable Energy',
+    'Research',
+    'Restaurants',
+    'Retail',
+    'Security & Investigations',
+    'Semiconductors',
+    'Software',
+    'Sports',
+    'Staffing & Recruiting',
+    'Telecommunications',
+    'Textiles',
+    'Transportation',
+    'Utilities',
+    'Venture Capital & Private Equity',
+    'Veterinary',
+    'Warehousing',
+    'Wholesale',
+    'Other',
+];
 const companySizes = ['1-50 employees', '51-200 employees', '201-500 employees', '500+ employees'];
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
@@ -60,44 +164,44 @@ export default function Register() {
                 `}</style>
             </Head>
 
-            <div className="min-h-screen bg-[#f7f9fb] px-0 py-0 text-[#191c1e]">
+            <div className="min-h-screen bg-[#f7f9fb] dark:bg-[#0d1117] px-0 py-0 text-[#191c1e] dark:text-[#e5e7eb]">
                 <div className="mx-auto w-full max-w-[96rem]">
-                    <div className="overflow-hidden rounded-2xl border border-[#c3c6d1]/20 bg-[#f7f9fb] shadow-[0_24px_70px_-40px_rgba(0,39,83,0.22)]">
-                        <div className="flex flex-col items-center justify-between gap-6 border-b border-[#c3c6d1]/15 bg-[#f2f4f6]/70 px-8 py-6 md:flex-row">
+                    <div className="overflow-hidden rounded-2xl border border-[#c3c6d1]/20 dark:border-[#2d3748]/40 bg-[#f7f9fb] dark:bg-[#111827] shadow-[0_24px_70px_-40px_rgba(0,39,83,0.22)] dark:shadow-[0_24px_70px_-40px_rgba(0,0,0,0.5)]">
+                        <div className="flex flex-col items-center justify-between gap-6 border-b border-[#c3c6d1]/15 dark:border-[#2d3748]/25 bg-[#f2f4f6]/70 dark:bg-[#161b2e]/70 px-8 py-6 md:flex-row">
                             <Link href={route('home')} className="flex items-center gap-3">
                                 <img src={privacyCureLogo} alt="Privacy Cure" className="h-9 w-auto" />
-                                <span className="text-lg font-extrabold tracking-tight text-[#002753]">Privacy Cure</span>
+                                <span className="text-lg font-extrabold tracking-tight text-[#002753] dark:text-[#93b4d8]">Privacy Cure</span>
                             </Link>
 
                             <div className="flex w-full items-center gap-2 overflow-x-auto pb-2 md:w-auto md:pb-0">
-                                <div className="flex shrink-0 items-center gap-2 rounded-full bg-[#002753]/10 px-3 py-1">
-                                    <span className="h-2 w-2 rounded-full bg-[#002753]" />
-                                    <span className="text-[10px] font-bold uppercase tracking-widest text-[#002753]">1. Identification</span>
+                                <div className="flex shrink-0 items-center gap-2 rounded-full bg-[#002753]/10 dark:bg-[#7cb3e8]/10 px-3 py-1">
+                                    <span className="h-2 w-2 rounded-full bg-[#002753] dark:bg-[#93b4d8]" />
+                                    <span className="text-[10px] font-bold uppercase tracking-widest text-[#002753] dark:text-[#93b4d8]">1. Identification</span>
                                 </div>
-                                <div className="h-px w-4 bg-[#c3c6d1]/40" />
+                                <div className="h-px w-4 bg-[#c3c6d1]/40 dark:bg-[#2d3748]/60" />
                                 <div className="flex shrink-0 items-center gap-2 px-3 py-1">
-                                    <span className="h-2 w-2 rounded-full bg-[#c3c6d1]" />
-                                    <span className="text-[10px] font-bold uppercase tracking-widest text-[#434750]">2. Setup</span>
+                                    <span className="h-2 w-2 rounded-full bg-[#c3c6d1] dark:bg-[#4a5568]" />
+                                    <span className="text-[10px] font-bold uppercase tracking-widest text-[#434750] dark:text-[#9ca3af]">2. Setup</span>
                                 </div>
-                                <div className="h-px w-4 bg-[#c3c6d1]/40" />
+                                <div className="h-px w-4 bg-[#c3c6d1]/40 dark:bg-[#2d3748]/60" />
                                 <div className="flex shrink-0 items-center gap-2 px-3 py-1">
-                                    <span className="h-2 w-2 rounded-full bg-[#c3c6d1]" />
-                                    <span className="text-[10px] font-bold uppercase tracking-widest text-[#434750]">3. Integration</span>
+                                    <span className="h-2 w-2 rounded-full bg-[#c3c6d1] dark:bg-[#4a5568]" />
+                                    <span className="text-[10px] font-bold uppercase tracking-widest text-[#434750] dark:text-[#9ca3af]">3. Integration</span>
                                 </div>
                             </div>
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-12">
-                            <div className="border-r border-[#c3c6d1]/15 p-8 md:p-12 lg:col-span-8">
+                            <div className="border-r border-[#c3c6d1]/15 dark:border-[#2d3748]/25 p-8 md:p-12 lg:col-span-8">
                                 <header className="mb-12">
                                     <span className="mb-4 inline-flex items-center rounded-full bg-[#00444d] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.1em] text-[#00b9ce]">
                                         Workspace setup
                                     </span>
-                                    <h1 className="mb-4 text-3xl leading-tight font-bold text-[#002753] md:text-5xl">
+                                    <h1 className="mb-4 text-3xl leading-tight font-bold text-[#002753] dark:text-[#93b4d8] md:text-5xl">
                                         Create Your Company <br />
-                                        <span className="text-[#194781]">Architectural Sanctuary</span>
+                                        <span className="text-[#194781] dark:text-[#7cb3e8]">Architectural Sanctuary</span>
                                     </h1>
-                                    <p className="max-w-xl text-base leading-relaxed text-[#434750]">
+                                    <p className="max-w-xl text-base leading-relaxed text-[#434750] dark:text-[#9ca3af]">
                                         Establish your organization&apos;s secure compliance perimeter. Privacy Cure adapts to Zimbabwean regulatory
                                         frameworks.
                                     </p>
@@ -105,7 +209,7 @@ export default function Register() {
 
                                 <form onSubmit={submit} noValidate className="space-y-12">
                                     <section className="space-y-8">
-                                        <h3 className="flex items-center gap-3 text-xl font-bold text-[#002753]">
+                                        <h3 className="flex items-center gap-3 text-xl font-bold text-[#002753] dark:text-[#93b4d8]">
                                             <span className="h-6 w-1.5 rounded-full bg-[#00daf3]" />
                                             Organization Profile
                                         </h3>
@@ -146,7 +250,7 @@ export default function Register() {
                                                     <SelectTrigger>
                                                         <SelectValue placeholder="Select industry" />
                                                     </SelectTrigger>
-                                                    <SelectContent>
+                                                    <SelectContent className="max-h-80">
                                                         {industries.map((industry) => (
                                                             <SelectItem key={industry} value={industry}>
                                                                 {industry}
@@ -192,8 +296,8 @@ export default function Register() {
                                     </section>
 
                                     <section className="space-y-8">
-                                        <h3 className="flex items-center gap-3 text-xl font-bold text-[#002753]">
-                                            <span className="h-6 w-1.5 rounded-full bg-[#002753]" />
+                                        <h3 className="flex items-center gap-3 text-xl font-bold text-[#002753] dark:text-[#93b4d8]">
+                                            <span className="h-6 w-1.5 rounded-full bg-[#002753] dark:bg-[#93b4d8]" />
                                             Administrator Identity
                                         </h3>
 
@@ -263,8 +367,8 @@ export default function Register() {
                                         </div>
                                     </section>
 
-                                    <div className="flex items-center justify-between border-t border-[#c3c6d1]/15 pt-8">
-                                        <Link href={route('home')} className="group flex items-center gap-2 text-sm font-bold text-[#002753] hover:underline">
+                                    <div className="flex items-center justify-between border-t border-[#c3c6d1]/15 dark:border-[#2d3748]/25 pt-8">
+                                        <Link href={route('home')} className="group flex items-center gap-2 text-sm font-bold text-[#002753] dark:text-[#93b4d8] hover:underline">
                                             <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" />
                                             Back to Welcome
                                         </Link>
@@ -281,7 +385,7 @@ export default function Register() {
                                 </form>
                             </div>
 
-                            <div className="space-y-8 bg-[#f2f4f6]/30 p-8 lg:col-span-4">
+                            <div className="space-y-8 bg-[#f2f4f6]/30 dark:bg-[#161b2e]/30 p-8 lg:col-span-4">
                                 <div className="group relative aspect-[4/3] overflow-hidden rounded-2xl lg:aspect-square">
                                     <img
                                         className="absolute inset-0 h-full w-full object-cover grayscale brightness-50 transition-all duration-700 group-hover:grayscale-0"
@@ -297,8 +401,8 @@ export default function Register() {
                                     </div>
                                 </div>
 
-                                <div className="space-y-6 rounded-2xl border border-[#c3c6d1]/15 bg-white p-6">
-                                    <h5 className="border-b border-[#c3c6d1]/30 pb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#002753]">
+                                <div className="space-y-6 rounded-2xl border border-[#c3c6d1]/15 dark:border-[#2d3748]/25 bg-white dark:bg-[#1a202c] p-6">
+                                    <h5 className="border-b border-[#c3c6d1]/30 dark:border-[#2d3748]/40 pb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#002753] dark:text-[#93b4d8]">
                                         Onboarding Milestones
                                     </h5>
                                     <ul className="space-y-5">
@@ -307,8 +411,8 @@ export default function Register() {
                                                 <Check className="size-3 text-[#002753]" />
                                             </div>
                                             <div>
-                                                <p className="text-xs font-bold text-[#002753]">Company and admin details</p>
-                                                <p className="mt-1 text-[10px] leading-relaxed text-[#434750]">
+                                                <p className="text-xs font-bold text-[#002753] dark:text-[#93b4d8]">Company and admin details</p>
+                                                <p className="mt-1 text-[10px] leading-relaxed text-[#434750] dark:text-[#9ca3af]">
                                                     Your company profile and company administrator login are captured in one step.
                                                 </p>
                                             </div>
@@ -318,17 +422,17 @@ export default function Register() {
                                                 <div className="h-1.5 w-1.5 rounded-full bg-[#00daf3]" />
                                             </div>
                                             <div>
-                                                <p className="text-xs font-bold text-[#002753]">Pending workspace creation</p>
-                                                <p className="mt-1 text-[10px] leading-relaxed text-[#434750]">
+                                                <p className="text-xs font-bold text-[#002753] dark:text-[#93b4d8]">Pending workspace creation</p>
+                                                <p className="mt-1 text-[10px] leading-relaxed text-[#434750] dark:text-[#9ca3af]">
                                                     A tenant workspace is created in pending status after you submit this form.
                                                 </p>
                                             </div>
                                         </li>
                                         <li className="flex items-start gap-3 opacity-40">
-                                            <div className="h-5 w-5 shrink-0 rounded-full border border-[#737781]" />
+                                            <div className="h-5 w-5 shrink-0 rounded-full border border-[#737781] dark:border-[#4a5568]" />
                                             <div>
-                                                <p className="text-xs font-bold text-[#002753]">Super admin activation</p>
-                                                <p className="mt-1 text-[10px] leading-relaxed text-[#434750]">
+                                                <p className="text-xs font-bold text-[#002753] dark:text-[#93b4d8]">Super admin activation</p>
+                                                <p className="mt-1 text-[10px] leading-relaxed text-[#434750] dark:text-[#9ca3af]">
                                                     Your workspace becomes active once platform support approves and activates the tenant.
                                                 </p>
                                             </div>
@@ -340,17 +444,17 @@ export default function Register() {
                     </div>
 
                     <footer className="mt-8 flex flex-col items-center justify-between gap-6 px-4 md:flex-row">
-                        <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-[#434750]">
+                        <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-[#434750] dark:text-[#6b7280]">
                             © 2024 Privacy Cure (Pvt) Ltd. All Rights Reserved.
                         </p>
                         <div className="flex items-center gap-6">
-                            <a className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#434750] transition-colors hover:text-[#002753]" href="#">
+                            <a className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#434750] dark:text-[#6b7280] transition-colors hover:text-[#002753] dark:hover:text-[#93b4d8]" href="#">
                                 Privacy Policy
                             </a>
-                            <a className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#434750] transition-colors hover:text-[#002753]" href="#">
+                            <a className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#434750] dark:text-[#6b7280] transition-colors hover:text-[#002753] dark:hover:text-[#93b4d8]" href="#">
                                 Terms
                             </a>
-                            <a className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#434750] transition-colors hover:text-[#002753]" href="#">
+                            <a className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#434750] dark:text-[#6b7280] transition-colors hover:text-[#002753] dark:hover:text-[#93b4d8]" href="#">
                                 Security
                             </a>
                         </div>
