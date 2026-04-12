@@ -117,6 +117,7 @@ export default function SubmissionShow({
     const permissions = auth.permissions ?? [];
     const canUploadEvidence = permissions.includes('upload evidence');
     const canReviewEvidence = permissions.includes('review evidence');
+    const canManageSubmissions = permissions.includes('manage compliance submissions');
 
     const sections = submission.framework?.sections ?? [];
     const existingResponses = new Map((submission.responses ?? []).map((response) => [response.compliance_question_id, response]));
@@ -199,18 +200,18 @@ export default function SubmissionShow({
                         </CardHeader>
                         <CardContent>
                             <Tabs defaultValue={defaultTab} className="space-y-4">
-                                <TabsList className="h-auto w-full flex-wrap justify-start rounded-xl border border-border bg-muted/35 p-1">
+                                <TabsList className="w-full flex-wrap justify-start">
                                     {sections.map((section) => {
                                         const count = section.questions.filter((question) => filledResponse(responsesByQuestionId.get(question.id))).length;
 
                                         return (
-                                            <TabsTrigger key={section.id} value={`section-${section.id}`} className="rounded-lg px-4 py-2.5">
+                                            <TabsTrigger key={section.id} value={`section-${section.id}`}>
                                                 {section.name}
                                                 <span className="ml-2 text-xs text-muted-foreground">{count}/{section.questions.length}</span>
                                             </TabsTrigger>
                                         );
                                     })}
-                                    <TabsTrigger value="review" className="rounded-lg px-4 py-2.5">
+                                    <TabsTrigger value="review">
                                         Review
                                     </TabsTrigger>
                                 </TabsList>
@@ -335,14 +336,18 @@ export default function SubmissionShow({
                                     <MessageSquareText className="size-4" />
                                     Save draft responses
                                 </Button>
-                                <Button variant="outline" className="w-full" onClick={() => router.post(route('submissions.submit', submission.id, false))}>
-                                    <ShieldCheck className="size-4" />
-                                    Submit for review
-                                </Button>
-                                <Button variant="outline" className="w-full" onClick={() => router.post(route('submissions.recalculate', submission.id, false))}>
-                                    <Gauge className="size-4" />
-                                    Recalculate score
-                                </Button>
+                                {canManageSubmissions && (
+                                    <>
+                                        <Button variant="outline" className="w-full" onClick={() => router.post(route('submissions.submit', submission.id, false))}>
+                                            <ShieldCheck className="size-4" />
+                                            Submit for review
+                                        </Button>
+                                        <Button variant="outline" className="w-full" onClick={() => router.post(route('submissions.recalculate', submission.id, false))}>
+                                            <Gauge className="size-4" />
+                                            Recalculate score
+                                        </Button>
+                                    </>
+                                )}
                             </CardContent>
                         </Card>
 

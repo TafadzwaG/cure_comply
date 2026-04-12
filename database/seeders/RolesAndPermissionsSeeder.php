@@ -31,6 +31,8 @@ class RolesAndPermissionsSeeder extends Seeder
             Permissions::CALCULATE_COMPLIANCE_SCORES,
             Permissions::VIEW_REPORTS,
             Permissions::EXPORT_REPORTS,
+            Permissions::VIEW_FILE_LIBRARY,
+            Permissions::MANAGE_FILE_LIBRARY,
             Permissions::VIEW_AUDIT_LOGS,
         ]);
         Role::findOrCreate('employee', 'web')->syncPermissions([
@@ -38,10 +40,12 @@ class RolesAndPermissionsSeeder extends Seeder
             Permissions::ANSWER_COMPLIANCE_QUESTIONS,
             Permissions::UPLOAD_EVIDENCE,
             Permissions::VIEW_REPORTS,
+            Permissions::VIEW_FILE_LIBRARY,
         ]);
         Role::findOrCreate('reviewer', 'web')->syncPermissions([
             Permissions::REVIEW_EVIDENCE,
             Permissions::VIEW_REPORTS,
+            Permissions::VIEW_FILE_LIBRARY,
         ]);
     }
 }

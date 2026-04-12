@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 use Lab404\Impersonate\Models\Impersonate;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -27,10 +28,13 @@ class User extends Authenticatable
         'tenant_id',
         'name',
         'email',
+        'archived_email',
         'status',
         'last_login_at',
         'last_password_changed_at',
+        'deactivated_at',
         'password',
+        'remember_token',
     ];
 
     protected $hidden = [
@@ -48,6 +52,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'last_login_at' => 'datetime',
             'last_password_changed_at' => 'datetime',
+            'deactivated_at' => 'datetime',
             'password' => 'hashed',
             'status' => UserStatus::class,
         ];
@@ -88,6 +93,11 @@ class User extends Authenticatable
         return $this->hasMany(ComplianceSubmission::class, 'submitted_by');
     }
 
+    public function assignedComplianceSubmissions(): HasMany
+    {
+        return $this->hasMany(ComplianceSubmissionAssignment::class, 'assigned_to_user_id');
+    }
+
     public function complianceResponses(): HasMany
     {
         return $this->hasMany(ComplianceResponse::class, 'answered_by');
@@ -116,6 +126,25 @@ class User extends Authenticatable
     public function isSuperAdmin(): bool
     {
         return $this->hasRole('super_admin');
+    }
+
+    public function isInactive(): bool
+    {
+        return $this->status === UserStatus::Inactive;
+    }
+
+    public function hasPlaceholderEmail(): bool
+    {
+        return str_contains(Str::lower($this->email), '@users.privacycure.invalid');
+    }
+
+    public static function makeDeactivatedEmail(int $userId): string
+    {
+        return sprintf(
+            'deactivated+%d+%s@users.privacycure.invalid',
+            $userId,
+            now()->format('YmdHis'),
+        );
     }
 
     public function requiresProfileCompletion(): bool

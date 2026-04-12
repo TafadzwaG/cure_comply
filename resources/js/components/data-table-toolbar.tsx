@@ -63,10 +63,10 @@ export function DataTableToolbar({
                 <div className="flex flex-wrap items-center gap-2">
                     {exportable ? (
                         <Button asChild variant="outline">
-                            <Link href={`${window.location.pathname}?${new URLSearchParams({ ...stringify(query), export: 'xlsx' }).toString()}`}>
+                            <a href={`${window.location.pathname}?${new URLSearchParams({ ...stringify(query), export: 'xlsx' }).toString()}`}>
                                 <Download className="size-4" />
                                 Export Excel
-                            </Link>
+                            </a>
                         </Button>
                     ) : null}
 

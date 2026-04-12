@@ -49,6 +49,8 @@ export interface User {
     tenant_id?: number | null;
     name: string;
     email: string;
+    archived_email?: string | null;
+    deactivated_at?: string | null;
     status?: string;
     display_role?: string | null;
     roles?: Array<{ id: number; name: string }>;
@@ -298,4 +300,33 @@ export interface ExportRequestSummary {
     completed_at?: string | null;
     created_at: string;
     download_url?: string | null;
+}
+
+export interface LibraryFileSummary {
+    id: number;
+    title: string;
+    description?: string | null;
+    category?: string | null;
+    original_name: string;
+    mime_type?: string | null;
+    file_size: number;
+    file_type: string;
+    scope: 'shared' | 'tenant';
+    scope_label: string;
+    tenant?: {
+        id: number;
+        name: string;
+    } | null;
+    uploader?: {
+        id: number;
+        name: string;
+    } | null;
+    created_at?: string | null;
+    updated_at?: string | null;
+    download_url: string;
+    abilities: {
+        canEdit: boolean;
+        canDelete: boolean;
+        canDownload: boolean;
+    };
 }

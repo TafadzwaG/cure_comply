@@ -21,6 +21,8 @@ final class Permissions
     public const CALCULATE_COMPLIANCE_SCORES = 'calculate compliance scores';
     public const VIEW_REPORTS = 'view reports';
     public const EXPORT_REPORTS = 'export reports';
+    public const VIEW_FILE_LIBRARY = 'view file library';
+    public const MANAGE_FILE_LIBRARY = 'manage file library';
     public const IMPERSONATE_USERS = 'impersonate users';
     public const VIEW_AUDIT_LOGS = 'view audit logs';
 
@@ -44,6 +46,8 @@ final class Permissions
             self::CALCULATE_COMPLIANCE_SCORES,
             self::VIEW_REPORTS,
             self::EXPORT_REPORTS,
+            self::VIEW_FILE_LIBRARY,
+            self::MANAGE_FILE_LIBRARY,
             self::IMPERSONATE_USERS,
             self::VIEW_AUDIT_LOGS,
         ];

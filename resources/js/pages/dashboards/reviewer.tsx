@@ -182,17 +182,17 @@ export default function ReviewerDashboard(props: ReviewerDashboardProps) {
                 <PendingItemsPanel items={props.pendingItems} />
 
                 <Tabs defaultValue="queue" className="space-y-4">
-                    <TabsList className="h-auto w-full justify-start rounded-lg border border-border bg-muted/40 p-1">
-                        <TabsTrigger value="queue" className="rounded-md px-4 py-2">
+                    <TabsList className="w-full justify-start">
+                        <TabsTrigger value="queue">
                             Queue
                         </TabsTrigger>
-                        <TabsTrigger value="decisions" className="rounded-md px-4 py-2">
+                        <TabsTrigger value="decisions">
                             Decisions
                         </TabsTrigger>
-                        <TabsTrigger value="submissions" className="rounded-md px-4 py-2">
+                        <TabsTrigger value="submissions">
                             Submissions
                         </TabsTrigger>
-                        <TabsTrigger value="activity" className="rounded-md px-4 py-2">
+                        <TabsTrigger value="activity">
                             Activity
                         </TabsTrigger>
                     </TabsList>

@@ -1,6 +1,7 @@
 
 
 import { DataIndexPage } from '@/components/data-index-page';
+import { EmployeeCourseWorkspace, type EmployeeCourseWorkspaceData } from '@/components/employee-course-workspace';
 import { SortableTableHead } from '@/components/sortable-table-head';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -22,7 +23,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import PlatformLayout from '@/layouts/platform-layout';
 import { IndexStat, Paginated, TableFilters, User } from '@/types';
-import { Link, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import {
     AlarmClock,
     BadgeCheck,
@@ -121,37 +122,52 @@ export default function AssignmentsIndex({
     isSuperAdmin = false,
     filters,
     stats,
+    employeeWorkspace,
 }: {
-    assignments: Paginated<Assignment>;
-    courses: Array<{ id: number; title: string }>;
-    users: User[];
+    assignments?: Paginated<Assignment>;
+    courses?: Array<{ id: number; title: string }>;
+    users?: User[];
     tenants?: Array<{ id: number; name: string }>;
     isSuperAdmin?: boolean;
-    filters: TableFilters;
-    stats: Record<string, number>;
+    filters?: TableFilters;
+    stats?: Record<string, number>;
+    employeeWorkspace?: EmployeeCourseWorkspaceData;
 }) {
+    if (employeeWorkspace) {
+        return (
+            <PlatformLayout>
+                <Head title="Assignments" />
+                <EmployeeCourseWorkspace workspace={employeeWorkspace} />
+            </PlatformLayout>
+        );
+    }
+
+    const assignmentPage = assignments!;
+    const courseOptions = courses ?? [];
+    const tableFilters = filters!;
+    const assignmentStats = stats!;
     const statItems: IndexStat[] = [
         {
             label: 'Assignments',
-            value: stats.total,
+            value: assignmentStats.total,
             detail: 'Training allocations in the workspace.',
             icon: SquareKanban,
         },
         {
             label: 'In progress',
-            value: stats.inProgress,
+            value: assignmentStats.inProgress,
             detail: 'Employees currently working through content.',
             icon: ClipboardList,
         },
         {
             label: 'Completed',
-            value: stats.completed,
+            value: assignmentStats.completed,
             detail: 'Assignments already completed.',
             icon: BadgeCheck,
         },
         {
             label: 'Overdue',
-            value: stats.overdue,
+            value: assignmentStats.overdue,
             detail: 'Assignments past their due date.',
             icon: AlarmClock,
         },
@@ -159,13 +175,14 @@ export default function AssignmentsIndex({
 
     return (
         <PlatformLayout>
+            <Head title="Assignments" />
             <div className="space-y-6">
                 <DataIndexPage
                     title="Assignments"
                     description="Assign courses to employees and monitor completion against due dates."
                     stats={statItems}
                     actions={[{ label: 'Assign Training', href: route('assignments.create'), icon: SquareKanban }]}
-                    filters={filters}
+                    filters={tableFilters}
                     filterConfigs={[
                         {
                             key: 'status',
@@ -188,7 +205,7 @@ export default function AssignmentsIndex({
                         {
                             key: 'course_id',
                             label: 'Course',
-                            options: courses.map((c) => ({ label: c.title, value: String(c.id) })),
+                            options: courseOptions.map((c) => ({ label: c.title, value: String(c.id) })),
                         },
                         ...(isSuperAdmin
                             ? [
@@ -200,7 +217,7 @@ export default function AssignmentsIndex({
                               ]
                             : []),
                     ]}
-                    paginated={assignments}
+                    paginated={assignmentPage}
                     tableTitle="Assignment Tracker"
                     tableDescription="Use this view to drive overdue follow-up and training completion campaigns."
                     exportable
@@ -239,7 +256,7 @@ export default function AssignmentsIndex({
                                             size="sm"
                                             className="border-white/20 bg-white/10 text-white hover:bg-white/15"
                                         >
-                                            {assignments.total ?? assignments.data.length} Total Assignments
+                                            {assignmentPage.total ?? assignmentPage.data.length} Total Assignments
                                         </Button>
                                     </div>
                                 </div>
@@ -262,7 +279,7 @@ export default function AssignmentsIndex({
                                         variant="outline"
                                         className="w-fit border-[#14417A]/20 bg-[#14417A]/5 text-[#14417A] dark:border-blue-900/50 dark:bg-blue-950/30 dark:text-blue-300"
                                     >
-                                        {assignments.total ?? assignments.data.length} records
+                                        {assignmentPage.total ?? assignmentPage.data.length} records
                                     </Badge>
                                 </div>
                             </CardHeader>
@@ -274,14 +291,14 @@ export default function AssignmentsIndex({
                                             <TableHead>Employee</TableHead>
                                             {isSuperAdmin && <TableHead>Tenant</TableHead>}
                                             <TableHead>Course</TableHead>
-                                            <SortableTableHead label="Due Date" column="due_date" filters={filters} />
-                                            <SortableTableHead label="Status" column="status" filters={filters} />
+                                            <SortableTableHead label="Due Date" column="due_date" filters={tableFilters} />
+                                            <SortableTableHead label="Status" column="status" filters={tableFilters} />
                                             <TableHead className="w-[190px] text-right">Actions</TableHead>
                                         </TableRow>
                                     </TableHeader>
 
                                     <TableBody>
-                                        {assignments.data.map((assignment) => (
+                                        {assignmentPage.data.map((assignment) => (
                                             <TableRow
                                                 key={assignment.id}
                                                 className="border-border/60 transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-900/40"
@@ -396,7 +413,7 @@ export default function AssignmentsIndex({
                                             </TableRow>
                                         ))}
 
-                                        {assignments.data.length === 0 && (
+                                        {assignmentPage.data.length === 0 && (
                                             <TableRow>
                                                 <TableCell
                                                     colSpan={isSuperAdmin ? 6 : 5}

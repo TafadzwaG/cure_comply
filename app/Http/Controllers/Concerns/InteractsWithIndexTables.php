@@ -125,7 +125,7 @@ trait InteractsWithIndexTables
             ]
         );
 
-        return back()->with('success', 'Export queued. You will be notified when it is ready.');
+        return back()->with('success', 'Export queued. You will be notified when it is ready, and it will appear on the Exports page.');
     }
 
     protected function queuePdfExport(Request $request, string $source, array $filters = [], array $payload = []): RedirectResponse
@@ -138,6 +138,6 @@ trait InteractsWithIndexTables
             $payload
         );
 
-        return back()->with('success', 'PDF export queued. You will be notified when it is ready.');
+        return back()->with('success', 'PDF export queued. You will be notified when it is ready, and it will appear on the Exports page.');
     }
 }

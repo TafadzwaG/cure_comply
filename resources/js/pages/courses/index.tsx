@@ -1,4 +1,5 @@
 import { DataIndexPage } from '@/components/data-index-page';
+import { EmployeeCourseWorkspace, type EmployeeCourseWorkspaceData } from '@/components/employee-course-workspace';
 import { SortableTableHead } from '@/components/sortable-table-head';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -19,7 +20,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import PlatformLayout from '@/layouts/platform-layout';
 import { IndexStat, Paginated, TableFilters } from '@/types';
-import { Link, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import {
     BookOpen,
     Eye,
@@ -66,33 +67,47 @@ export default function CoursesIndex({
     courses,
     filters,
     stats,
+    employeeWorkspace,
 }: {
-    courses: Paginated<Course>;
-    filters: TableFilters;
-    stats: Record<string, number>;
+    courses?: Paginated<Course>;
+    filters?: TableFilters;
+    stats?: Record<string, number>;
+    employeeWorkspace?: EmployeeCourseWorkspaceData;
 }) {
+    if (employeeWorkspace) {
+        return (
+            <PlatformLayout>
+                <Head title="Courses" />
+                <EmployeeCourseWorkspace workspace={employeeWorkspace} />
+            </PlatformLayout>
+        );
+    }
+
+    const coursePage = courses!;
+    const tableFilters = filters!;
+    const courseStats = stats!;
     const statItems: IndexStat[] = [
         {
             label: 'Courses',
-            value: stats.total,
+            value: courseStats.total,
             detail: 'Training assets in the platform library.',
             icon: BookOpen,
         },
         {
             label: 'Published',
-            value: stats.published,
+            value: courseStats.published,
             detail: 'Available for assignment.',
             icon: FileStack,
         },
         {
             label: 'Draft',
-            value: stats.draft,
+            value: courseStats.draft,
             detail: 'Still under construction.',
             icon: PenSquare,
         },
         {
             label: 'Archived',
-            value: stats.archived,
+            value: courseStats.archived,
             detail: 'Retained but inactive.',
             icon: FolderKanban,
         },
@@ -100,6 +115,7 @@ export default function CoursesIndex({
 
     return (
         <PlatformLayout>
+            <Head title="Courses" />
             <div className="space-y-6">
                 <DataIndexPage
                     title="Courses"
@@ -112,7 +128,7 @@ export default function CoursesIndex({
                             icon: BookOpen,
                         },
                     ]}
-                    filters={filters}
+                    filters={tableFilters}
                     filterConfigs={[
                         {
                             key: 'status',
@@ -124,7 +140,7 @@ export default function CoursesIndex({
                             ],
                         },
                     ]}
-                    paginated={courses}
+                    paginated={coursePage}
                     tableTitle="Course Library"
                     tableDescription="Published courses become available for assignment and reporting."
                     exportable
@@ -164,7 +180,7 @@ export default function CoursesIndex({
                                             className="border-white/20 bg-white/10 text-white hover:bg-white/15"
                                         >
                                             <ListOrdered className="mr-2 h-4 w-4" />
-                                            {courses.total ?? courses.data.length} Total Courses
+                                            {coursePage.total ?? coursePage.data.length} Total Courses
                                         </Button>
                                     </div>
                                 </div>
@@ -188,7 +204,7 @@ export default function CoursesIndex({
                                         variant="outline"
                                         className="w-fit border-[#14417A]/20 bg-[#14417A]/5 text-[#14417A] dark:border-blue-900/50 dark:bg-blue-950/30 dark:text-blue-300"
                                     >
-                                        {courses.total ?? courses.data.length} records
+                                        {coursePage.total ?? coursePage.data.length} records
                                     </Badge>
                                 </div>
                             </CardHeader>
@@ -197,20 +213,20 @@ export default function CoursesIndex({
                                 <Table>
                                     <TableHeader>
                                         <TableRow className="border-border/60">
-                                            <SortableTableHead label="Title" column="title" filters={filters} />
+                                            <SortableTableHead label="Title" column="title" filters={tableFilters} />
                                             <SortableTableHead
                                                 label="Duration"
                                                 column="estimated_minutes"
-                                                filters={filters}
+                                                filters={tableFilters}
                                             />
                                             <TableHead>Modules</TableHead>
-                                            <SortableTableHead label="Status" column="status" filters={filters} />
+                                            <SortableTableHead label="Status" column="status" filters={tableFilters} />
                                             <TableHead className="w-[190px] text-right">Actions</TableHead>
                                         </TableRow>
                                     </TableHeader>
 
                                     <TableBody>
-                                        {courses.data.map((course) => (
+                                        {coursePage.data.map((course) => (
                                             <TableRow
                                                 key={course.id}
                                                 className="border-border/60 transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-900/40"
@@ -315,7 +331,7 @@ export default function CoursesIndex({
                                             </TableRow>
                                         ))}
 
-                                        {courses.data.length === 0 && (
+                                        {coursePage.data.length === 0 && (
                                             <TableRow>
                                                 <TableCell
                                                     colSpan={5}

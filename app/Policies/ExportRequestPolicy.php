@@ -11,6 +11,11 @@ class ExportRequestPolicy
 {
     use HandlesPlatformAuthorization;
 
+    public function viewAny(User $user): bool
+    {
+        return $user->can(Permissions::EXPORT_REPORTS);
+    }
+
     public function view(User $user, ExportRequest $exportRequest): bool
     {
         return $user->can(Permissions::EXPORT_REPORTS)

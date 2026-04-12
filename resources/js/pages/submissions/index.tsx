@@ -120,6 +120,7 @@ export default function SubmissionsIndex({
     stats,
     isSuperAdmin = false,
     tenants = [],
+    canManageSubmissions = false,
 }: {
     submissions: Paginated<Submission>;
     frameworks: Array<{ id: number; name: string }>;
@@ -127,6 +128,7 @@ export default function SubmissionsIndex({
     stats: Record<string, number>;
     isSuperAdmin?: boolean;
     tenants?: Array<{ id: number; name: string }>;
+    canManageSubmissions?: boolean;
 }) {
     const statItems: IndexStat[] = [
         {
@@ -162,13 +164,17 @@ export default function SubmissionsIndex({
                     title="Compliance Submissions"
                     description="Create and manage tenant submissions against the selected framework version."
                     stats={statItems}
-                    actions={[
-                        {
-                            label: 'New Submission',
-                            href: route('submissions.create'),
-                            icon: ClipboardCheck,
-                        },
-                    ]}
+                    actions={
+                        canManageSubmissions
+                            ? [
+                                  {
+                                      label: 'New Submission',
+                                      href: route('submissions.create'),
+                                      icon: ClipboardCheck,
+                                  },
+                              ]
+                            : []
+                    }
                     filters={filters}
                     filterConfigs={[
                         {
@@ -225,16 +231,18 @@ export default function SubmissionsIndex({
                                     </div>
 
                                     <div className="flex flex-wrap gap-3">
-                                        <Button
-                                            asChild
-                                            size="sm"
-                                            className="bg-white text-[#0F2E52] hover:bg-white/90"
-                                        >
-                                            <Link href={route('submissions.create')}>
-                                                <Plus className="mr-2 h-4 w-4" />
-                                                Create Submission
-                                            </Link>
-                                        </Button>
+                                        {canManageSubmissions && (
+                                            <Button
+                                                asChild
+                                                size="sm"
+                                                className="bg-white text-[#0F2E52] hover:bg-white/90"
+                                            >
+                                                <Link href={route('submissions.create')}>
+                                                    <Plus className="mr-2 h-4 w-4" />
+                                                    Create Submission
+                                                </Link>
+                                            </Button>
+                                        )}
 
                                         <Button
                                             variant="outline"
@@ -347,49 +355,53 @@ export default function SubmissionsIndex({
                                                             </Link>
                                                         </Button>
 
-                                                        <Button
-                                                            size="sm"
-                                                            className="bg-emerald-600 text-white hover:bg-emerald-700"
-                                                            onClick={() =>
-                                                                router.post(route('submissions.recalculate', submission.id))
-                                                            }
-                                                        >
-                                                            <RotateCw className="mr-2 h-4 w-4" />
-                                                            Recalculate
-                                                        </Button>
+                                                        {canManageSubmissions && (
+                                                            <Button
+                                                                size="sm"
+                                                                className="bg-emerald-600 text-white hover:bg-emerald-700"
+                                                                onClick={() =>
+                                                                    router.post(route('submissions.recalculate', submission.id))
+                                                                }
+                                                            >
+                                                                <RotateCw className="mr-2 h-4 w-4" />
+                                                                Recalculate
+                                                            </Button>
+                                                        )}
 
-                                                        <DropdownMenu>
-                                                            <DropdownMenuTrigger asChild>
-                                                                <Button
-                                                                    variant="outline"
-                                                                    size="icon"
-                                                                    className="border-[#14417A]/20 text-[#14417A] hover:bg-[#14417A]/5 hover:text-[#14417A]"
-                                                                >
-                                                                    <MoreHorizontal className="h-4 w-4" />
-                                                                    <span className="sr-only">Open actions</span>
-                                                                </Button>
-                                                            </DropdownMenuTrigger>
+                                                        {canManageSubmissions && (
+                                                            <DropdownMenu>
+                                                                <DropdownMenuTrigger asChild>
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        size="icon"
+                                                                        className="border-[#14417A]/20 text-[#14417A] hover:bg-[#14417A]/5 hover:text-[#14417A]"
+                                                                    >
+                                                                        <MoreHorizontal className="h-4 w-4" />
+                                                                        <span className="sr-only">Open actions</span>
+                                                                    </Button>
+                                                                </DropdownMenuTrigger>
 
-                                                            <DropdownMenuContent align="end" className="w-44">
-                                                                <DropdownMenuItem asChild>
-                                                                    <Link href={route('submissions.show', submission.id)}>
-                                                                        <Eye className="mr-2 h-4 w-4" />
-                                                                        View submission
-                                                                    </Link>
-                                                                </DropdownMenuItem>
+                                                                <DropdownMenuContent align="end" className="w-44">
+                                                                    <DropdownMenuItem asChild>
+                                                                        <Link href={route('submissions.show', submission.id)}>
+                                                                            <Eye className="mr-2 h-4 w-4" />
+                                                                            View submission
+                                                                        </Link>
+                                                                    </DropdownMenuItem>
 
-                                                                <DropdownMenuItem
-                                                                    onClick={() =>
-                                                                        router.post(
-                                                                            route('submissions.recalculate', submission.id),
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    <RotateCw className="mr-2 h-4 w-4" />
-                                                                    Recalculate
-                                                                </DropdownMenuItem>
-                                                            </DropdownMenuContent>
-                                                        </DropdownMenu>
+                                                                    <DropdownMenuItem
+                                                                        onClick={() =>
+                                                                            router.post(
+                                                                                route('submissions.recalculate', submission.id),
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        <RotateCw className="mr-2 h-4 w-4" />
+                                                                        Recalculate
+                                                                    </DropdownMenuItem>
+                                                                </DropdownMenuContent>
+                                                            </DropdownMenu>
+                                                        )}
                                                     </div>
                                                 </TableCell>
                                             </TableRow>

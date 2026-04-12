@@ -7,19 +7,38 @@ import PlatformLayout from '@/layouts/platform-layout';
 import { User } from '@/types';
 import { Link, useForm } from '@inertiajs/react';
 import { AlarmClock, BookMarked, Plus, ShieldCheck, UserCheck } from 'lucide-react';
+import { useMemo } from 'react';
 
 export default function AssignmentsCreate({
     courses,
     users,
+    tenants = [],
+    isSuperAdmin = false,
 }: {
     courses: Array<{ id: number; title: string }>;
     users: User[];
+    tenants?: Array<{ id: number; name: string }>;
+    isSuperAdmin?: boolean;
 }) {
     const form = useForm({
+        tenant_id: '',
         course_id: '',
         assigned_to_user_id: '',
         due_date: '',
     });
+
+    const tenantOptions = useMemo(() => new Map(tenants.map((tenant) => [tenant.id, tenant.name])), [tenants]);
+    const filteredUsers = useMemo(() => {
+        if (!isSuperAdmin) {
+            return users;
+        }
+
+        if (!form.data.tenant_id) {
+            return [];
+        }
+
+        return users.filter((user) => String(user.tenant_id) === form.data.tenant_id);
+    }, [form.data.tenant_id, isSuperAdmin, users]);
 
     const guidanceItems = [
         {
@@ -91,6 +110,33 @@ export default function AssignmentsCreate({
                         </CardHeader>
 
                         <CardContent className="space-y-5 p-6">
+                            {isSuperAdmin && (
+                                <div className="space-y-2">
+                                    <Label htmlFor="tenant_id">Company</Label>
+                                    <Select
+                                        value={form.data.tenant_id}
+                                        onValueChange={(value) => {
+                                            form.setData('tenant_id', value);
+                                            form.setData('assigned_to_user_id', '');
+                                        }}
+                                    >
+                                        <SelectTrigger id="tenant_id" className="rounded-md border-border/60">
+                                            <SelectValue placeholder="Select company" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {tenants.map((tenant) => (
+                                                <SelectItem key={tenant.id} value={String(tenant.id)}>
+                                                    {tenant.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {form.errors.tenant_id ? (
+                                        <p className="text-sm text-destructive">{form.errors.tenant_id}</p>
+                                    ) : null}
+                                </div>
+                            )}
+
                             <div className="space-y-2">
                                 <Label htmlFor="course_id">Course</Label>
                                 <Select
@@ -123,12 +169,13 @@ export default function AssignmentsCreate({
                                         id="assigned_to_user_id"
                                         className="rounded-md border-border/60"
                                     >
-                                        <SelectValue placeholder="Select employee" />
+                                        <SelectValue placeholder={isSuperAdmin && !form.data.tenant_id ? 'Select company first' : 'Select employee'} />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {users.map((user) => (
+                                        {filteredUsers.map((user) => (
                                             <SelectItem key={user.id} value={String(user.id)}>
                                                 {user.name}
+                                                {isSuperAdmin && user.tenant_id ? ` · ${tenantOptions.get(user.tenant_id) ?? 'Tenant'}` : ''}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
@@ -163,7 +210,8 @@ export default function AssignmentsCreate({
                                         <p className="text-sm font-medium">Assignment note</p>
                                         <p className="text-sm text-muted-foreground">
                                             New assignments will appear in the employee training workflow and
-                                            contribute to progress tracking.
+                                            contribute to progress tracking. The assignment tenant is taken from the
+                                            selected employee to keep reporting and dashboards tenant-safe.
                                         </p>
                                     </div>
                                 </div>

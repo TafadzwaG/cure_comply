@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Department;
+use App\Models\EmployeeProfile;
 use App\Models\Invitation;
 use App\Models\Tenant;
 use App\Models\User;
@@ -47,7 +48,7 @@ class InvitationFlowTest extends TestCase
         $this->assertSame('reviewer', $invitation->role);
         $this->assertSame($department->id, $invitation->department_id);
 
-        Queue::assertPushed(SendQueuedNotifications::class);
+        Queue::assertPushed(SendQueuedNotifications::class, fn (SendQueuedNotifications $job) => $job->queue === 'mail');
     }
 
     public function test_super_admin_can_invite_a_platform_admin_without_a_tenant(): void
@@ -72,6 +73,54 @@ class InvitationFlowTest extends TestCase
         $this->assertNull($invitation->department_id);
         $this->assertSame('super_admin', $invitation->role);
 
-        Queue::assertPushed(SendQueuedNotifications::class);
+        Queue::assertPushed(SendQueuedNotifications::class, fn (SendQueuedNotifications $job) => $job->queue === 'mail');
+    }
+
+    public function test_company_admin_can_invite_a_user_for_their_own_tenant_and_the_email_is_queued(): void
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+        Queue::fake();
+
+        $tenant = Tenant::factory()->create(['status' => 'active']);
+        $otherTenant = Tenant::factory()->create(['status' => 'active']);
+
+        $companyAdmin = User::factory()->create([
+            'tenant_id' => $tenant->id,
+            'status' => 'active',
+        ]);
+        $companyAdmin->assignRole('company_admin');
+
+        EmployeeProfile::factory()->create([
+            'tenant_id' => $tenant->id,
+            'user_id' => $companyAdmin->id,
+            'department_id' => Department::factory()->create(['tenant_id' => $tenant->id])->id,
+            'job_title' => 'Compliance lead',
+            'branch' => 'Harare',
+            'phone' => '+263700000001',
+            'status' => 'active',
+        ]);
+
+        $department = Department::factory()->create([
+            'tenant_id' => $tenant->id,
+            'name' => 'Operations',
+        ]);
+
+        $response = $this->actingAs($companyAdmin)->post(route('invitations.store'), [
+            'tenant_id' => $otherTenant->id,
+            'name' => 'Assigned User',
+            'email' => 'assigned.user@example.com',
+            'role' => 'employee',
+            'department_id' => $department->id,
+        ]);
+
+        $response->assertRedirect();
+
+        $invitation = Invitation::query()->firstOrFail();
+
+        $this->assertSame($tenant->id, $invitation->tenant_id);
+        $this->assertSame($department->id, $invitation->department_id);
+        $this->assertSame($companyAdmin->id, $invitation->invited_by);
+
+        Queue::assertPushed(SendQueuedNotifications::class, fn (SendQueuedNotifications $job) => $job->queue === 'mail');
     }
 }

@@ -6,7 +6,6 @@ use App\Jobs\GeneratePdfExportJob;
 use App\Jobs\GenerateXlsxExportJob;
 use App\Models\ExportRequest;
 use App\Models\User;
-use Illuminate\Support\Facades\URL;
 use InvalidArgumentException;
 
 class ExportRequestService
@@ -59,11 +58,7 @@ class ExportRequestService
             'completed_at' => now(),
         ]);
 
-        $downloadUrl = URL::temporarySignedRoute(
-            'exports.download',
-            now()->addDays(3),
-            ['exportRequest' => $exportRequest->id]
-        );
+        $actionUrl = route('exports.index', ['highlight' => $exportRequest->id], false);
 
         $this->auditLogService->logExport('export_completed', $exportRequest, [
             'file_name' => $exportRequest->file_name,
@@ -75,7 +70,7 @@ class ExportRequestService
             'export_ready',
             'Your export is ready',
             sprintf('%s has finished processing and is ready to download.', $exportRequest->file_name ?? 'Export'),
-            $downloadUrl,
+            $actionUrl,
             [
                 'export_request_id' => $exportRequest->id,
                 'source' => $exportRequest->source,
@@ -83,7 +78,7 @@ class ExportRequestService
             ],
             true,
             'Privacy Cure export ready',
-            'Download export'
+            'Open exports'
         );
     }
 
@@ -104,7 +99,7 @@ class ExportRequestService
             'export_failed',
             'An export failed',
             sprintf('We could not generate %s. Please try again.', $exportRequest->file_name ?? 'the requested export'),
-            route('reports.index', [], false),
+            route('exports.index', ['highlight' => $exportRequest->id], false),
             [
                 'export_request_id' => $exportRequest->id,
                 'source' => $exportRequest->source,
@@ -112,7 +107,7 @@ class ExportRequestService
             ],
             true,
             'Privacy Cure export failed',
-            'Open reports'
+            'Open exports'
         );
     }
 

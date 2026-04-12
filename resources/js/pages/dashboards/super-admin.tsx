@@ -215,14 +215,14 @@ export default function SuperAdminDashboard(props: Props) {
                 <PendingItemsPanel items={props.pendingItems} />
 
                 <Tabs defaultValue="overview" className="space-y-4">
-                    <TabsList className="h-auto w-full justify-start rounded-lg border border-border bg-muted/40 p-1">
-                        <TabsTrigger value="overview" className="rounded-md px-4 py-2">
+                    <TabsList className="w-full justify-start">
+                        <TabsTrigger value="overview">
                             Overview
                         </TabsTrigger>
-                        <TabsTrigger value="compliance" className="rounded-md px-4 py-2">
+                        <TabsTrigger value="compliance">
                             Compliance
                         </TabsTrigger>
-                        <TabsTrigger value="operations" className="rounded-md px-4 py-2">
+                        <TabsTrigger value="operations">
                             Operations
                         </TabsTrigger>
                     </TabsList>

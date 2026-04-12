@@ -45,18 +45,24 @@ class EmployeeProfileCompletionController extends Controller
             'name' => $payload['name'],
         ]);
 
-        $profile = $user->employeeProfile()->updateOrCreate(
-            ['user_id' => $user->id],
-            [
-                'tenant_id' => $user->tenant_id,
-                'status' => $user->status?->value ?? $user->getRawOriginal('status') ?? 'active',
-                'job_title' => $payload['job_title'],
-                'branch' => $payload['branch'],
-                'phone' => $payload['phone'],
-                'alternate_phone' => $payload['alternate_phone'] ?? null,
-                'employment_type' => $payload['employment_type'] ?? null,
-            ],
-        );
+        $profile = EmployeeProfile::withoutGlobalScope('tenant')
+            ->withTrashed()
+            ->firstOrNew(['user_id' => $user->id]);
+
+        if ($profile->exists && $profile->trashed()) {
+            $profile->restore();
+        }
+
+        $profile->fill([
+            'tenant_id' => $user->tenant_id,
+            'status' => $user->status?->value ?? $user->getRawOriginal('status') ?? 'active',
+            'job_title' => $payload['job_title'],
+            'branch' => $payload['branch'],
+            'phone' => $payload['phone'],
+            'alternate_phone' => $payload['alternate_phone'] ?? null,
+            'employment_type' => $payload['employment_type'] ?? null,
+        ]);
+        $profile->save();
 
         app(\App\Services\AuditLogService::class)->logModelUpdated('profile_completed', $profile, []);
         app(AppNotificationService::class)->sendToUser(

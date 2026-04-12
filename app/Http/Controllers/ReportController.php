@@ -132,6 +132,6 @@ class ReportController extends Controller
                 ]
         );
 
-        return back()->with('success', 'Report export queued. You will be notified when it is ready.');
+        return back()->with('success', 'Report export queued. You will be notified when it is ready, and it will appear on the Exports page.');
     }
 }

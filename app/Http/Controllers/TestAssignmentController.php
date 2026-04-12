@@ -2,15 +2,91 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\TenantStatus;
+use App\Enums\UserStatus;
 use App\Http\Requests\TestAssignmentRequest;
+use App\Models\Tenant;
 use App\Models\Test;
 use App\Models\TestAssignment;
 use App\Models\User;
 use App\Services\AppNotificationService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class TestAssignmentController extends Controller
 {
+    public function create(Request $request): Response
+    {
+        $this->authorize('create', TestAssignment::class);
+
+        $user = $request->user();
+        $isSuperAdmin = (bool) $user?->isSuperAdmin();
+        $selectedTenantId = $isSuperAdmin ? ($request->integer('tenant_id') ?: null) : $user?->tenant_id;
+        $selectedTestId = $request->integer('test_id') ?: null;
+
+        $tenants = $isSuperAdmin
+            ? Tenant::query()
+                ->where('status', TenantStatus::Active)
+                ->orderBy('name')
+                ->get(['id', 'name', 'status'])
+                ->map(fn (Tenant $tenant) => [
+                    'id' => $tenant->id,
+                    'name' => $tenant->name,
+                    'status' => $tenant->status instanceof \BackedEnum ? $tenant->status->value : (string) $tenant->status,
+                ])
+                ->values()
+            : collect();
+
+        $employees = collect();
+
+        if ($selectedTenantId) {
+            $employees = User::query()
+                ->where('tenant_id', $selectedTenantId)
+                ->where('status', UserStatus::Active)
+                ->whereHas('roles', fn ($query) => $query->where('name', 'employee'))
+                ->whereHas('employeeProfile')
+                ->with(['employeeProfile.department:id,name'])
+                ->orderBy('name')
+                ->get(['id', 'tenant_id', 'name', 'email'])
+                ->map(fn (User $employee) => [
+                    'id' => $employee->id,
+                    'name' => $employee->name,
+                    'email' => $employee->email,
+                    'department' => $employee->employeeProfile?->department?->name,
+                    'job_title' => $employee->employeeProfile?->job_title,
+                ])
+                ->values();
+        }
+
+        $tests = Test::query()
+            ->with('course:id,title')
+            ->orderBy('title')
+            ->get(['id', 'course_id', 'title', 'status', 'pass_mark'])
+            ->map(fn (Test $test) => [
+                'id' => $test->id,
+                'title' => $test->title,
+                'status' => $test->status instanceof \BackedEnum ? $test->status->value : (string) $test->status,
+                'pass_mark' => $test->pass_mark,
+                'course' => $test->course ? [
+                    'id' => $test->course->id,
+                    'title' => $test->course->title,
+                ] : null,
+            ])
+            ->values();
+
+        return Inertia::render('tests/assignments/create', [
+            'tenants' => $tenants,
+            'tests' => $tests,
+            'employees' => $employees,
+            'selectedTenantId' => $selectedTenantId,
+            'selectedTestId' => $selectedTestId,
+            'isSuperAdmin' => $isSuperAdmin,
+        ]);
+    }
+
     public function store(TestAssignmentRequest $request, Test $test): RedirectResponse
     {
         $this->authorize('create', TestAssignment::class);
@@ -30,6 +106,19 @@ class TestAssignmentController extends Controller
             ->get();
 
         abort_if($assignees->count() !== $assigneeIds->count(), 404);
+
+        if ($request->filled('tenant_id')) {
+            $selectedTenantId = $request->integer('tenant_id');
+            $outsideSelectedTenant = $assignees->contains(
+                fn (User $assignee) => (int) $assignee->tenant_id !== $selectedTenantId
+            );
+
+            if ($outsideSelectedTenant) {
+                throw ValidationException::withMessages([
+                    'assigned_to_user_ids' => 'Selected employees must belong to the selected tenant.',
+                ]);
+            }
+        }
 
         if (! $request->user()?->isSuperAdmin()) {
             $outsideTenant = $assignees->contains(

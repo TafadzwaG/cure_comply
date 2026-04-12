@@ -14,7 +14,7 @@ const statusTone: Record<string, string> = {
     rejected: 'border-border bg-muted/70 text-foreground',
     failed: 'border-border bg-muted/70 text-foreground',
     archived: 'border-dashed border-border bg-muted/60 text-muted-foreground',
-    inactive: 'border-dashed border-border bg-muted/60 text-muted-foreground',
+    inactive: 'border-destructive/40 bg-destructive/10 text-destructive',
     scored: 'border-border bg-background text-foreground',
     closed: 'border-dashed border-border bg-muted/60 text-muted-foreground',
     unread: 'border-border bg-background text-foreground',

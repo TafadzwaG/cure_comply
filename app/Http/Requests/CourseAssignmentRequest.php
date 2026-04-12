@@ -15,8 +15,9 @@ class CourseAssignmentRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'tenant_id' => ['nullable', 'integer', 'exists:tenants,id'],
             'course_id' => ['required', 'integer'],
-            'assigned_to_user_id' => ['required', 'integer'],
+            'assigned_to_user_id' => ['required', 'integer', 'exists:users,id'],
             'due_date' => ['nullable', 'date'],
             'status' => ['nullable', 'string', 'max:50'],
         ];

@@ -15,7 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PlatformLayout from '@/layouts/platform-layout';
 import { type BreadcrumbItem, type PendingItem } from '@/types';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { BookOpen, CheckCircle2, ClipboardCheck, FileSearch, ShieldCheck, TimerReset } from 'lucide-react';
 
 interface EmployeeDashboardProps {
@@ -189,17 +189,17 @@ export default function EmployeeDashboard(props: EmployeeDashboardProps) {
                 <PendingItemsPanel items={props.pendingItems} />
 
                 <Tabs defaultValue="work" className="space-y-4">
-                    <TabsList className="h-auto w-full justify-start rounded-lg border border-border bg-muted/40 p-1">
-                        <TabsTrigger value="work" className="rounded-md px-4 py-2">
+                    <TabsList className="w-full justify-start">
+                        <TabsTrigger value="work">
                             My work
                         </TabsTrigger>
-                        <TabsTrigger value="training" className="rounded-md px-4 py-2">
+                        <TabsTrigger value="training">
                             Training
                         </TabsTrigger>
-                        <TabsTrigger value="assessments" className="rounded-md px-4 py-2">
+                        <TabsTrigger value="assessments">
                             Assessments
                         </TabsTrigger>
-                        <TabsTrigger value="compliance" className="rounded-md px-4 py-2">
+                        <TabsTrigger value="compliance">
                             Compliance
                         </TabsTrigger>
                     </TabsList>
@@ -262,10 +262,17 @@ export default function EmployeeDashboard(props: EmployeeDashboardProps) {
                                             <TableHead className="text-right">Due</TableHead>
                                         </TableRow>
                                     </TableHeader>
-                                    <TableBody>
-                                        {props.currentCourses.map((course) => (
-                                            <TableRow key={course.id}>
-                                                <TableCell className="font-medium">{course.course}</TableCell>
+                                        <TableBody>
+                                            {props.currentCourses.map((course) => (
+                                                <TableRow key={course.id}>
+                                                    <TableCell className="font-medium">
+                                                        <Link
+                                                            href={route('assignments.show', course.id)}
+                                                            className="inline-flex items-center text-foreground transition-colors hover:text-primary hover:underline"
+                                                        >
+                                                            {course.course}
+                                                        </Link>
+                                                    </TableCell>
                                                 <TableCell>
                                                     <Badge variant="outline" className="capitalize">
                                                         {course.status.replace('_', ' ')}

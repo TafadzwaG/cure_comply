@@ -15,6 +15,7 @@ class TestAssignmentRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'tenant_id' => ['nullable', 'integer', 'exists:tenants,id'],
             'assigned_to_user_id' => ['nullable', 'integer', 'exists:users,id'],
             'assigned_to_user_ids' => ['nullable', 'array', 'min:1'],
             'assigned_to_user_ids.*' => ['integer', 'exists:users,id'],

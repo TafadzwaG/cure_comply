@@ -156,14 +156,14 @@ export default function CourseShow({ course, canManage }: { course: Course; canM
                 </section>
 
                 <Tabs defaultValue={defaultTab} className="space-y-4">
-                    <TabsList className="h-auto w-full justify-start rounded-lg border border-border bg-muted/40 p-1">
-                        <TabsTrigger value="overview" className="rounded-md px-4 py-2">
+                    <TabsList className="w-full justify-start">
+                        <TabsTrigger value="overview">
                             Overview
                         </TabsTrigger>
-                        <TabsTrigger value="modules" className="rounded-md px-4 py-2">
+                        <TabsTrigger value="modules">
                             Modules & lessons
                         </TabsTrigger>
-                        <TabsTrigger value="settings" className="rounded-md px-4 py-2">
+                        <TabsTrigger value="settings">
                             Settings
                         </TabsTrigger>
                     </TabsList>

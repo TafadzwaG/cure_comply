@@ -50,6 +50,11 @@ class ComplianceSubmission extends Model
         return $this->hasMany(ComplianceResponse::class);
     }
 
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(ComplianceSubmissionAssignment::class);
+    }
+
     public function evidenceFiles(): HasMany
     {
         return $this->hasMany(EvidenceFile::class);

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\EmployeeProfile;
 use App\Models\Tenant;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
@@ -50,6 +51,39 @@ class DashboardTest extends TestCase
         $this->actingAs($user);
 
         $this->get('/dashboard')->assertRedirect(route('employee-profile.complete.edit'));
+    }
+
+    public function test_profile_completion_restores_existing_soft_deleted_employee_profile(): void
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+
+        $tenant = Tenant::factory()->create(['status' => 'active']);
+        $user = User::factory()->forTenant($tenant)->create();
+        $user->assignRole('employee');
+
+        $profile = $user->employeeProfile()->create([
+            'tenant_id' => $tenant->id,
+            'status' => 'active',
+        ]);
+        $profile->delete();
+
+        $this->actingAs($user);
+
+        $this->patch(route('employee-profile.complete.update'), [
+            'name' => 'Completed User',
+            'job_title' => 'General Manager',
+            'branch' => 'Harare',
+            'phone' => '+263782903276',
+            'employment_type' => 'full_time',
+        ])->assertRedirect(route('dashboard'));
+
+        $restoredProfile = EmployeeProfile::withTrashed()->where('user_id', $user->id)->firstOrFail();
+
+        $this->assertNull($restoredProfile->deleted_at);
+        $this->assertSame('General Manager', $restoredProfile->job_title);
+        $this->assertSame('Harare', $restoredProfile->branch);
+        $this->assertSame('+263782903276', $restoredProfile->phone);
+        $this->assertSame(1, EmployeeProfile::withTrashed()->where('user_id', $user->id)->count());
     }
 
     public function test_inactive_tenant_user_is_redirected_to_activation_pending_page()

@@ -8,10 +8,13 @@ use App\Http\Requests\ComplianceSubmissionRequest;
 use App\Models\ComplianceFramework;
 use App\Models\ComplianceResponse;
 use App\Models\ComplianceSubmission;
+use App\Models\ComplianceSubmissionAssignment;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Services\AppNotificationService;
 use App\Services\ComplianceScoringService;
+use App\Support\Permissions;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -39,6 +42,7 @@ class ComplianceSubmissionController extends Controller
         ]);
 
         $query = ComplianceSubmission::query()->with(['framework', 'score', 'tenant:id,name']);
+        $this->scopeVisibleSubmissions($query, $request->user());
         $this->applySearch($query, $filters['search'] ?? null, ['title', 'framework.name', 'reporting_period', 'tenant.name']);
         $this->applyFilters($query, $filters, [
             'status' => 'status',
@@ -71,24 +75,25 @@ class ComplianceSubmissionController extends Controller
             'frameworks' => ComplianceFramework::query()->orderBy('name')->get(),
             'filters' => $filters,
             'isSuperAdmin' => $request->user()?->isSuperAdmin() ?? false,
+            'canManageSubmissions' => (bool) $request->user()?->can(Permissions::MANAGE_COMPLIANCE_SUBMISSIONS),
             'tenants' => $request->user()?->isSuperAdmin()
                 ? Tenant::query()->orderBy('name')->get(['id', 'name'])
                 : [],
-            'stats' => [
-                'total' => ComplianceSubmission::query()->count(),
-                'submitted' => ComplianceSubmission::query()->where('status', 'submitted')->count(),
-                'inReview' => ComplianceSubmission::query()->where('status', 'in_review')->count(),
-                'scored' => ComplianceSubmission::query()->where('status', 'scored')->count(),
-            ],
+            'stats' => $this->submissionStats($request->user()),
         ]);
     }
 
-    public function create(): Response
+    public function create(Request $request): Response
     {
         $this->authorize('create', ComplianceSubmission::class);
 
         return Inertia::render('submissions/create', [
             'frameworks' => ComplianceFramework::query()->orderBy('name')->get(),
+            'employees' => $this->availableSubmissionAssignees($request),
+            'tenants' => $request->user()?->isSuperAdmin()
+                ? Tenant::query()->orderBy('name')->get(['id', 'name'])
+                : [],
+            'isSuperAdmin' => $request->user()?->isSuperAdmin() ?? false,
         ]);
     }
 
@@ -96,10 +101,26 @@ class ComplianceSubmissionController extends Controller
     {
         $this->authorize('create', ComplianceSubmission::class);
 
+        $validated = $request->validated();
+        $syncAssignments = array_key_exists('assigned_to_user_ids', $validated);
+        $assigneeIds = collect($validated['assigned_to_user_ids'] ?? [])
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values();
+        unset($validated['assigned_to_user_ids']);
+
+        $tenantId = $this->submissionTenantId($request);
+        abort_if($tenantId < 1, 422, 'A tenant is required to create a submission.');
+        $validated['tenant_id'] = $tenantId;
+
+        abort_if($assigneeIds->isNotEmpty() && ! $this->assigneesBelongToTenant($assigneeIds->all(), $tenantId), 422, 'Selected assignees must belong to the submission tenant.');
+
         $submission = ComplianceSubmission::query()->create([
-            ...$request->validated(),
+            ...$validated,
             'status' => $request->input('status', 'draft'),
         ]);
+
+        $this->syncSubmissionAssignments($submission, $assigneeIds->all(), $request->user());
         app(\App\Services\AuditLogService::class)->logModelCreated('submission_created', $submission);
 
         return redirect()->route('submissions.show', $submission)->with('success', 'Submission created.');
@@ -114,6 +135,8 @@ class ComplianceSubmissionController extends Controller
             'framework.sections.questions' => fn ($query) => $query->orderBy('sort_order'),
             'responses.evidenceFiles.uploader',
             'responses.evidenceFiles.reviews.reviewer',
+            'assignments.assignee:id,name,email',
+            'assignments.assigner:id,name,email',
             'score',
             'sectionScores.section',
         ]);
@@ -137,8 +160,23 @@ class ComplianceSubmissionController extends Controller
     public function update(ComplianceSubmissionRequest $request, ComplianceSubmission $complianceSubmission): RedirectResponse
     {
         $this->authorize('update', $complianceSubmission);
-        $oldValues = $complianceSubmission->toArray();
-        $complianceSubmission->update($request->validated());
+        $validated = $request->validated();
+        $assigneeIds = collect($validated['assigned_to_user_ids'] ?? [])
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values();
+        unset($validated['assigned_to_user_ids'], $validated['tenant_id']);
+
+        abort_if($syncAssignments && $assigneeIds->isNotEmpty() && ! $this->assigneesBelongToTenant($assigneeIds->all(), $complianceSubmission->tenant_id), 422, 'Selected assignees must belong to the submission tenant.');
+
+        $oldValues = [
+            ...$complianceSubmission->toArray(),
+            'assigned_to_user_ids' => $complianceSubmission->assignments()->pluck('assigned_to_user_id')->all(),
+        ];
+        $complianceSubmission->update($validated);
+        if ($syncAssignments) {
+            $this->syncSubmissionAssignments($complianceSubmission, $assigneeIds->all(), $request->user());
+        }
         app(\App\Services\AuditLogService::class)->logModelUpdated('submission_updated', $complianceSubmission, $oldValues);
 
         return back()->with('success', 'Submission updated.');
@@ -146,7 +184,7 @@ class ComplianceSubmissionController extends Controller
 
     public function saveResponses(ComplianceResponseRequest $request, ComplianceSubmission $complianceSubmission): RedirectResponse
     {
-        $this->authorize('update', $complianceSubmission);
+        $this->authorize('respond', $complianceSubmission);
 
         try {
             DB::transaction(function () use ($request, $complianceSubmission) {
@@ -254,5 +292,88 @@ class ComplianceSubmissionController extends Controller
             'submission_id' => $complianceSubmission->id,
             'title' => $complianceSubmission->title,
         ]);
+    }
+
+    protected function scopeVisibleSubmissions(Builder $query, ?User $user): void
+    {
+        if (! $user || $user->can(Permissions::MANAGE_COMPLIANCE_SUBMISSIONS)) {
+            return;
+        }
+
+        if ($user->can(Permissions::ANSWER_COMPLIANCE_QUESTIONS)) {
+            $query->whereHas('assignments', function (Builder $assignmentQuery) use ($user) {
+                $assignmentQuery
+                    ->where('assigned_to_user_id', $user->id)
+                    ->whereHas('assigner', fn (Builder $assignerQuery) => $assignerQuery->role(['company_admin', 'super_admin']));
+            });
+        }
+    }
+
+    protected function submissionStats(?User $user): array
+    {
+        $query = ComplianceSubmission::query();
+        $this->scopeVisibleSubmissions($query, $user);
+
+        return [
+            'total' => (clone $query)->count(),
+            'submitted' => (clone $query)->where('status', 'submitted')->count(),
+            'inReview' => (clone $query)->where('status', 'in_review')->count(),
+            'scored' => (clone $query)->where('status', 'scored')->count(),
+        ];
+    }
+
+    protected function availableSubmissionAssignees(Request $request)
+    {
+        return User::query()
+            ->select(['id', 'tenant_id', 'name', 'email'])
+            ->role('employee')
+            ->when(! $request->user()?->isSuperAdmin(), fn (Builder $query) => $query->where('tenant_id', $request->user()?->tenant_id))
+            ->orderBy('name')
+            ->get();
+    }
+
+    protected function submissionTenantId(ComplianceSubmissionRequest $request): int
+    {
+        if ($request->user()?->isSuperAdmin() && $request->filled('tenant_id')) {
+            return $request->integer('tenant_id');
+        }
+
+        return (int) $request->user()?->tenant_id;
+    }
+
+    protected function assigneesBelongToTenant(array $assigneeIds, int $tenantId): bool
+    {
+        if ($assigneeIds === []) {
+            return true;
+        }
+
+        return User::query()
+            ->whereIn('id', $assigneeIds)
+            ->where('tenant_id', $tenantId)
+            ->count() === count($assigneeIds);
+    }
+
+    protected function syncSubmissionAssignments(ComplianceSubmission $submission, array $assigneeIds, ?User $assigner): void
+    {
+        $currentIds = $submission->assignments()->pluck('assigned_to_user_id')->all();
+        $removeIds = array_diff($currentIds, $assigneeIds);
+
+        if ($removeIds !== []) {
+            $submission->assignments()->whereIn('assigned_to_user_id', $removeIds)->delete();
+        }
+
+        foreach ($assigneeIds as $assigneeId) {
+            ComplianceSubmissionAssignment::query()->updateOrCreate(
+                [
+                    'compliance_submission_id' => $submission->id,
+                    'assigned_to_user_id' => $assigneeId,
+                ],
+                [
+                    'tenant_id' => $submission->tenant_id,
+                    'assigned_by' => $assigner?->id,
+                    'assigned_at' => now(),
+                ],
+            );
+        }
     }
 }

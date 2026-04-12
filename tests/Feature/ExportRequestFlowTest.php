@@ -40,7 +40,7 @@ class ExportRequestFlowTest extends TestCase
 
         $response
             ->assertRedirect()
-            ->assertSessionHas('success', 'Report export queued. You will be notified when it is ready.');
+            ->assertSessionHas('success', 'Report export queued. You will be notified when it is ready, and it will appear on the Exports page.');
 
         $exportRequest = ExportRequest::query()->firstOrFail();
 
@@ -102,5 +102,44 @@ class ExportRequestFlowTest extends TestCase
         $this->actingAs($otherUser)
             ->get(route('exports.download', $exportRequest))
             ->assertForbidden();
+    }
+
+    public function test_exports_page_lists_the_current_users_export_requests(): void
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+
+        $tenant = Tenant::factory()->create(['status' => 'active']);
+
+        $user = User::factory()->forTenant($tenant)->create([
+            'name' => 'Export Owner',
+        ]);
+        $user->assignRole('company_admin');
+
+        EmployeeProfile::factory()->create([
+            'tenant_id' => $tenant->id,
+            'user_id' => $user->id,
+            'job_title' => 'Compliance Lead',
+            'branch' => 'Harare',
+            'phone' => '+263771000000',
+        ]);
+
+        ExportRequest::query()->create([
+            'tenant_id' => $tenant->id,
+            'user_id' => $user->id,
+            'source' => 'employees.index',
+            'format' => 'xlsx',
+            'status' => 'completed',
+            'file_name' => 'employees-index-20260412.xlsx',
+            'file_path' => 'exports/employees-index-20260412.xlsx',
+            'completed_at' => now(),
+        ]);
+
+        $response = $this->actingAs($user)->get(route('exports.index'));
+
+        $response
+            ->assertOk()
+            ->assertSee('exports/index')
+            ->assertSee('employees-index-20260412.xlsx')
+            ->assertSee('Employees');
     }
 }

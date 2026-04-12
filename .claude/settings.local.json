@@ -17,7 +17,9 @@
       "Bash(php check_img.php)",
       "Bash(grep -n \"fillable\\\\|protected $\" C:/Users/tafad/Documents/PROJECTS/Cure_Compliance/cure_comply/app/Models/CourseAssignment.php)",
       "Bash(grep -n \"use Illuminate\\\\\\\\Support\\\\\\\\Facades\\\\\\\\DB\\\\|use Carbon\" C:/Users/tafad/Documents/PROJECTS/Cure_Compliance/cure_comply/app/Services/DashboardService.php)",
-      "Bash(grep -E \"\\\\.\\(php|tsx|ts\\)$\")"
+      "Bash(grep -E \"\\\\.\\(php|tsx|ts\\)$\")",
+      "Bash(find C:UserstafadDocumentsPROJECTSCure_Compliancecure_comply -type f \\\\\\(-name *Invitation* -o -path */Mail/* -o -path */Jobs/* -o -path */Notifications/* \\\\\\))",
+      "Bash(xargs cat:*)"
     ]
   }
 }

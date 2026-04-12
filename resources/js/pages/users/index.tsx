@@ -2,17 +2,26 @@ import { DataIndexPage } from '@/components/data-index-page';
 import { RowActionsMenu } from '@/components/row-actions-menu';
 import { SortableTableHead } from '@/components/sortable-table-head';
 import { StatusBadge } from '@/components/status-badge';
+import { UserStatusActionDialog } from '@/components/user-status-action-dialog';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { formatLongDateTime } from '@/lib/date';
 import PlatformLayout from '@/layouts/platform-layout';
-import { IndexStat, Paginated, TableFilters, Tenant, User } from '@/types';
+import { IndexStat, Paginated, SharedData, TableFilters, Tenant, User } from '@/types';
 import { router } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
 import { Building2, Shield, UserCheck, UserCog, UserPlus2 } from 'lucide-react';
 
 interface UserRow extends User {
     tenant?: Tenant | null;
     roles?: Array<{ id: number; name: string }>;
+    abilities?: {
+        canEdit?: boolean;
+        canDeactivate?: boolean;
+        canReactivate?: boolean;
+        canImpersonate?: boolean;
+    };
     employee_profile?: {
         job_title?: string | null;
         department?: { name: string } | null;
@@ -32,9 +41,11 @@ export default function UsersIndex({
     tenants: Array<{ id: number; name: string }>;
     roles: string[];
 }) {
+    const { auth } = usePage<SharedData>().props;
+    const isSuperAdmin = auth.user?.roles?.some((role) => role.name === 'super_admin');
     const statItems: IndexStat[] = [
         { label: 'All users', value: stats.total, detail: 'Every platform and tenant user account.', icon: UserCog },
-        { label: 'Platform users', value: stats.platform, detail: 'Users not assigned to a tenant workspace.', icon: Shield },
+        { label: isSuperAdmin ? 'Platform users' : 'Inactive', value: isSuperAdmin ? stats.platform : (stats.inactive ?? 0), detail: isSuperAdmin ? 'Users not assigned to a tenant workspace.' : 'Accounts currently paused and unable to sign in.', icon: Shield },
         { label: 'Active', value: stats.active, detail: 'Accounts currently able to work in the platform.', icon: UserCheck },
         { label: 'Invited', value: stats.invited, detail: 'Provisioned accounts awaiting full activation.', icon: UserPlus2 },
     ];
@@ -43,7 +54,7 @@ export default function UsersIndex({
         <PlatformLayout>
             <DataIndexPage
                 title="Users"
-                description="Super admin visibility across every tenant account, including direct support actions and impersonation."
+                description={isSuperAdmin ? 'Cross-tenant visibility across every account, including direct support actions and impersonation.' : 'Manage user accounts inside your company workspace, including profile fixes and access lifecycle actions.'}
                 stats={statItems}
                 filters={filters}
                 filterConfigs={[
@@ -68,8 +79,8 @@ export default function UsersIndex({
                     },
                 ]}
                 paginated={users}
-                tableTitle="Cross-tenant user directory"
-                tableDescription="Search by person or tenant, sort by account metadata, export the current scope, and impersonate when support access is required."
+                tableTitle={isSuperAdmin ? 'Cross-tenant user directory' : 'Tenant user directory'}
+                tableDescription={isSuperAdmin ? 'Search by person or tenant, sort by account metadata, export the current scope, and impersonate when support access is required.' : 'Search and review user accounts inside the current tenant, then open profile or lifecycle actions as needed.'}
                 exportable
             >
                 <Table>
@@ -94,7 +105,9 @@ export default function UsersIndex({
                                         {user.employee_profile?.department?.name ? ` · ${user.employee_profile.department.name}` : ''}
                                     </div>
                                 </TableCell>
-                                <TableCell>{user.email}</TableCell>
+                                <TableCell>
+                                    <UserEmailDisplay user={user} />
+                                </TableCell>
                                 <TableCell>
                                     <div className="flex items-center gap-2">
                                         <Building2 className="size-4 text-muted-foreground" />
@@ -108,18 +121,24 @@ export default function UsersIndex({
                                 <TableCell>{formatLongDateTime(user.created_at)}</TableCell>
                                 <TableCell className="text-right">
                                     <div className="flex items-center justify-end gap-2">
-                                        {!user.roles?.some((role) => role.name === 'super_admin') ? (
+                                        {user.abilities?.canImpersonate ? (
                                             <Button variant="outline" size="sm" onClick={() => router.post(route('impersonation.start', user.id))}>
                                                 <UserCog className="size-4" />
                                                 Impersonate
                                             </Button>
                                         ) : null}
+                                        {user.abilities?.canDeactivate ? (
+                                            <UserStatusActionDialog userId={user.id} userName={user.name} action="deactivate" compact triggerLabel="Deactivate" />
+                                        ) : null}
+                                        {user.abilities?.canReactivate ? (
+                                            <UserStatusActionDialog userId={user.id} userName={user.name} action="reactivate" compact triggerLabel="Reactivate" />
+                                        ) : null}
                                         <RowActionsMenu
                                             actions={[
                                                 { label: 'View details', href: route('users.show', user.id) },
-                                                ...(user.roles?.some((role) => role.name === 'super_admin')
-                                                    ? []
-                                                    : [{ label: 'Impersonate User', href: route('impersonation.start', user.id), method: 'post' as const }]),
+                                                ...(user.abilities?.canImpersonate
+                                                    ? [{ label: 'Impersonate User', href: route('impersonation.start', user.id), method: 'post' as const }]
+                                                    : []),
                                             ]}
                                         />
                                     </div>
@@ -131,4 +150,16 @@ export default function UsersIndex({
             </DataIndexPage>
         </PlatformLayout>
     );
+}
+
+function UserEmailDisplay({ user }: { user: UserRow }) {
+    if (isDeactivatedPlaceholderEmail(user.email)) {
+        return <Badge variant="destructive">Deactivated</Badge>;
+    }
+
+    return <span>{user.email}</span>;
+}
+
+function isDeactivatedPlaceholderEmail(email?: string | null) {
+    return Boolean(email?.toLowerCase().includes('@users.privacycure.invalid'));
 }

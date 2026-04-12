@@ -39,6 +39,8 @@ export default function PlatformSettingsPage({
     recipientUsers: RecipientUser[];
     pendingTenants: Tenant[];
 }) {
+    const selectedUsers = recipientUsers.filter((user) => settings.recipient_user_ids?.includes(user.id));
+    const extraRecipientEmails = settings.recipient_emails ?? [];
     const form = useForm({
         recipient_user_ids: settings.recipient_user_ids ?? [],
         recipient_emails_text: (settings.recipient_emails ?? []).join('\n'),
@@ -62,19 +64,77 @@ export default function PlatformSettingsPage({
             <SettingsLayout fullWidth>
                 <div className="space-y-6">
                     <HeadingSmall
-                        title="Platform approvals"
-                        description="Choose who receives new tenant registration alerts and act quickly on workspaces waiting for activation."
+                        title="Tenant registration notifications"
+                        description="Choose exactly who receives new tenant registration email notifications and in-app alerts, then review pending workspaces from the same settings area."
                     />
+
+                    <div className="grid gap-4 md:grid-cols-3">
+                        <InfoCard
+                            icon={BellRing}
+                            title="Internal recipients"
+                            description={`${selectedUsers.length} ${selectedUsers.length === 1 ? 'platform user is' : 'platform users are'} configured to receive in-app alerts and email when a new company registers.`}
+                        />
+                        <InfoCard
+                            icon={Mail}
+                            title="Email-only recipients"
+                            description={`${extraRecipientEmails.length} ${extraRecipientEmails.length === 1 ? 'external address is' : 'external addresses are'} configured to receive tenant registration emails only.`}
+                        />
+                        <InfoCard
+                            icon={ShieldAlert}
+                            title="Notification scope"
+                            description="Only the recipients configured on this page receive new tenant registration alerts. The system does not notify every super admin automatically."
+                        />
+                    </div>
 
                     <Card className="border-border/70 shadow-none">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2 text-base font-medium">
                                 <Settings2 className="size-4" />
-                                Registration recipients
+                                Who gets new tenant registration emails
                             </CardTitle>
-                            <CardDescription>Internal platform recipients receive in-app alerts and email. Extra addresses receive email only.</CardDescription>
+                            <CardDescription>
+                                Internal platform recipients receive both in-app alerts and email. Extra addresses receive email only.
+                            </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
+                            <div className="grid gap-4 md:grid-cols-2">
+                                <div className="rounded-xl border border-border/70 bg-muted/15 p-4">
+                                    <div className="mb-3 flex items-center gap-2 text-sm font-medium">
+                                        <BellRing className="size-4 text-[#083d77]" />
+                                        In-app and email recipients
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {selectedUsers.length > 0 ? (
+                                            selectedUsers.map((user) => (
+                                                <Badge key={user.id} variant="outline" className="rounded-full px-3 py-1">
+                                                    {user.name}
+                                                </Badge>
+                                            ))
+                                        ) : (
+                                            <span className="text-sm text-muted-foreground">No internal platform users selected yet.</span>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="rounded-xl border border-border/70 bg-muted/15 p-4">
+                                    <div className="mb-3 flex items-center gap-2 text-sm font-medium">
+                                        <Mail className="size-4 text-[#083d77]" />
+                                        Email-only recipients
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {extraRecipientEmails.length > 0 ? (
+                                            extraRecipientEmails.map((email) => (
+                                                <Badge key={email} variant="outline" className="rounded-full px-3 py-1">
+                                                    {email}
+                                                </Badge>
+                                            ))
+                                        ) : (
+                                            <span className="text-sm text-muted-foreground">No extra email recipients configured yet.</span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
                             <div className="space-y-3">
                                 <Label>Internal platform users</Label>
                                 <div className="grid gap-3 rounded-2xl border border-border/70 bg-muted/15 p-4">
@@ -120,7 +180,7 @@ export default function PlatformSettingsPage({
 
                             <Button type="button" onClick={submit} disabled={form.processing}>
                                 <BellRing className="size-4" />
-                                {form.processing ? 'Saving settings...' : 'Save platform settings'}
+                                {form.processing ? 'Saving notification settings...' : 'Save notification recipients'}
                             </Button>
                         </CardContent>
                     </Card>
@@ -173,21 +233,16 @@ export default function PlatformSettingsPage({
                         </CardContent>
                     </Card>
 
-                    <div className="grid gap-4 md:grid-cols-3">
-                        <InfoCard
-                            icon={ShieldAlert}
-                            title="Registration flow"
-                            description="New company signups stay in pending status until a super admin explicitly activates the tenant."
-                        />
+                    <div className="grid gap-4 md:grid-cols-2">
                         <InfoCard
                             icon={ShieldCheck}
                             title="Activation notice"
                             description="Activation and deactivation both send branded lifecycle emails and in-app notifications to the tenant administrator."
                         />
                         <InfoCard
-                            icon={Mail}
-                            title="Recipient control"
-                            description="Only the recipients configured here are notified when new tenant registrations arrive."
+                            icon={ShieldAlert}
+                            title="Registration flow"
+                            description="New company signups stay in pending status until a super admin explicitly activates the tenant."
                         />
                     </div>
                 </div>

@@ -266,26 +266,17 @@ export function FrameworkBuilder({
                 </section>
 
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-                    <TabsList className="h-auto w-full justify-start rounded-lg border border-border bg-muted/40 p-1">
-                        <TabsTrigger
-                            value="overview"
-                            className="rounded-md px-4 py-2.5 data-[state=active]:bg-[#14417A] data-[state=active]:text-white"
-                        >
-                            <BookMarked className="mr-2 size-4" />
+                    <TabsList className="w-full justify-start">
+                        <TabsTrigger value="overview" className="gap-2">
+                            <BookMarked className="size-4" />
                             Overview
                         </TabsTrigger>
-                        <TabsTrigger
-                            value="sections"
-                            className="rounded-md px-4 py-2.5 data-[state=active]:bg-[#14417A] data-[state=active]:text-white"
-                        >
-                            <Layers3 className="mr-2 size-4" />
+                        <TabsTrigger value="sections" className="gap-2">
+                            <Layers3 className="size-4" />
                             Sections & questions
                         </TabsTrigger>
-                        <TabsTrigger
-                            value="help"
-                            className="rounded-md px-4 py-2.5 data-[state=active]:bg-[#14417A] data-[state=active]:text-white"
-                        >
-                            <HelpCircle className="mr-2 size-4" />
+                        <TabsTrigger value="help" className="gap-2">
+                            <HelpCircle className="size-4" />
                             Help
                         </TabsTrigger>
                     </TabsList>

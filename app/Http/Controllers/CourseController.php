@@ -4,8 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\InteractsWithIndexTables;
 use App\Http\Requests\CourseRequest;
+use App\Enums\CourseAssignmentStatus;
 use App\Enums\CourseStatus;
 use App\Models\Course;
+use App\Models\CourseAssignment;
+use App\Models\User;
+use App\Services\EmployeeCourseWorkspaceService;
+use App\Support\Permissions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -18,9 +23,15 @@ class CourseController extends Controller
 {
     use InteractsWithIndexTables;
 
-    public function index(Request $request): Response|StreamedResponse
+    public function index(Request $request, EmployeeCourseWorkspaceService $workspaceService): Response|StreamedResponse
     {
         $this->authorize('viewAny', Course::class);
+
+        if ($this->shouldShowEmployeeWorkspace($request->user())) {
+            return Inertia::render('courses/index', [
+                'employeeWorkspace' => $workspaceService->for($request->user()),
+            ]);
+        }
 
         $filters = $this->validateIndex($request, ['title', 'status', 'estimated_minutes', 'created_at', 'updated_at'], [
             'status' => ['nullable', 'string'],
@@ -147,6 +158,48 @@ class CourseController extends Controller
         return back()->with('success', 'Course published successfully.');
     }
 
+    public function selfAssign(Request $request, Course $course): RedirectResponse
+    {
+        $this->authorize('selfAssign', $course);
+
+        $user = $request->user();
+
+        $mandatoryAssignment = CourseAssignment::query()
+            ->where('course_id', $course->id)
+            ->where('assigned_to_user_id', $user->id)
+            ->where(fn ($query) => $query->whereNull('assigned_by')->orWhere('assigned_by', '<>', $user->id))
+            ->latest('assigned_at')
+            ->first();
+
+        if ($mandatoryAssignment) {
+            return redirect()
+                ->route('assignments.show', $mandatoryAssignment)
+                ->with('success', 'Opening your mandatory course assignment.');
+        }
+
+        $assignment = CourseAssignment::query()->firstOrCreate(
+            [
+                'course_id' => $course->id,
+                'assigned_to_user_id' => $user->id,
+                'assigned_by' => $user->id,
+            ],
+            [
+                'tenant_id' => $user->tenant_id,
+                'assigned_at' => now(),
+                'due_date' => null,
+                'status' => CourseAssignmentStatus::Assigned,
+            ]
+        );
+
+        if ($assignment->wasRecentlyCreated) {
+            app(\App\Services\AuditLogService::class)->logModelCreated('public_course_started', $assignment);
+        }
+
+        return redirect()
+            ->route('assignments.show', $assignment)
+            ->with('success', $assignment->wasRecentlyCreated ? 'Public course started.' : 'Continuing public course.');
+    }
+
     public function destroy(Course $course): RedirectResponse
     {
         $this->authorize('delete', $course);
@@ -155,5 +208,13 @@ class CourseController extends Controller
         app(\App\Services\AuditLogService::class)->logModelDeleted('course_deleted', $course, $oldValues);
 
         return back()->with('success', 'Course deleted.');
+    }
+
+    protected function shouldShowEmployeeWorkspace(?User $user): bool
+    {
+        return $user !== null
+            && $user->can(Permissions::TAKE_TESTS)
+            && ! $user->can(Permissions::ASSIGN_TRAINING)
+            && ! $user->can(Permissions::MANAGE_COURSES);
     }
 }

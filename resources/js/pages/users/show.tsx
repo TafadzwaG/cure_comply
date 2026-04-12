@@ -1,6 +1,7 @@
 import InputError from '@/components/input-error';
 import { PageHeader } from '@/components/page-header';
 import { StatusBadge } from '@/components/status-badge';
+import { UserStatusActionDialog } from '@/components/user-status-action-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,10 +11,11 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { formatLongDateTime } from '@/lib/date';
 import PlatformLayout from '@/layouts/platform-layout';
 import { Tenant, User } from '@/types';
-import { router, useForm } from '@inertiajs/react';
-import { Building2, Eye, KeyRound, Shield, ShieldCheck, UserCog, UserRoundCheck } from 'lucide-react';
+import { Link, router, useForm } from '@inertiajs/react';
+import { Building2, Eye, KeyRound, Mail, Shield, ShieldCheck, UserCog, UserRoundCheck } from 'lucide-react';
 import { ReactNode } from 'react';
 
 interface RoleOption {
@@ -31,6 +33,16 @@ interface AuditTrailRow {
     action: string;
     entity_type: string;
     created_at: string;
+}
+
+interface UserAbilities {
+    canEdit: boolean;
+    canChangeTenant: boolean;
+    canUpdatePassword: boolean;
+    canEditAccess: boolean;
+    canDeactivate: boolean;
+    canReactivate: boolean;
+    canImpersonate: boolean;
 }
 
 interface UserRecord extends User {
@@ -52,18 +64,20 @@ export default function UserShow({
     roles,
     permissions,
     auditTrail,
+    abilities,
 }: {
     userRecord: UserRecord;
     tenants: Array<{ id: number; name: string }>;
     roles: RoleOption[];
     permissions: PermissionOption[];
     auditTrail: AuditTrailRow[];
+    abilities: UserAbilities;
 }) {
+    const hasPlaceholderEmail = isDeactivatedPlaceholderEmail(userRecord.email);
     const profileForm = useForm({
         tenant_id: userRecord.tenant_id ? String(userRecord.tenant_id) : 'platform',
         name: userRecord.name,
-        email: userRecord.email,
-        status: userRecord.status ?? 'active',
+        email: hasPlaceholderEmail ? '' : userRecord.email,
     });
 
     const passwordForm = useForm({
@@ -77,6 +91,8 @@ export default function UserShow({
     });
 
     const isSuperAdminTarget = userRecord.roles?.some((role) => role.name === 'super_admin');
+    const showAccessTab = abilities.canEditAccess;
+    const showSecurityTab = abilities.canUpdatePassword || abilities.canDeactivate || abilities.canReactivate || abilities.canImpersonate || Boolean(userRecord.tenant);
 
     const toggleAccessValue = (field: 'roles' | 'permissions', value: string) => {
         const current = accessForm.data[field];
@@ -87,21 +103,41 @@ export default function UserShow({
         );
     };
 
+    const saveProfileChanges = () => {
+        profileForm.transform((data) => ({
+            ...data,
+            email: hasPlaceholderEmail && data.email.trim() === '' ? userRecord.email : data.email,
+            tenant_id: abilities.canChangeTenant
+                ? (data.tenant_id === 'platform' ? null : Number(data.tenant_id))
+                : userRecord.tenant_id ?? null,
+        }));
+
+        profileForm.patch(route('users.update', userRecord.id), {
+            preserveScroll: true,
+        });
+    };
+
     return (
         <PlatformLayout>
             <div className="space-y-6">
                 <PageHeader
                     title={userRecord.name}
-                    description="Update user identity, access configuration, password credentials, and support actions from one workspace."
+                    description="Update user identity, password credentials, and lifecycle status from one workspace."
                 >
                     <Badge variant="outline" className="rounded-full px-3 py-1 text-[11px] uppercase tracking-[0.22em]">
-                        Cross-tenant user operations
+                        Account lifecycle workspace
                     </Badge>
-                    {!isSuperAdminTarget ? (
+                    {abilities.canReactivate ? (
+                        <UserStatusActionDialog userId={userRecord.id} userName={userRecord.name} action="reactivate" triggerLabel="Reactivate user" />
+                    ) : null}
+                    {abilities.canDeactivate ? (
+                        <UserStatusActionDialog userId={userRecord.id} userName={userRecord.name} action="deactivate" triggerLabel="Deactivate user" />
+                    ) : null}
+                    {abilities.canImpersonate && !isSuperAdminTarget ? (
                         <Button variant="outline" onClick={() => router.post(route('impersonation.start', userRecord.id))}>
                             <Eye className="size-4" />
                             <UserCog className="size-4" />
-                            Impersonate User
+                            Impersonate user
                         </Button>
                     ) : null}
                 </PageHeader>
@@ -118,10 +154,10 @@ export default function UserShow({
                 </section>
 
                 <Tabs defaultValue="profile" className="space-y-4">
-                    <TabsList className="h-auto w-full justify-start rounded-xl border border-border bg-muted/35 p-1">
-                        <TabsTrigger value="profile" className="rounded-lg px-4 py-2.5">Profile</TabsTrigger>
-                        <TabsTrigger value="access" className="rounded-lg px-4 py-2.5">Roles & permissions</TabsTrigger>
-                        <TabsTrigger value="security" className="rounded-lg px-4 py-2.5">Security</TabsTrigger>
+                    <TabsList className="w-full justify-start">
+                        <TabsTrigger value="profile">Profile</TabsTrigger>
+                        {showAccessTab ? <TabsTrigger value="access">Roles & permissions</TabsTrigger> : null}
+                        {showSecurityTab ? <TabsTrigger value="security">Security</TabsTrigger> : null}
                     </TabsList>
 
                     <TabsContent value="profile" className="space-y-4">
@@ -129,23 +165,32 @@ export default function UserShow({
                             <Card className="border-border/70 shadow-none">
                                 <CardHeader>
                                     <CardTitle>Profile information</CardTitle>
-                                    <CardDescription>Update the user identity, email address, workspace assignment, and status.</CardDescription>
+                                    <CardDescription>Update the user identity, email address, and workspace assignment.</CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <div className="grid gap-4 md:grid-cols-2">
                                         <div className="space-y-2">
                                             <Label>Name</Label>
-                                            <Input value={profileForm.data.name} onChange={(event) => profileForm.setData('name', event.target.value)} />
+                                            <Input value={profileForm.data.name} onChange={(event) => profileForm.setData('name', event.target.value)} disabled={!abilities.canEdit} />
                                             <InputError message={profileForm.errors.name} />
                                         </div>
                                         <div className="space-y-2">
-                                            <Label>Email</Label>
-                                            <Input type="email" value={profileForm.data.email} onChange={(event) => profileForm.setData('email', event.target.value)} />
+                                            <div className="flex items-center justify-between gap-2">
+                                                <Label>Email</Label>
+                                                {hasPlaceholderEmail ? <Badge variant="destructive">Deactivated</Badge> : null}
+                                            </div>
+                                            <Input
+                                                type="email"
+                                                value={profileForm.data.email}
+                                                onChange={(event) => profileForm.setData('email', event.target.value)}
+                                                disabled={!abilities.canEdit}
+                                                placeholder={hasPlaceholderEmail ? 'Enter a new email before reactivation' : 'Email address'}
+                                            />
                                             <InputError message={profileForm.errors.email} />
                                         </div>
                                     </div>
 
-                                    <div className="grid gap-4 md:grid-cols-2">
+                                    {abilities.canChangeTenant ? (
                                         <div className="space-y-2">
                                             <Label>Tenant</Label>
                                             <Select value={profileForm.data.tenant_id} onValueChange={(value) => profileForm.setData('tenant_id', value)}>
@@ -163,43 +208,33 @@ export default function UserShow({
                                             </Select>
                                             <InputError message={profileForm.errors.tenant_id} />
                                         </div>
+                                    ) : (
+                                        <SnapshotItem label="Tenant" value={userRecord.tenant?.name ?? 'Platform'} />
+                                    )}
 
-                                        <div className="space-y-2">
-                                            <Label>Status</Label>
-                                            <Select value={profileForm.data.status} onValueChange={(value) => profileForm.setData('status', value)}>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select status" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="invited">Invited</SelectItem>
-                                                    <SelectItem value="active">Active</SelectItem>
-                                                    <SelectItem value="inactive">Inactive</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                            <InputError message={profileForm.errors.status} />
-                                        </div>
+                                    <div className="rounded-xl border border-border/70 bg-muted/20 p-4 text-sm text-muted-foreground">
+                                        Status changes now use dedicated lifecycle actions so inactive accounts can archive their current email and clear active sessions safely.
+                                        {hasPlaceholderEmail ? ' Leave the email blank to keep the account deactivated, or enter a real email before reactivation.' : ''}
                                     </div>
 
-                                    <Button
-                                        onClick={() =>
-                                            profileForm.transform((data) => ({
-                                                ...data,
-                                                tenant_id: data.tenant_id === 'platform' ? null : Number(data.tenant_id),
-                                            })).patch(route('users.update', userRecord.id))
-                                        }
-                                    >
-                                        <UserCog className="size-4" />
-                                        Save profile changes
-                                    </Button>
+                                    {abilities.canEdit ? (
+                                        <Button type="button" disabled={profileForm.processing} onClick={saveProfileChanges}>
+                                            <UserCog className="size-4" />
+                                            Save profile changes
+                                        </Button>
+                                    ) : null}
                                 </CardContent>
                             </Card>
 
                             <Card className="border-border/70 bg-muted/20 shadow-none">
                                 <CardHeader>
-                                    <CardTitle>Work profile snapshot</CardTitle>
-                                    <CardDescription>Read-only operational detail from the linked employee profile.</CardDescription>
+                                    <CardTitle>Account snapshot</CardTitle>
+                                    <CardDescription>Read-only operational detail from the linked employee profile and lifecycle state.</CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-4 text-sm">
+                                    <SnapshotItem label="Current status" value={userRecord.status ?? 'active'} />
+                                    <SnapshotItem label="Archived email" value={userRecord.archived_email ?? 'None'} />
+                                    <SnapshotItem label="Deactivated at" value={formatLongDateTime(userRecord.deactivated_at)} />
                                     <SnapshotItem label="Department" value={userRecord.employee_profile?.department?.name ?? 'Not assigned'} />
                                     <SnapshotItem label="Job title" value={userRecord.employee_profile?.job_title ?? 'Not set'} />
                                     <SnapshotItem label="Branch" value={userRecord.employee_profile?.branch ?? 'Not set'} />
@@ -216,7 +251,7 @@ export default function UserShow({
                                                     <div key={entry.id} className="rounded-lg border border-border/70 bg-background p-3">
                                                         <div className="text-sm font-medium">{entry.action}</div>
                                                         <div className="text-xs text-muted-foreground">
-                                                            {entry.entity_type} · {entry.created_at}
+                                                            {entry.entity_type} · {formatLongDateTime(entry.created_at)}
                                                         </div>
                                                     </div>
                                                 ))
@@ -228,134 +263,170 @@ export default function UserShow({
                         </div>
                     </TabsContent>
 
-                    <TabsContent value="access" className="space-y-4">
-                        <div className="grid gap-6 xl:grid-cols-2">
-                            <Card className="border-border/70 shadow-none">
-                                <CardHeader>
-                                    <CardTitle>Role assignment</CardTitle>
-                                    <CardDescription>Roles define the default permission baseline for the account.</CardDescription>
-                                </CardHeader>
-                                <CardContent className="grid gap-3">
-                                    {roles.map((role) => (
-                                        <ToggleRow
-                                            key={role.id}
-                                            checked={accessForm.data.roles.includes(role.name)}
-                                            label={role.name.replaceAll('_', ' ')}
-                                            description={`Grant the ${role.name.replaceAll('_', ' ')} role to this user.`}
-                                            onCheckedChange={() => toggleAccessValue('roles', role.name)}
-                                        />
-                                    ))}
-                                </CardContent>
-                            </Card>
+                    {showAccessTab ? (
+                        <TabsContent value="access" className="space-y-4">
+                            <div className="grid gap-6 xl:grid-cols-2">
+                                <Card className="border-border/70 shadow-none">
+                                    <CardHeader>
+                                        <CardTitle>Role assignment</CardTitle>
+                                        <CardDescription>Roles define the default permission baseline for the account.</CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="grid gap-3">
+                                        {roles.map((role) => (
+                                            <ToggleRow
+                                                key={role.id}
+                                                checked={accessForm.data.roles.includes(role.name)}
+                                                label={role.name.replaceAll('_', ' ')}
+                                                description={`Grant the ${role.name.replaceAll('_', ' ')} role to this user.`}
+                                                onCheckedChange={() => toggleAccessValue('roles', role.name)}
+                                            />
+                                        ))}
+                                    </CardContent>
+                                </Card>
 
-                            <Card className="border-border/70 shadow-none">
-                                <CardHeader>
-                                    <CardTitle>Direct permissions</CardTitle>
-                                    <CardDescription>Use direct permissions sparingly when a role alone is not precise enough.</CardDescription>
-                                </CardHeader>
-                                <CardContent className="grid gap-3">
-                                    {permissions.map((permission) => (
-                                        <ToggleRow
-                                            key={permission.id}
-                                            checked={accessForm.data.permissions.includes(permission.name)}
-                                            label={permission.name}
-                                            description={`Directly assign ${permission.name} to this account.`}
-                                            onCheckedChange={() => toggleAccessValue('permissions', permission.name)}
-                                        />
-                                    ))}
-                                </CardContent>
-                            </Card>
-                        </div>
+                                <Card className="border-border/70 shadow-none">
+                                    <CardHeader>
+                                        <CardTitle>Direct permissions</CardTitle>
+                                        <CardDescription>Use direct permissions sparingly when a role alone is not precise enough.</CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="grid gap-3">
+                                        {permissions.map((permission) => (
+                                            <ToggleRow
+                                                key={permission.id}
+                                                checked={accessForm.data.permissions.includes(permission.name)}
+                                                label={permission.name}
+                                                description={`Directly assign ${permission.name} to this account.`}
+                                                onCheckedChange={() => toggleAccessValue('permissions', permission.name)}
+                                            />
+                                        ))}
+                                    </CardContent>
+                                </Card>
+                            </div>
 
-                        <InputError message={accessForm.errors.roles || accessForm.errors.permissions} />
-                        <Button onClick={() => accessForm.patch(route('users.access.update', userRecord.id))}>
-                            <ShieldCheck className="size-4" />
-                            Save access changes
-                        </Button>
-                    </TabsContent>
+                            <InputError message={accessForm.errors.roles || accessForm.errors.permissions} />
+                            <Button onClick={() => accessForm.patch(route('users.access.update', userRecord.id))}>
+                                <ShieldCheck className="size-4" />
+                                Save access changes
+                            </Button>
+                        </TabsContent>
+                    ) : null}
 
-                    <TabsContent value="security" className="space-y-4">
-                        <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-                            <Card className="border-border/70 shadow-none">
-                                <CardHeader>
-                                    <CardTitle>Password reset</CardTitle>
-                                    <CardDescription>Set a new password directly for this account.</CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label>New password</Label>
-                                        <Input
-                                            type="password"
-                                            value={passwordForm.data.password}
-                                            onChange={(event) => passwordForm.setData('password', event.target.value)}
-                                        />
-                                        <InputError message={passwordForm.errors.password} />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>Confirm password</Label>
-                                        <Input
-                                            type="password"
-                                            value={passwordForm.data.password_confirmation}
-                                            onChange={(event) => passwordForm.setData('password_confirmation', event.target.value)}
-                                        />
-                                    </div>
-                                    <Button onClick={() => passwordForm.patch(route('users.password.update', userRecord.id))}>
-                                        <KeyRound className="size-4" />
-                                        Update password
-                                    </Button>
-                                </CardContent>
-                            </Card>
+                    {showSecurityTab ? (
+                        <TabsContent value="security" className="space-y-4">
+                            <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+                                {abilities.canUpdatePassword ? (
+                                    <Card className="border-border/70 shadow-none">
+                                        <CardHeader>
+                                            <CardTitle>Password reset</CardTitle>
+                                            <CardDescription>Set a new password directly for this account.</CardDescription>
+                                        </CardHeader>
+                                        <CardContent className="space-y-4">
+                                            <div className="space-y-2">
+                                                <Label>New password</Label>
+                                                <Input
+                                                    type="password"
+                                                    value={passwordForm.data.password}
+                                                    onChange={(event) => passwordForm.setData('password', event.target.value)}
+                                                />
+                                                <InputError message={passwordForm.errors.password} />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>Confirm password</Label>
+                                                <Input
+                                                    type="password"
+                                                    value={passwordForm.data.password_confirmation}
+                                                    onChange={(event) => passwordForm.setData('password_confirmation', event.target.value)}
+                                                />
+                                            </div>
+                                            <Button onClick={() => passwordForm.patch(route('users.password.update', userRecord.id))}>
+                                                <KeyRound className="size-4" />
+                                                Update password
+                                            </Button>
+                                        </CardContent>
+                                    </Card>
+                                ) : (
+                                    <Card className="border-border/70 shadow-none">
+                                        <CardHeader>
+                                            <CardTitle>Password reset</CardTitle>
+                                            <CardDescription>Password changes are not available for your current access level.</CardDescription>
+                                        </CardHeader>
+                                        <CardContent className="text-sm text-muted-foreground">
+                                            Contact a super admin if this account needs a direct password reset.
+                                        </CardContent>
+                                    </Card>
+                                )}
 
-                            <Card className="border-border/70 bg-muted/20 shadow-none">
-                                <CardHeader>
-                                    <CardTitle>Support actions</CardTitle>
-                                    <CardDescription>High-impact actions available to super admins for account support.</CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <ActionDetail
-                                        icon={Eye}
-                                        title="Impersonate user"
-                                        description="Open the platform exactly as this user sees it to debug permission or workflow issues."
-                                        action={
-                                            isSuperAdminTarget ? null : (
-                                                <Button variant="outline" onClick={() => router.post(route('impersonation.start', userRecord.id))}>
-                                                    <Eye className="size-4" />
-                                                    <UserCog className="size-4" />
-                                                    Start impersonation
-                                                </Button>
-                                            )
-                                        }
-                                    />
-                                    <Separator />
-                                    <ActionDetail
-                                        icon={Building2}
-                                        title="Tenant context"
-                                        description="Review the tenant workspace associated with this account."
-                                        action={
-                                            userRecord.tenant ? (
-                                                <Button asChild variant="outline">
-                                                    <a href={route('tenants.show', userRecord.tenant.id)}>
-                                                        <Building2 className="size-4" />
-                                                        View tenant
-                                                    </a>
-                                                </Button>
-                                            ) : null
-                                        }
-                                    />
-                                    <Separator />
-                                    <ActionDetail
-                                        icon={Shield}
-                                        title="Access posture"
-                                        description="Roles and direct permissions are managed separately so emergency support overrides stay explicit."
-                                    />
-                                </CardContent>
-                            </Card>
-                        </div>
-                    </TabsContent>
+                                <Card className="border-border/70 bg-muted/20 shadow-none">
+                                    <CardHeader>
+                                        <CardTitle>Support actions</CardTitle>
+                                        <CardDescription>High-impact actions available for account support and lifecycle management.</CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <ActionDetail
+                                            icon={Mail}
+                                            title="Email reuse lifecycle"
+                                            description="Deactivate an account to archive its current email and make that address available for a new invitation or replacement account."
+                                        />
+                                        <Separator />
+                                        <ActionDetail
+                                            icon={Shield}
+                                            title="Account lifecycle"
+                                            description="Deactivation clears active sessions and blocks sign-in. Reactivation requires a real unique email address on the profile."
+                                            action={
+                                                <div className="flex flex-wrap gap-2">
+                                                    {abilities.canDeactivate ? (
+                                                        <UserStatusActionDialog userId={userRecord.id} userName={userRecord.name} action="deactivate" compact triggerLabel="Deactivate" />
+                                                    ) : null}
+                                                    {abilities.canReactivate ? (
+                                                        <UserStatusActionDialog userId={userRecord.id} userName={userRecord.name} action="reactivate" compact triggerLabel="Reactivate" />
+                                                    ) : null}
+                                                </div>
+                                            }
+                                        />
+                                        <Separator />
+                                        <ActionDetail
+                                            icon={Eye}
+                                            title="Impersonate user"
+                                            description="Open the platform exactly as this user sees it to debug permission or workflow issues."
+                                            action={
+                                                abilities.canImpersonate && !isSuperAdminTarget ? (
+                                                    <Button variant="outline" onClick={() => router.post(route('impersonation.start', userRecord.id))}>
+                                                        <Eye className="size-4" />
+                                                        <UserCog className="size-4" />
+                                                        Start impersonation
+                                                    </Button>
+                                                ) : null
+                                            }
+                                        />
+                                        <Separator />
+                                        <ActionDetail
+                                            icon={Building2}
+                                            title="Tenant context"
+                                            description="Review the tenant workspace associated with this account."
+                                            action={
+                                                userRecord.tenant ? (
+                                                    <Button asChild variant="outline">
+                                                        <Link href={route('tenants.show', userRecord.tenant.id)}>
+                                                            <Building2 className="size-4" />
+                                                            View tenant
+                                                        </Link>
+                                                    </Button>
+                                                ) : null
+                                            }
+                                        />
+                                    </CardContent>
+                                </Card>
+                            </div>
+                        </TabsContent>
+                    ) : null}
                 </Tabs>
             </div>
         </PlatformLayout>
     );
+}
+
+function isDeactivatedPlaceholderEmail(email?: string | null) {
+    return Boolean(email?.toLowerCase().includes('@users.privacycure.invalid'));
 }
 
 function MetricCard({

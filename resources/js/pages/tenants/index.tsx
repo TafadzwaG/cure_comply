@@ -102,51 +102,37 @@ export default function TenantsIndex({
                 tableDescription="The tenant table now surfaces contact, registration, and workspace footprint details at a glance."
                 exportable
                 tableToolbarAddon={
-                    <div className="rounded-2xl border border-border/70 bg-muted/15 p-2">
-                        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
-                            {tabs.map((tab) => {
-                                const Icon = tab.icon;
+                    <div className="flex flex-wrap gap-1 rounded-lg bg-neutral-100 p-1 dark:bg-neutral-800">
+                        {tabs.map((tab) => {
+                            const Icon = tab.icon;
 
-                                return (
-                                    <Link
-                                        key={tab.label}
-                                        href={tab.href}
+                            return (
+                                <Link
+                                    key={tab.label}
+                                    href={tab.href}
+                                    className={cn(
+                                        'flex min-h-10 items-center gap-2 rounded-md px-3.5 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#083d77]/30 focus-visible:ring-offset-2',
+                                        tab.active
+                                            ? 'bg-white text-foreground shadow-sm dark:bg-neutral-700 dark:text-neutral-100'
+                                            : 'text-neutral-500 hover:bg-neutral-200/60 hover:text-black dark:text-neutral-400 dark:hover:bg-neutral-700/60 dark:hover:text-neutral-100',
+                                    )}
+                                >
+                                    <Icon className="size-4" />
+                                    <span>{tab.label}</span>
+                                    <Badge
+                                        variant="outline"
                                         className={cn(
-                                            'group flex min-h-20 items-center justify-between rounded-xl border px-4 py-3 transition-all',
+                                            'ml-1 rounded-full border px-2 py-0.5 text-[11px]',
                                             tab.active
-                                                ? 'border-[#083d77]/20 bg-[#083d77] text-white shadow-sm'
-                                                : 'border-border/70 bg-background text-foreground hover:border-[#083d77]/20 hover:bg-[#083d77]/[0.04]',
+                                                ? 'border-border/70 bg-background/80 text-foreground dark:border-neutral-600 dark:bg-neutral-800'
+                                                : 'border-border/70 bg-background/70 text-muted-foreground dark:border-neutral-700 dark:bg-neutral-900/60 dark:text-neutral-300',
                                         )}
                                     >
-                                        <div className="space-y-1">
-                                            <div
-                                                className={cn(
-                                                    'flex items-center gap-2 text-sm font-medium tracking-tight',
-                                                    tab.active ? 'text-white' : 'text-foreground',
-                                                )}
-                                            >
-                                                <Icon className={cn('size-4', tab.active ? 'text-white' : 'text-[#083d77]')} />
-                                                <span>{tab.label}</span>
-                                            </div>
-                                            <p className={cn('text-xs', tab.active ? 'text-white/80' : 'text-muted-foreground')}>
-                                                {tab.active ? 'Current tenant view' : 'Open this tenant state'}
-                                            </p>
-                                        </div>
-                                        <Badge
-                                            variant="outline"
-                                            className={cn(
-                                                'rounded-full px-3 py-1 text-xs',
-                                                tab.active
-                                                    ? 'border-white/20 bg-white/10 text-white'
-                                                    : 'border-[#083d77]/15 bg-[#083d77]/[0.05] text-[#083d77]',
-                                            )}
-                                        >
-                                            {tab.count}
-                                        </Badge>
-                                    </Link>
-                                );
-                            })}
-                        </div>
+                                        {tab.count}
+                                    </Badge>
+                                </Link>
+                            );
+                        })}
                     </div>
                 }
             >

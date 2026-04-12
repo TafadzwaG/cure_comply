@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ArrayXlsxExport;
 use App\Http\Controllers\Concerns\InteractsWithIndexTables;
+use App\Http\Requests\EmployeeImportRequest;
 use App\Http\Requests\EmployeeProfileRequest;
 use App\Models\AuditLog;
 use App\Models\ComplianceResponse;
@@ -11,9 +13,12 @@ use App\Models\Department;
 use App\Models\EmployeeProfile;
 use App\Models\EvidenceFile;
 use App\Models\LessonProgress;
+use App\Models\Tenant;
 use App\Models\TestAssignment;
 use App\Models\TestAttempt;
 use App\Models\User;
+use App\Services\EmployeeImportService;
+use App\Services\UserLifecycleService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -24,7 +29,13 @@ class EmployeeProfileController extends Controller
 {
     use InteractsWithIndexTables;
 
-    public function index(Request $request): Response|StreamedResponse
+    public function __construct(
+        protected UserLifecycleService $userLifecycleService,
+        protected EmployeeImportService $employeeImportService,
+    ) {
+    }
+
+    public function index(Request $request): Response|RedirectResponse
     {
         $this->authorize('viewAny', EmployeeProfile::class);
 
@@ -73,15 +84,27 @@ class EmployeeProfileController extends Controller
             $rows = $query->get()->map(fn (EmployeeProfile $profile) => [
                 $profile->user?->name,
                 $profile->user?->email,
+                $profile->user?->roles?->pluck('name')->first(),
                 $profile->department?->name ?: 'Unassigned',
                 $profile->job_title ?: 'Not set',
                 $profile->employment_type ?: 'Not set',
-                $profile->risk_level ?: 'Unscored',
-                $profile->user?->last_login_at?->format('Y-m-d H:i') ?: 'Never',
+                $profile->start_date?->format('Y-m-d'),
+                $profile->risk_level ?: '',
+                $profile->branch ?: '',
+                $profile->employee_number ?: '',
+                $profile->phone ?: '',
+                $profile->alternate_phone ?: '',
                 $profile->status->value,
             ])->all();
 
-            return $this->exportTable('employees.xlsx', ['Name', 'Email', 'Department', 'Job Title', 'Employment Type', 'Risk Level', 'Last Login', 'Status'], $rows);
+            return $this->queueTableExport(
+                $request,
+                'employees.index',
+                $filters,
+                ['Name', 'Email', 'Role', 'Department', 'Job Title', 'Employment Type', 'Start Date', 'Risk Level', 'Branch', 'Employee Number', 'Phone', 'Alternate Phone', 'Status'],
+                $rows,
+                'Employees',
+            );
         }
 
         $paginated = $query->paginate($this->perPage($filters))->withQueryString();
@@ -119,6 +142,9 @@ class EmployeeProfileController extends Controller
         return Inertia::render('employees/index', [
             'employees' => $employees,
             'departments' => Department::query()->orderBy('name')->get(['id', 'name']),
+            'tenants' => $request->user()?->isSuperAdmin()
+                ? Tenant::query()->orderBy('name')->get(['id', 'name'])
+                : [],
             'filters' => $filters,
             'stats' => [
                 'total' => EmployeeProfile::query()->count(),
@@ -129,6 +155,47 @@ class EmployeeProfileController extends Controller
                 'avgTestScore' => round((float) TestAttempt::query()->avg('percentage')),
             ],
         ]);
+    }
+
+    public function importTemplate(): StreamedResponse
+    {
+        $this->authorize('create', EmployeeProfile::class);
+
+        return (new ArrayXlsxExport(
+            ['Name', 'Email', 'Role', 'Department', 'Job Title', 'Employment Type', 'Start Date', 'Risk Level', 'Branch', 'Employee Number', 'Phone', 'Alternate Phone'],
+            [],
+        ))->download('employee-import-template.xlsx');
+    }
+
+    public function import(EmployeeImportRequest $request): RedirectResponse
+    {
+        $this->authorize('create', EmployeeProfile::class);
+
+        $summary = $this->employeeImportService->import(
+            $request->file('file'),
+            $request->user(),
+            (int) $request->tenantId(),
+        );
+
+        $parts = [];
+
+        if ($summary['updated'] > 0) {
+            $parts[] = sprintf('%d existing %s updated.', $summary['updated'], $summary['updated'] === 1 ? 'employee was' : 'employees were');
+        }
+
+        if ($summary['invited'] > 0) {
+            $parts[] = sprintf('%d new %s queued for invitation delivery.', $summary['invited'], $summary['invited'] === 1 ? 'employee was' : 'employees were');
+        }
+
+        if ($summary['resent'] > 0) {
+            $parts[] = sprintf('%d pending %s re-queued.', $summary['resent'], $summary['resent'] === 1 ? 'invitation was' : 'invitations were');
+        }
+
+        if ($parts === []) {
+            $parts[] = 'No employee rows were changed.';
+        }
+
+        return back()->with('success', 'Employee import completed. '.implode(' ', $parts));
     }
 
     public function show(EmployeeProfile $employee): Response
@@ -319,8 +386,8 @@ class EmployeeProfileController extends Controller
     {
         $this->authorize('update', $employee);
 
-        $employee->user->update($request->safe()->only(['name', 'email', 'status']));
-        $employee->update($request->safe()->except(['name', 'email', 'status']));
+        $employee->user->update($request->safe()->only(['name', 'email']));
+        $employee->update($request->safe()->except(['name', 'email']));
 
         return back()->with('success', 'Employee updated.');
     }
@@ -329,9 +396,18 @@ class EmployeeProfileController extends Controller
     {
         $this->authorize('delete', $employee);
 
-        $employee->delete();
-        User::query()->whereKey($employee->user_id)->delete();
+        $user = $employee->user;
 
-        return back()->with('success', 'Employee removed.');
+        if (! $user) {
+            return back()->with('error', 'This employee is missing a linked user account and cannot be deactivated.');
+        }
+
+        if ($user->isInactive()) {
+            return back()->with('error', 'This employee account is already inactive.');
+        }
+
+        $this->userLifecycleService->deactivate($user);
+
+        return back()->with('success', 'Employee account deactivated.');
     }
 }

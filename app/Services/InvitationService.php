@@ -10,8 +10,10 @@ use App\Models\User;
 use App\Notifications\InvitationNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
+use Throwable;
 
 class InvitationService
 {
@@ -45,7 +47,28 @@ class InvitationService
             return $invite;
         });
 
-        Notification::route('mail', $invite->email)->notify((new InvitationNotification($invite))->onQueue('mail'));
+        try {
+            Notification::route('mail', $invite->email)->notify((new InvitationNotification($invite))->onQueue('mail'));
+
+            Log::info('Invitation email queued.', [
+                'invitation_id' => $invite->id,
+                'tenant_id' => $invite->tenant_id,
+                'email' => $invite->email,
+                'queue' => 'mail',
+                'invited_by' => $inviter->id,
+            ]);
+        } catch (Throwable $exception) {
+            Log::error('Invitation email queue dispatch failed.', [
+                'invitation_id' => $invite->id,
+                'tenant_id' => $invite->tenant_id,
+                'email' => $invite->email,
+                'queue' => 'mail',
+                'invited_by' => $inviter->id,
+                'message' => $exception->getMessage(),
+            ]);
+
+            report($exception);
+        }
 
         return $invite;
     }

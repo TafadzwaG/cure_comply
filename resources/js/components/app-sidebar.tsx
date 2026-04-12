@@ -5,15 +5,20 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import {
+    Award,
     Bell,
     Building2,
+    CircleHelp,
     ClipboardCheck,
+    Download,
     FileCheck2,
     FileSearch,
+    FileText,
     GraduationCap,
     LayoutGrid,
     ShieldCheck,
     SquareKanban,
+    UserRound,
     UserRoundPlus,
     Users,
     UsersRound,
@@ -40,7 +45,7 @@ export function AppSidebar() {
 
               { title: 'Employees', url: '/employees', icon: Users, visible: can('manage users') },
               { title: 'Courses', url: '/courses', icon: GraduationCap, visible: can('manage courses') },
-              { title: 'Assignments', url: '/assignments', icon: SquareKanban, visible: can('assign training') || can('manage courses') },
+              { title: 'Courses Assignments', url: '/assignments', icon: SquareKanban, visible: can('assign training') || can('manage courses') },
             //   { title: 'Assessments ', url: '/tests', icon: ClipboardCheck, visible: can('manage tests') },
               { title: 'Test Assignments', url: '/tests?tab=assignments', icon: UsersRound, visible: can('manage tests') },
               { title: 'Assessments Attempts', url: '/test-attempts', icon: ClipboardCheck, visible: can('manage tests') },
@@ -53,6 +58,7 @@ export function AppSidebar() {
                   visible: can('manage compliance submissions') || can('answer compliance questions'),
               },
               { title: 'Frameworks Evidence', url: '/evidence', icon: FileSearch, visible: can('review evidence') || can('upload evidence') },
+              { title: 'Files', url: '/files', icon: FileText, visible: can('view file library') || can('manage file library') },
           ])
         : hasRole('company_admin')
           ? makeNav([
@@ -72,6 +78,7 @@ export function AppSidebar() {
                     visible: can('manage compliance submissions') || can('answer compliance questions'),
                 },
                 { title: 'Evidence', url: '/evidence', icon: FileSearch, visible: can('upload evidence') || can('review evidence') },
+                { title: 'Files', url: '/files', icon: FileText, visible: can('view file library') || can('manage file library') },
             ])
           : hasRole('reviewer')
             ? makeNav([
@@ -89,39 +96,46 @@ export function AppSidebar() {
                       icon: ShieldCheck,
                       visible: can('review evidence') || can('manage compliance submissions'),
                   },
+                  { title: 'Files', url: '/files', icon: FileText, visible: can('view file library') || can('manage file library') },
               ])
             : makeNav([
                   { title: 'Dashboard', url: '/dashboard', icon: LayoutGrid },
-                  { title: 'Courses', url: '/courses', icon: GraduationCap, visible: can('manage courses') || can('assign training') },
-                  { title: 'Assignments', url: '/assignments', icon: SquareKanban, visible: can('assign training') || can('take tests') },
-                  { title: 'Tests', url: '/tests', icon: ClipboardCheck, visible: can('take tests') || can('manage tests') },
+                  { title: 'My Courses', url: '/courses', icon: GraduationCap, visible: can('take tests') },
+                  { title: 'My Assignments', url: '/assignments', icon: SquareKanban, visible: can('take tests') },
+                  { title: 'My Tests', url: '/tests', icon: ClipboardCheck, visible: can('take tests') },
                   {
-                      title: 'Compliance',
-                      url: '/submissions',
-                      icon: ShieldCheck,
-                      visible: can('answer compliance questions') || can('upload evidence'),
-                  },
-                  {
-                      title: 'Submissions',
+                      title: 'Assigned Submissions',
                       url: '/submissions',
                       icon: FileCheck2,
                       visible: can('answer compliance questions') || can('upload evidence'),
                   },
+                  { title: 'Files', url: '/files', icon: FileText, visible: can('view file library') || can('manage file library') },
+                  { title: 'Certificates', url: '/certificates', icon: Award, visible: can('take tests') },
               ]);
+
+    const accountFooterItems: NavItem[] = makeNav([
+        { title: 'Help / Support', url: '/help', icon: CircleHelp },
+        { title: 'Profile', url: '/settings/profile', icon: UserRound },
+        { title: 'Notifications', url: '/notifications', icon: Bell, badgeCount: notification_unread_count },
+    ]);
 
     const footerNavItems: NavItem[] = hasRole('super_admin')
         ? makeNav([
               { title: 'Users', url: '/users', icon: Users, visible: can('manage tenants') && can('manage users') },
               { title: 'Reports', url: '/reports', icon: ClipboardCheck, visible: can('view reports') },
-              { title: 'Notifications', url: '/notifications', icon: Bell, badgeCount: notification_unread_count },
+              { title: 'Exports', url: '/exports', icon: Download, visible: can('export reports') },
+              ...accountFooterItems,
               { title: 'Audit Logs', url: '/audit-logs', icon: FileSearch, visible: can('view audit logs') },
           ])
         : hasRole('company_admin')
           ? makeNav([
                 { title: 'Reports', url: '/reports', icon: ClipboardCheck, visible: can('view reports') },
-                { title: 'Notifications', url: '/notifications', icon: Bell, badgeCount: notification_unread_count },
+                { title: 'Exports', url: '/exports', icon: Download, visible: can('export reports') },
+                ...accountFooterItems,
             ])
-          : makeNav([{ title: 'Notifications', url: '/notifications', icon: Bell, badgeCount: notification_unread_count }]);
+          : hasRole('reviewer')
+            ? accountFooterItems
+          : accountFooterItems;
 
     return (
         <Sidebar collapsible="icon" variant="inset">

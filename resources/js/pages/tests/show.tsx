@@ -253,17 +253,17 @@ export default function TestShow({ test, attempts, canTake, canManage, attemptsU
                 </section>
 
                 <Tabs defaultValue={defaultTab} className="space-y-4">
-                    <TabsList className="h-auto w-full justify-start rounded-lg border border-border bg-muted/40 p-1">
-                        <TabsTrigger value="overview" className="rounded-md px-4 py-2">
+                    <TabsList className="w-full justify-start">
+                        <TabsTrigger value="overview">
                             Overview
                         </TabsTrigger>
-                        <TabsTrigger value="questions" className="rounded-md px-4 py-2">
+                        <TabsTrigger value="questions">
                             Questions
                         </TabsTrigger>
-                        <TabsTrigger value="settings" className="rounded-md px-4 py-2">
+                        <TabsTrigger value="settings">
                             Settings
                         </TabsTrigger>
-                        <TabsTrigger value="assignments" className="rounded-md px-4 py-2">
+                        <TabsTrigger value="assignments">
                             Assignments
                         </TabsTrigger>
                     </TabsList>
@@ -334,7 +334,7 @@ export default function TestShow({ test, attempts, canTake, canManage, attemptsU
                                     ) : null}
                                     {canManage ? (
                                         <Button asChild variant="outline" className="justify-start gap-2">
-                                            <Link href={route('tests.show', { test: test.id, tab: 'assignments' })}>
+                                            <Link href={route('tests.assignments.create', { test_id: test.id })}>
                                                 <UserCheck className="size-4" />
                                                 Assign employees
                                             </Link>

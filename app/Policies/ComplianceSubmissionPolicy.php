@@ -18,8 +18,13 @@ class ComplianceSubmissionPolicy
 
     public function view(User $user, ComplianceSubmission $complianceSubmission): bool
     {
-        return ($user->can(Permissions::MANAGE_COMPLIANCE_SUBMISSIONS) || $user->can(Permissions::ANSWER_COMPLIANCE_QUESTIONS))
-            && $this->sameTenant($user, $complianceSubmission);
+        if ($user->can(Permissions::MANAGE_COMPLIANCE_SUBMISSIONS)) {
+            return $this->sameTenant($user, $complianceSubmission);
+        }
+
+        return $user->can(Permissions::ANSWER_COMPLIANCE_QUESTIONS)
+            && $this->sameTenant($user, $complianceSubmission)
+            && $this->assignedToUserByManager($user, $complianceSubmission);
     }
 
     public function create(User $user): bool
@@ -32,8 +37,27 @@ class ComplianceSubmissionPolicy
         return $user->can(Permissions::MANAGE_COMPLIANCE_SUBMISSIONS) && $this->sameTenant($user, $complianceSubmission);
     }
 
+    public function respond(User $user, ComplianceSubmission $complianceSubmission): bool
+    {
+        if ($user->can(Permissions::MANAGE_COMPLIANCE_SUBMISSIONS)) {
+            return $this->sameTenant($user, $complianceSubmission);
+        }
+
+        return $user->can(Permissions::ANSWER_COMPLIANCE_QUESTIONS)
+            && $this->sameTenant($user, $complianceSubmission)
+            && $this->assignedToUserByManager($user, $complianceSubmission);
+    }
+
     public function delete(User $user, ComplianceSubmission $complianceSubmission): bool
     {
         return $user->can(Permissions::MANAGE_COMPLIANCE_SUBMISSIONS) && $this->sameTenant($user, $complianceSubmission);
+    }
+
+    protected function assignedToUserByManager(User $user, ComplianceSubmission $complianceSubmission): bool
+    {
+        return $complianceSubmission->assignments()
+            ->where('assigned_to_user_id', $user->id)
+            ->whereHas('assigner', fn ($query) => $query->role(['company_admin', 'super_admin']))
+            ->exists();
     }
 }

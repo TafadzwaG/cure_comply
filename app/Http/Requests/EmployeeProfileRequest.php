@@ -27,7 +27,6 @@ class EmployeeProfileRequest extends FormRequest
             'employee_number' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
             'alternate_phone' => ['nullable', 'string', 'max:50'],
-            'status' => ['required', 'string', 'max:50'],
         ];
     }
 }

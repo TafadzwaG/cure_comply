@@ -43,6 +43,14 @@ composer dev
 
 This runs the PHP server, queue worker, and Vite dev server concurrently.
 
+The bundled worker listens to both the `mail` and `default` queues:
+
+```bash
+php artisan queue:listen --queue=mail,default --tries=1
+```
+
+This matters for invitation emails and other queued mail notifications, because they are dispatched onto the `mail` queue.
+
 ## Project Structure
 
 ```

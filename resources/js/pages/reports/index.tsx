@@ -418,12 +418,12 @@ export default function ReportsIndex({ reports, filters, filterOptions }: Props)
 
                     <div className="space-y-6">
                         <Tabs defaultValue="training" className="space-y-4">
-                            <TabsList className="h-auto w-full justify-start rounded-xl border border-border bg-muted/35 p-1">
+                            <TabsList className="w-full justify-start">
                                 {Object.entries(reportMeta).map(([key, meta]) => {
                                     const Icon = meta.icon;
 
                                     return (
-                                        <TabsTrigger key={key} value={meta.value} className="gap-2 rounded-lg px-4 py-2.5">
+                                        <TabsTrigger key={key} value={meta.value} className="gap-2">
                                             <Icon className="size-4" />
                                             {meta.title.replace(' Report', '')}
                                         </TabsTrigger>
@@ -453,7 +453,14 @@ export default function ReportsIndex({ reports, filters, filterOptions }: Props)
                 <BrandCard
                     title="Recent export queue"
                     description="Track the latest queued, completed, and failed report exports from this account."
-                    headerRight={<IconChip icon={<Download className="size-4" />} />}
+                    headerRight={
+                        <div className="flex items-center gap-2">
+                            <IconChip icon={<Download className="size-4" />} />
+                            <Button asChild size="sm" variant="outline">
+                                <a href={route('exports.index')}>Open exports</a>
+                            </Button>
+                        </div>
+                    }
                 >
                     {recent_exports.length ? (
                         <div className="space-y-3">

@@ -89,15 +89,22 @@ class InvitationController extends Controller
         $this->authorize('create', Invitation::class);
 
         $user = request()->user();
+        $departmentsQuery = Department::query()->orderBy('name');
+        $recentInvitationsQuery = Invitation::query()
+            ->with(['tenant:id,name', 'department:id,name'])
+            ->latest()
+            ->limit(8);
+
+        if ($user && ! $user->isSuperAdmin()) {
+            $departmentsQuery->where('tenant_id', $user->tenant_id);
+            $recentInvitationsQuery->where('tenant_id', $user->tenant_id);
+        }
 
         return Inertia::render('invitations/create', [
-            'departments' => Department::query()->orderBy('name')->get(),
+            'departments' => $departmentsQuery->get(),
             'tenants' => $user?->isSuperAdmin() ? Tenant::query()->orderBy('name')->get(['id', 'name', 'status']) : [],
             'isSuperAdmin' => (bool) $user?->isSuperAdmin(),
-            'recentInvitations' => Invitation::query()
-                ->with(['tenant:id,name', 'department:id,name'])
-                ->latest()
-                ->limit(8)
+            'recentInvitations' => $recentInvitationsQuery
                 ->get()
                 ->map(fn (Invitation $invitation) => [
                     'id' => $invitation->id,
@@ -119,7 +126,7 @@ class InvitationController extends Controller
         $this->authorize('create', Invitation::class);
         $this->invitationService->create($request->validated(), $request->user());
 
-        return back()->with('success', 'Invitation sent.');
+        return back()->with('success', 'Invitation queued for delivery.');
     }
 
     public function destroy(Invitation $invitation): RedirectResponse

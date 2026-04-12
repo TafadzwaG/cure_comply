@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Support\Permissions;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
 
@@ -9,7 +10,7 @@ class UserPasswordUpdateRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->isSuperAdmin() ?? false;
+        return (bool) $this->user()?->can(Permissions::MANAGE_USERS);
     }
 
     public function rules(): array

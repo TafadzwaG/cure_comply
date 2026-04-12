@@ -46,7 +46,6 @@ export default function EmployeeShow({
     const profileForm = useForm({
         name: employee.user?.name ?? '',
         email: employee.user?.email ?? '',
-        status: employee.user?.status ?? employee.status,
         department_id: employee.department_id ? String(employee.department_id) : 'unassigned',
         manager_id: employee.manager_id ? String(employee.manager_id) : 'none',
         job_title: employee.job_title ?? '',
@@ -104,13 +103,13 @@ export default function EmployeeShow({
                 </section>
 
                 <Tabs defaultValue="profile" className="space-y-4">
-                    <TabsList className="h-auto w-full justify-start rounded-xl border border-border bg-muted/35 p-1">
-                        <TabsTrigger value="profile" className="rounded-lg px-4 py-2.5">Profile</TabsTrigger>
-                        <TabsTrigger value="training" className="rounded-lg px-4 py-2.5">Training</TabsTrigger>
-                        <TabsTrigger value="assessments" className="rounded-lg px-4 py-2.5">Assessments</TabsTrigger>
-                        <TabsTrigger value="compliance" className="rounded-lg px-4 py-2.5">Compliance</TabsTrigger>
-                        <TabsTrigger value="access" className="rounded-lg px-4 py-2.5">Access</TabsTrigger>
-                        <TabsTrigger value="activity" className="rounded-lg px-4 py-2.5">Activity</TabsTrigger>
+                    <TabsList className="w-full justify-start">
+                        <TabsTrigger value="profile">Profile</TabsTrigger>
+                        <TabsTrigger value="training">Training</TabsTrigger>
+                        <TabsTrigger value="assessments">Assessments</TabsTrigger>
+                        <TabsTrigger value="compliance">Compliance</TabsTrigger>
+                        <TabsTrigger value="access">Access</TabsTrigger>
+                        <TabsTrigger value="activity">Activity</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="profile" className="space-y-4">
@@ -190,7 +189,7 @@ export default function EmployeeShow({
                                         </Field>
                                     </div>
 
-                                    <div className="grid gap-4 md:grid-cols-3">
+                                    <div className="grid gap-4 md:grid-cols-2">
                                         <Field label="Start date" error={profileForm.errors.start_date}>
                                             <Input type="date" value={profileForm.data.start_date} onChange={(event) => profileForm.setData('start_date', event.target.value)} />
                                         </Field>
@@ -207,18 +206,10 @@ export default function EmployeeShow({
                                                 </SelectContent>
                                             </Select>
                                         </Field>
-                                        <Field label="Status" error={profileForm.errors.status}>
-                                            <Select value={profileForm.data.status} onValueChange={(value) => profileForm.setData('status', value)}>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select status" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="invited">Invited</SelectItem>
-                                                    <SelectItem value="active">Active</SelectItem>
-                                                    <SelectItem value="inactive">Inactive</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </Field>
+                                    </div>
+
+                                    <div className="rounded-xl border border-border/70 bg-muted/20 p-4 text-sm text-muted-foreground">
+                                        Account status is managed from the linked user account so deactivation can archive the login email and preserve the audit trail safely.
                                     </div>
 
                                     <Button
@@ -299,7 +290,14 @@ export default function EmployeeShow({
                                             {employee.assignments?.length ? (
                                                 employee.assignments.map((assignment) => (
                                                     <TableRow key={assignment.id}>
-                                                        <TableCell className="font-medium">{assignment.course ?? 'Untitled course'}</TableCell>
+                                                        <TableCell className="font-medium">
+                                                            <Link
+                                                                href={route('assignments.show', assignment.id)}
+                                                                className="inline-flex items-center text-foreground transition-colors hover:text-primary hover:underline"
+                                                            >
+                                                                {assignment.course ?? 'Untitled course'}
+                                                            </Link>
+                                                        </TableCell>
                                                         <TableCell><StatusBadge value={assignment.status} /></TableCell>
                                                         <TableCell>{formatLongDateTime(assignment.assigned_at)}</TableCell>
                                                         <TableCell>{formatLongDateTime(assignment.due_date)}</TableCell>

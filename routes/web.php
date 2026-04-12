@@ -11,6 +11,7 @@ use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseModuleController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\EmployeeCertificateController;
 use App\Http\Controllers\EmployeeProfileController;
 use App\Http\Controllers\EmployeeProfileCompletionController;
 use App\Http\Controllers\EvidenceFileController;
@@ -21,7 +22,9 @@ use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\LessonProgressController;
 use App\Http\Controllers\LessonController;
+use App\Http\Controllers\LibraryFileController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SupportController;
 use App\Http\Controllers\TenantController;
 use App\Http\Controllers\TestAttemptController;
 use App\Http\Controllers\TestAssignmentController;
@@ -45,6 +48,15 @@ Route::middleware(['auth', 'throttle:api', 'tenant', 'impersonation.audit'])->gr
 
     Route::middleware('employee.profile.complete')->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
+    Route::get('certificates', [EmployeeCertificateController::class, 'index'])->name('certificates.index');
+    Route::get('certificates/course/{assignment}', [EmployeeCertificateController::class, 'showCourse'])->name('certificates.course.show');
+    Route::get('certificates/test/{testAttempt}', [EmployeeCertificateController::class, 'showTest'])->name('certificates.test.show');
+    Route::get('help', SupportController::class)->name('help.index');
+    Route::get('files', [LibraryFileController::class, 'index'])->name('files.index');
+    Route::post('files', [LibraryFileController::class, 'store'])->middleware('throttle:uploads')->name('files.store');
+    Route::patch('files/{libraryFile}', [LibraryFileController::class, 'update'])->middleware('throttle:uploads')->name('files.update');
+    Route::delete('files/{libraryFile}', [LibraryFileController::class, 'destroy'])->name('files.destroy');
+    Route::get('files/{libraryFile}/download', [LibraryFileController::class, 'download'])->name('files.download');
 
     Route::resource('tenants', TenantController::class)->only(['index', 'show', 'edit', 'update', 'destroy']);
     Route::post('tenants/{tenant}/activate', [TenantController::class, 'activate'])->name('tenants.activate');
@@ -54,12 +66,17 @@ Route::middleware(['auth', 'throttle:api', 'tenant', 'impersonation.audit'])->gr
     Route::patch('users/{user}', [UserManagementController::class, 'update'])->name('users.update');
     Route::patch('users/{user}/password', [UserManagementController::class, 'updatePassword'])->name('users.password.update');
     Route::patch('users/{user}/access', [UserManagementController::class, 'updateAccess'])->name('users.access.update');
+    Route::patch('users/{user}/deactivate', [UserManagementController::class, 'deactivate'])->name('users.deactivate');
+    Route::patch('users/{user}/reactivate', [UserManagementController::class, 'reactivate'])->name('users.reactivate');
     Route::get('departments/scorecards', [DepartmentController::class, 'scorecards'])->name('departments.scorecards');
     Route::resource('departments', DepartmentController::class)->only(['index', 'create', 'store', 'update', 'destroy']);
+    Route::get('employees/import-template', [EmployeeProfileController::class, 'importTemplate'])->name('employees.import-template');
+    Route::post('employees/import', [EmployeeProfileController::class, 'import'])->middleware('throttle:uploads')->name('employees.import');
     Route::resource('employees', EmployeeProfileController::class)->only(['index', 'show', 'update', 'destroy']);
     Route::resource('invitations', InvitationController::class)->only(['index', 'create', 'store', 'destroy']);
     Route::resource('courses', CourseController::class)->only(['index', 'create', 'store', 'show', 'update', 'destroy']);
     Route::post('courses/{course}/publish', [CourseController::class, 'publish'])->name('courses.publish');
+    Route::post('courses/{course}/self-assign', [CourseController::class, 'selfAssign'])->name('courses.self-assign');
     Route::post('courses/{course}/modules', [CourseModuleController::class, 'store'])->name('courses.modules.store');
     Route::patch('courses/{course}/modules/{module}', [CourseModuleController::class, 'update'])->name('courses.modules.update');
     Route::delete('courses/{course}/modules/{module}', [CourseModuleController::class, 'destroy'])->name('courses.modules.destroy');
@@ -70,6 +87,7 @@ Route::middleware(['auth', 'throttle:api', 'tenant', 'impersonation.audit'])->gr
     Route::post('assignments/{assignment}/progress', [LessonProgressController::class, 'store'])->name('assignments.progress.store');
     Route::delete('assignments/{assignment}/progress', [LessonProgressController::class, 'destroy'])->name('assignments.progress.destroy');
     Route::patch('assignments/{assignment}/resume', [CourseAssignmentController::class, 'resume'])->name('assignments.resume');
+    Route::get('tests/assignments/create', [TestAssignmentController::class, 'create'])->name('tests.assignments.create');
     Route::resource('tests', TestController::class)->only(['index', 'create', 'store', 'show', 'update', 'destroy']);
     Route::post('tests/{test}/publish', [TestController::class, 'publish'])->name('tests.publish');
     Route::post('tests/{test}/assignments', [TestAssignmentController::class, 'store'])->name('tests.assignments.store');
@@ -118,6 +136,7 @@ Route::middleware(['auth', 'throttle:api', 'tenant', 'impersonation.audit'])->gr
     Route::patch('notifications/read-all', [AppNotificationController::class, 'markAllRead'])->name('notifications.read-all');
     Route::get('notifications/{appNotification}/open', [AppNotificationController::class, 'open'])->name('notifications.open');
     Route::patch('notifications/{appNotification}', [AppNotificationController::class, 'update'])->name('notifications.update');
+    Route::get('exports', [ExportRequestController::class, 'index'])->name('exports.index');
     Route::get('exports/{exportRequest}/download', [ExportRequestController::class, 'download'])->name('exports.download');
 
     Route::post('impersonation/{user}', [ImpersonationController::class, 'start'])->name('impersonation.start');

@@ -8,10 +8,13 @@ use App\Http\Requests\TestRequest;
 use App\Models\ComplianceFramework;
 use App\Models\Course;
 use App\Models\Test;
+use App\Models\TestAssignment;
 use App\Models\TestAttempt;
 use App\Models\User;
+use App\Support\Permissions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -23,6 +26,19 @@ class TestController extends Controller
     public function index(Request $request): Response|StreamedResponse
     {
         $this->authorize('viewAny', Test::class);
+
+        $user = $request->user();
+
+        if (
+            $user
+            && $user->can(Permissions::TAKE_TESTS)
+            && ! $user->hasRole('company_admin')
+            && ! $user->can(Permissions::MANAGE_TESTS)
+        ) {
+            return Inertia::render('tests/index', [
+                'employeeWorkspace' => $this->employeeWorkspacePayload($user),
+            ]);
+        }
 
         $filters = $this->validateIndex($request, ['title', 'status', 'pass_mark', 'created_at', 'updated_at'], [
             'status' => ['nullable', 'string'],
@@ -66,6 +82,97 @@ class TestController extends Controller
                 'archived' => Test::query()->where('status', 'archived')->count(),
             ],
         ]);
+    }
+
+    protected function employeeWorkspacePayload(User $user): array
+    {
+        $attemptsByTest = TestAttempt::query()
+            ->where('user_id', $user->id)
+            ->orderByDesc('attempt_number')
+            ->get(['id', 'test_id', 'attempt_number', 'percentage', 'result_status', 'submitted_at'])
+            ->groupBy('test_id');
+
+        $assignedTests = TestAssignment::query()
+            ->where('assigned_to_user_id', $user->id)
+            ->with([
+                'test' => fn ($query) => $query->with(['course:id,title'])->withCount('questions'),
+            ])
+            ->latest('assigned_at')
+            ->get()
+            ->filter(fn (TestAssignment $assignment) => $assignment->test !== null)
+            ->map(fn (TestAssignment $assignment) => $this->mapEmployeeTestRow($assignment->test, $attemptsByTest, $assignment))
+            ->values();
+
+        $publicTests = Test::query()
+            ->with(['course:id,title'])
+            ->withCount('questions')
+            ->where('status', TestStatus::Published)
+            ->whereNotIn('id', $assignedTests->pluck('id')->all())
+            ->orderBy('title')
+            ->get()
+            ->map(fn (Test $test) => $this->mapEmployeeTestRow($test, $attemptsByTest))
+            ->values();
+
+        $recentAttempts = TestAttempt::query()
+            ->where('user_id', $user->id)
+            ->with('test:id,title')
+            ->latest('submitted_at')
+            ->limit(8)
+            ->get()
+            ->map(fn (TestAttempt $attempt) => [
+                'id' => $attempt->id,
+                'test_id' => $attempt->test_id,
+                'test_title' => $attempt->test?->title ?? 'Assessment',
+                'attempt_number' => $attempt->attempt_number,
+                'percentage' => round((float) ($attempt->percentage ?? 0), 1),
+                'result_status' => $attempt->result_status?->value,
+                'submitted_at' => optional($attempt->submitted_at)?->toIso8601String(),
+            ])
+            ->values()
+            ->all();
+
+        return [
+            'stats' => [
+                'mandatory' => $assignedTests->count(),
+                'public' => $publicTests->count(),
+                'attempted' => $attemptsByTest->count(),
+                'attempts' => $attemptsByTest->sum(fn (Collection $attempts) => $attempts->count()),
+            ],
+            'assignedTests' => $assignedTests->all(),
+            'publicTests' => $publicTests->all(),
+            'recentAttempts' => $recentAttempts,
+        ];
+    }
+
+    protected function mapEmployeeTestRow(Test $test, Collection $attemptsByTest, ?TestAssignment $assignment = null): array
+    {
+        /** @var Collection<int, TestAttempt> $attempts */
+        $attempts = $attemptsByTest->get($test->id, collect());
+        /** @var TestAttempt|null $latestAttempt */
+        $latestAttempt = $attempts->first();
+        $attemptCount = $attempts->count();
+        $maxAttempts = $test->max_attempts;
+        $canTake = $test->status === TestStatus::Published
+            && ($maxAttempts === null || $attemptCount < $maxAttempts);
+
+        return [
+            'id' => $test->id,
+            'title' => $test->title,
+            'course' => $test->course?->title,
+            'questions_count' => $test->questions_count ?? 0,
+            'pass_mark' => $test->pass_mark,
+            'status' => $test->status->value,
+            'assignment_status' => $assignment?->status,
+            'due_date' => optional($assignment?->due_date)?->toDateString(),
+            'attempts_count' => $attemptCount,
+            'best_score' => round((float) ($attempts->max('percentage') ?? 0), 1),
+            'latest_result_status' => $latestAttempt?->result_status?->value,
+            'latest_attempt_id' => $latestAttempt?->id,
+            'latest_submitted_at' => optional($latestAttempt?->submitted_at)?->toIso8601String(),
+            'can_take' => $canTake,
+            'max_attempts' => $maxAttempts,
+            'is_mandatory' => $assignment !== null,
+        ];
     }
 
     public function create(): Response

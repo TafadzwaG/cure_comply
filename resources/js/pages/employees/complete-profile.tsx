@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import privacyCureLogo from '@/images/privacycure-logo.png';
 import { SharedData } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { toast } from 'sonner';
 import {
     BadgeCheck,
     Building2,
@@ -76,7 +77,17 @@ export default function CompleteProfile({
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        form.patch(route('employee-profile.complete.update'));
+        form.patch(route('employee-profile.complete.update'), {
+            preserveScroll: true,
+            onError: (errors) => {
+                const message = Object.values(errors).filter(Boolean).join('\n') || 'Unable to complete your profile. Please review the form and try again.';
+
+                toast.error(message);
+            },
+            onSuccess: () => {
+                toast.success('Profile completed. Opening your dashboard.');
+            },
+        });
     };
 
     return (

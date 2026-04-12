@@ -65,12 +65,12 @@ export default function InvitationsCreate({ departments, tenants, isSuperAdmin, 
         : departments;
 
     const isPlatformAdmin = form.data.is_platform_admin;
-    const roleOptions = isSuperAdmin ? tenantRoles : tenantRoles.filter((role) => role.value !== 'company_admin');
+    const roleOptions = tenantRoles;
 
     const submit = (event: React.FormEvent) => {
         event.preventDefault();
         form.post(route('invitations.store'), {
-            onSuccess: () => toast.success('Invitation sent successfully.'),
+            onSuccess: () => toast.success('Invitation queued for delivery.'),
             onError: () => toast.error('Please fix the errors and try again.'),
         });
     };
@@ -82,7 +82,7 @@ export default function InvitationsCreate({ departments, tenants, isSuperAdmin, 
             <div className="space-y-6">
                 <PageHeader
                     title="Invite a user"
-                    description="Send a queued invitation into a company workspace, or create a new platform administrator."
+                    description="Queue an invitation into a company workspace, or create a new platform administrator."
                 >
                     <Button asChild size="sm" className="bg-white text-[#0F2E52] hover:bg-white/90 hover:text-black">
                         <Link href={route('invitations.index')}>
@@ -370,7 +370,7 @@ export default function InvitationsCreate({ departments, tenants, isSuperAdmin, 
                                     <GuidanceRow
                                         icon={Mail}
                                         title="SMTP delivery"
-                                        description="Emails are pushed onto the mail queue and sent by the queue worker."
+                                        description="Emails are pushed onto the mail queue. Workers must listen to both the mail and default queues."
                                     />
                                 </CardContent>
                             </Card>
