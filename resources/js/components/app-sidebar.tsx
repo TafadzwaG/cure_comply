@@ -58,6 +58,7 @@ export function AppSidebar() {
                   visible: can('manage compliance submissions') || can('answer compliance questions'),
               },
               { title: 'Frameworks Evidence', url: '/evidence', icon: FileSearch, visible: can('review evidence') || can('upload evidence') },
+              { title: 'Policies', url: '/policies', icon: FileCheck2, visible: can('view policies') || can('manage policies') || can('assign policies') },
               { title: 'Files', url: '/files', icon: FileText, visible: can('view file library') || can('manage file library') },
           ])
         : hasRole('company_admin')
@@ -78,6 +79,7 @@ export function AppSidebar() {
                     visible: can('manage compliance submissions') || can('answer compliance questions'),
                 },
                 { title: 'Evidence', url: '/evidence', icon: FileSearch, visible: can('upload evidence') || can('review evidence') },
+                { title: 'Policies', url: '/policies', icon: FileCheck2, visible: can('view policies') || can('manage policies') || can('assign policies') },
                 { title: 'Files', url: '/files', icon: FileText, visible: can('view file library') || can('manage file library') },
             ])
           : hasRole('reviewer')
@@ -96,6 +98,7 @@ export function AppSidebar() {
                       icon: ShieldCheck,
                       visible: can('review evidence') || can('manage compliance submissions'),
                   },
+                  { title: 'Policies', url: '/policies', icon: FileCheck2, visible: can('view policies') || can('manage policies') || can('assign policies') },
                   { title: 'Files', url: '/files', icon: FileText, visible: can('view file library') || can('manage file library') },
               ])
             : makeNav([
@@ -109,6 +112,7 @@ export function AppSidebar() {
                       icon: FileCheck2,
                       visible: can('answer compliance questions') || can('upload evidence'),
                   },
+                  { title: 'Policies', url: '/policies', icon: FileCheck2, visible: can('view policies') || can('manage policies') || can('assign policies') },
                   { title: 'Files', url: '/files', icon: FileText, visible: can('view file library') || can('manage file library') },
                   { title: 'Certificates', url: '/certificates', icon: Award, visible: can('take tests') },
               ]);

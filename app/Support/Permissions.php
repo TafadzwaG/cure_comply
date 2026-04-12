@@ -23,6 +23,10 @@ final class Permissions
     public const EXPORT_REPORTS = 'export reports';
     public const VIEW_FILE_LIBRARY = 'view file library';
     public const MANAGE_FILE_LIBRARY = 'manage file library';
+    public const VIEW_POLICIES = 'view policies';
+    public const MANAGE_POLICIES = 'manage policies';
+    public const ASSIGN_POLICIES = 'assign policies';
+    public const ACKNOWLEDGE_POLICIES = 'acknowledge policies';
     public const IMPERSONATE_USERS = 'impersonate users';
     public const VIEW_AUDIT_LOGS = 'view audit logs';
 
@@ -48,6 +52,10 @@ final class Permissions
             self::EXPORT_REPORTS,
             self::VIEW_FILE_LIBRARY,
             self::MANAGE_FILE_LIBRARY,
+            self::VIEW_POLICIES,
+            self::MANAGE_POLICIES,
+            self::ASSIGN_POLICIES,
+            self::ACKNOWLEDGE_POLICIES,
             self::IMPERSONATE_USERS,
             self::VIEW_AUDIT_LOGS,
         ];

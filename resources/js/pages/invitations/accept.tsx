@@ -1,4 +1,5 @@
 import InputError from '@/components/input-error';
+import { PhoneInput } from '@/components/phone-input';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -175,13 +176,14 @@ export default function AcceptInvitation({ invitation }: { invitation: Invitatio
 
                                             <div className="space-y-2">
                                                 <FieldLabel>Phone</FieldLabel>
-                                                <LightInput
+                                                <PhoneInput
                                                     id="phone"
                                                     name="phone"
-                                                    type="tel"
                                                     value={form.data.phone}
-                                                    onChange={(event) => form.setData('phone', event.target.value)}
-                                                    placeholder="+263..."
+                                                    onChange={(value) => form.setData('phone', value)}
+                                                    placeholder="77 123 4567"
+                                                    className="border-[#c3c6d1]/20 bg-white text-[#191c1e] placeholder:text-[#737781]"
+                                                    selectClassName="border-[#c3c6d1]/20 bg-white text-[#191c1e]"
                                                     autoComplete="tel"
                                                 />
                                                 <InputError message={form.errors.phone} />

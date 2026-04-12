@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Concerns\InteractsWithIndexTables;
 use App\Http\Requests\LibraryFileStoreRequest;
 use App\Http\Requests\LibraryFileUpdateRequest;
+use App\Http\Requests\RepublishPolicyRequest;
 use App\Models\LibraryFile;
 use App\Models\Tenant;
 use App\Services\AuditLogService;
 use App\Services\LibraryFileStorageService;
+use App\Services\PolicyWorkflowService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -21,6 +23,7 @@ class LibraryFileController extends Controller
     public function __construct(
         protected LibraryFileStorageService $storageService,
         protected AuditLogService $auditLogService,
+        protected PolicyWorkflowService $policyWorkflowService,
     ) {
     }
 
@@ -38,7 +41,7 @@ class LibraryFileController extends Controller
 
         $currentScope = $this->resolveScope($user, $filters['scope'] ?? null);
         $visibleQuery = LibraryFile::query()
-            ->with(['tenant:id,name', 'uploader:id,name'])
+            ->with(['tenant:id,name', 'uploader:id,name', 'currentPolicyVersion.publisher:id,name'])
             ->visibleTo($user);
 
         $statsBase = LibraryFile::query()->visibleTo($user);
@@ -95,10 +98,24 @@ class LibraryFileController extends Controller
                 'created_at' => optional($file->created_at)?->toIso8601String(),
                 'updated_at' => optional($file->updated_at)?->toIso8601String(),
                 'download_url' => route('files.download', $file, false),
+                'policy' => [
+                    'is_policy' => (bool) $file->is_policy,
+                    'state' => $file->policy_state?->value,
+                    'current_version_number' => $file->current_policy_version_number,
+                    'published_at' => optional($file->currentPolicyVersion?->published_at)?->toIso8601String(),
+                    'published_by' => $file->currentPolicyVersion?->publisher ? [
+                        'id' => $file->currentPolicyVersion->publisher->id,
+                        'name' => $file->currentPolicyVersion->publisher->name,
+                    ] : null,
+                    'workspace_url' => $file->is_policy ? route('policies.index', ['tab' => 'published', 'search' => $file->title], false) : null,
+                ],
                 'abilities' => [
                     'canEdit' => $request->user()?->can('update', $file) ?? false,
                     'canDelete' => $request->user()?->can('delete', $file) ?? false,
                     'canDownload' => $request->user()?->can('view', $file) ?? false,
+                    'canPublishPolicy' => $request->user()?->can('publishPolicy', $file) ?? false,
+                    'canRepublishPolicy' => $request->user()?->can('republishPolicy', $file) ?? false,
+                    'canArchivePolicy' => $request->user()?->can('archivePolicy', $file) ?? false,
                 ],
             ]);
 
@@ -199,6 +216,33 @@ class LibraryFileController extends Controller
         $this->auditLogService->logModel('library_file_downloaded', $libraryFile);
 
         return $this->storageService->download($libraryFile);
+    }
+
+    public function publishPolicy(Request $request, LibraryFile $libraryFile): RedirectResponse
+    {
+        $this->authorize('publishPolicy', $libraryFile);
+
+        $this->policyWorkflowService->publish($libraryFile, $request->user());
+
+        return back()->with('success', 'File published as a tracked policy.');
+    }
+
+    public function republishPolicy(RepublishPolicyRequest $request, LibraryFile $libraryFile): RedirectResponse
+    {
+        $this->authorize('republishPolicy', $libraryFile);
+
+        $this->policyWorkflowService->republish($libraryFile, $request->user(), $request->string('due_date')->toString());
+
+        return back()->with('success', 'Policy version republished and assignments rolled forward.');
+    }
+
+    public function archivePolicy(Request $request, LibraryFile $libraryFile): RedirectResponse
+    {
+        $this->authorize('archivePolicy', $libraryFile);
+
+        $this->policyWorkflowService->archive($libraryFile, $request->user());
+
+        return back()->with('success', 'Policy archived.');
     }
 
     protected function resolveScope(?\App\Models\User $user, ?string $scope): string

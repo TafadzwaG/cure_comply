@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Enums\PolicyState;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class LibraryFile extends Model
@@ -30,7 +33,19 @@ class LibraryFile extends Model
         'mime_type',
         'file_size',
         'uploaded_by',
+        'is_policy',
+        'policy_state',
+        'current_policy_version_id',
+        'current_policy_version_number',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_policy' => 'boolean',
+            'policy_state' => PolicyState::class,
+        ];
+    }
 
     public static function categoryOptions(): array
     {
@@ -52,6 +67,21 @@ class LibraryFile extends Model
     public function uploader(): BelongsTo
     {
         return $this->belongsTo(User::class, 'uploaded_by');
+    }
+
+    public function currentPolicyVersion(): BelongsTo
+    {
+        return $this->belongsTo(LibraryFileVersion::class, 'current_policy_version_id');
+    }
+
+    public function policyVersions(): HasMany
+    {
+        return $this->hasMany(LibraryFileVersion::class)->orderByDesc('version_number');
+    }
+
+    public function policyAssignments(): HasMany
+    {
+        return $this->hasMany(PolicyAssignment::class);
     }
 
     public function scopeVisibleTo(Builder $query, User $user): Builder
@@ -77,5 +107,10 @@ class LibraryFile extends Model
     public function scopeTenantScoped(Builder $query): Builder
     {
         return $query->whereNotNull('tenant_id');
+    }
+
+    public function scopePublishedPolicies(Builder $query): Builder
+    {
+        return $query->where('is_policy', true)->where('policy_state', PolicyState::Published->value);
     }
 }

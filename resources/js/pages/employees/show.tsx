@@ -1,5 +1,6 @@
 import InputError from '@/components/input-error';
 import { PageHeader } from '@/components/page-header';
+import { PhoneInput } from '@/components/phone-input';
 import { StatusBadge } from '@/components/status-badge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -182,10 +183,22 @@ export default function EmployeeShow({
 
                                     <div className="grid gap-4 md:grid-cols-2">
                                         <Field label="Primary phone" error={profileForm.errors.phone}>
-                                            <Input value={profileForm.data.phone} onChange={(event) => profileForm.setData('phone', event.target.value)} />
+                                            <PhoneInput
+                                                value={profileForm.data.phone}
+                                                onChange={(value) => profileForm.setData('phone', value)}
+                                                error={profileForm.errors.phone}
+                                                placeholder="77 123 4567"
+                                                autoComplete="tel"
+                                            />
                                         </Field>
                                         <Field label="Alternate phone" error={profileForm.errors.alternate_phone}>
-                                            <Input value={profileForm.data.alternate_phone} onChange={(event) => profileForm.setData('alternate_phone', event.target.value)} />
+                                            <PhoneInput
+                                                value={profileForm.data.alternate_phone}
+                                                onChange={(value) => profileForm.setData('alternate_phone', value)}
+                                                error={profileForm.errors.alternate_phone}
+                                                placeholder="Optional alternate number"
+                                                autoComplete="tel-national"
+                                            />
                                         </Field>
                                     </div>
 

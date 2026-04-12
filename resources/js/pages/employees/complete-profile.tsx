@@ -1,4 +1,5 @@
 import InputError from '@/components/input-error';
+import { PhoneInput } from '@/components/phone-input';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -239,13 +240,12 @@ export default function CompleteProfile({
 
                                             <div className="space-y-2">
                                                 <FieldLabel>Primary Phone</FieldLabel>
-                                                <FormInput
+                                                <PhoneInput
                                                     id="phone"
                                                     name="phone"
-                                                    type="tel"
                                                     value={form.data.phone}
-                                                    onChange={(event) => form.setData('phone', event.target.value)}
-                                                    placeholder="+263..."
+                                                    onChange={(value) => form.setData('phone', value)}
+                                                    placeholder="77 123 4567"
                                                     error={form.errors.phone}
                                                     required
                                                     autoComplete="tel"
@@ -255,12 +255,11 @@ export default function CompleteProfile({
 
                                             <div className="space-y-2">
                                                 <FieldLabel>Alternate Phone</FieldLabel>
-                                                <FormInput
+                                                <PhoneInput
                                                     id="alternate_phone"
                                                     name="alternate_phone"
-                                                    type="tel"
                                                     value={form.data.alternate_phone}
-                                                    onChange={(event) => form.setData('alternate_phone', event.target.value)}
+                                                    onChange={(value) => form.setData('alternate_phone', value)}
                                                     placeholder="Optional alternate number"
                                                     error={form.errors.alternate_phone}
                                                     autoComplete="tel-national"

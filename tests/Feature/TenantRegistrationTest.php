@@ -35,6 +35,7 @@ class TenantRegistrationTest extends TestCase
         $this->assertDatabaseHas('tenants', [
             'name' => 'Acme Compliance',
             'status' => 'pending',
+            'contact_phone' => '+263771000000',
         ]);
         $this->assertDatabaseHas('users', [
             'email' => 'admin@example.com',

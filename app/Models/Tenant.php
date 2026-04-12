@@ -65,6 +65,11 @@ class Tenant extends Model
         return $this->hasMany(ComplianceSubmission::class);
     }
 
+    public function policyAssignments(): HasMany
+    {
+        return $this->hasMany(PolicyAssignment::class);
+    }
+
     public function getLogoUrlAttribute(): ?string
     {
         if (blank($this->logo_path)) {

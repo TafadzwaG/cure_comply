@@ -7,11 +7,13 @@ use App\Models\Lesson;
 use App\Models\CourseModule;
 use App\Models\ExportRequest;
 use App\Models\LibraryFile;
+use App\Models\PolicyAssignment;
 use App\Models\TestAssignment;
 use App\Policies\LessonPolicy;
 use App\Policies\CourseModulePolicy;
 use App\Policies\ExportRequestPolicy;
 use App\Policies\LibraryFilePolicy;
+use App\Policies\PolicyAssignmentPolicy;
 use App\Policies\TestAssignmentPolicy;
 use App\Policies\UserPolicy;
 use App\Services\CurrentTenantResolver;
@@ -51,6 +53,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Lesson::class, LessonPolicy::class);
         Gate::policy(TestAssignment::class, TestAssignmentPolicy::class);
         Gate::policy(LibraryFile::class, LibraryFilePolicy::class);
+        Gate::policy(PolicyAssignment::class, PolicyAssignmentPolicy::class);
 
         RateLimiter::for('login', function (Request $request) {
             $key = strtolower($request->string('email')).'|'.$request->ip();

@@ -73,7 +73,7 @@ class DashboardTest extends TestCase
             'name' => 'Completed User',
             'job_title' => 'General Manager',
             'branch' => 'Harare',
-            'phone' => '+263782903276',
+            'phone' => '+263 0782 903 276',
             'employment_type' => 'full_time',
         ])->assertRedirect(route('dashboard'));
 
@@ -84,6 +84,28 @@ class DashboardTest extends TestCase
         $this->assertSame('Harare', $restoredProfile->branch);
         $this->assertSame('+263782903276', $restoredProfile->phone);
         $this->assertSame(1, EmployeeProfile::withTrashed()->where('user_id', $user->id)->count());
+    }
+
+    public function test_profile_completion_rejects_an_invalid_phone_number(): void
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+
+        $tenant = Tenant::factory()->create(['status' => 'active']);
+        $user = User::factory()->forTenant($tenant)->create();
+        $user->assignRole('employee');
+
+        $this->actingAs($user);
+
+        $this->from(route('employee-profile.complete.edit'))
+            ->patch(route('employee-profile.complete.update'), [
+                'name' => 'Completed User',
+                'job_title' => 'General Manager',
+                'branch' => 'Harare',
+                'phone' => 'invalid-number',
+                'employment_type' => 'full_time',
+            ])
+            ->assertRedirect(route('employee-profile.complete.edit'))
+            ->assertSessionHasErrors('phone');
     }
 
     public function test_inactive_tenant_user_is_redirected_to_activation_pending_page()

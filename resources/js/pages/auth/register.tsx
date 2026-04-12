@@ -1,4 +1,5 @@
 import InputError from '@/components/input-error';
+import { PhoneInput } from '@/components/phone-input';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -280,13 +281,12 @@ export default function Register() {
 
                                             <div className="space-y-2 md:col-span-2">
                                                 <FieldLabel>Contact Phone</FieldLabel>
-                                                <FormInput
+                                                <PhoneInput
                                                     id="contact_phone"
                                                     name="contact_phone"
-                                                    type="tel"
                                                     value={form.data.contact_phone}
-                                                    onChange={(e) => form.setData('contact_phone', e.target.value)}
-                                                    placeholder="+263 7..."
+                                                    onChange={(value) => form.setData('contact_phone', value)}
+                                                    placeholder="77 123 4567"
                                                     error={form.errors.contact_phone}
                                                     autoComplete="tel"
                                                 />

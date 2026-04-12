@@ -118,6 +118,11 @@ class User extends Authenticatable
         return $this->hasMany(AppNotification::class);
     }
 
+    public function policyAssignments(): HasMany
+    {
+        return $this->hasMany(PolicyAssignment::class, 'assigned_to_user_id');
+    }
+
     public function auditLogs(): HasMany
     {
         return $this->hasMany(AuditLog::class);

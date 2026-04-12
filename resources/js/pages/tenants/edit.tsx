@@ -1,6 +1,7 @@
 import { CreateGuidancePanel } from '@/components/create-guidance-panel';
 import InputError from '@/components/input-error';
 import { PageHeader } from '@/components/page-header';
+import { PhoneInput } from '@/components/phone-input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -66,7 +67,13 @@ export default function TenantEdit({ tenant }: { tenant: Tenant }) {
                             </div>
 
                             <Field label="Contact phone" error={form.errors.contact_phone}>
-                                <Input value={form.data.contact_phone} onChange={(event) => form.setData('contact_phone', event.target.value)} />
+                                <PhoneInput
+                                    value={form.data.contact_phone}
+                                    onChange={(value) => form.setData('contact_phone', value)}
+                                    error={form.errors.contact_phone}
+                                    placeholder="77 123 4567"
+                                    autoComplete="tel"
+                                />
                             </Field>
 
                             <Button onClick={() => form.patch(route('tenants.update', tenant.id))} disabled={form.processing}>

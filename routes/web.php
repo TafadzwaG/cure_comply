@@ -23,6 +23,8 @@ use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\LessonProgressController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\LibraryFileController;
+use App\Http\Controllers\PolicyAssignmentController;
+use App\Http\Controllers\PolicyController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SupportController;
 use App\Http\Controllers\TenantController;
@@ -57,6 +59,13 @@ Route::middleware(['auth', 'throttle:api', 'tenant', 'impersonation.audit'])->gr
     Route::patch('files/{libraryFile}', [LibraryFileController::class, 'update'])->middleware('throttle:uploads')->name('files.update');
     Route::delete('files/{libraryFile}', [LibraryFileController::class, 'destroy'])->name('files.destroy');
     Route::get('files/{libraryFile}/download', [LibraryFileController::class, 'download'])->name('files.download');
+    Route::post('files/{libraryFile}/policy/publish', [LibraryFileController::class, 'publishPolicy'])->name('files.policy.publish');
+    Route::post('files/{libraryFile}/policy/republish', [LibraryFileController::class, 'republishPolicy'])->name('files.policy.republish');
+    Route::post('files/{libraryFile}/policy/archive', [LibraryFileController::class, 'archivePolicy'])->name('files.policy.archive');
+    Route::get('policies', [PolicyController::class, 'index'])->name('policies.index');
+    Route::post('policy-assignments', [PolicyAssignmentController::class, 'store'])->name('policy-assignments.store');
+    Route::get('policy-assignments/{policyAssignment}/open', [PolicyAssignmentController::class, 'open'])->name('policy-assignments.open');
+    Route::post('policy-assignments/{policyAssignment}/acknowledge', [PolicyAssignmentController::class, 'acknowledge'])->name('policy-assignments.acknowledge');
 
     Route::resource('tenants', TenantController::class)->only(['index', 'show', 'edit', 'update', 'destroy']);
     Route::post('tenants/{tenant}/activate', [TenantController::class, 'activate'])->name('tenants.activate');

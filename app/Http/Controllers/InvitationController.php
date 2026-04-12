@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\InteractsWithIndexTables;
+use App\Http\Requests\AcceptInvitationRequest;
 use App\Http\Requests\EmployeeInvitationRequest;
 use App\Models\Department;
 use App\Models\Invitation;
@@ -149,18 +150,12 @@ class InvitationController extends Controller
         ]);
     }
 
-    public function accept(Request $request, string $token): RedirectResponse
+    public function accept(AcceptInvitationRequest $request, string $token): RedirectResponse
     {
         $invitation = Invitation::query()->where('token', $token)->firstOrFail();
         abort_if($invitation->accepted_at || $invitation->expires_at->isPast(), 403);
 
-        $request->validate([
-            'password' => ['required', 'confirmed', 'min:8'],
-            'job_title' => ['nullable', 'string', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:50'],
-        ]);
-
-        $user = $this->invitationService->accept($invitation, $request->all());
+        $user = $this->invitationService->accept($invitation, $request->validated());
         Auth::login($user);
 
         return to_route('dashboard')->with('success', 'Invitation accepted.');

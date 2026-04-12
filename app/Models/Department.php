@@ -25,4 +25,9 @@ class Department extends Model
     {
         return $this->hasMany(EmployeeProfile::class);
     }
+
+    public function policyAssignments(): HasMany
+    {
+        return $this->hasMany(PolicyAssignment::class, 'source_department_id');
+    }
 }

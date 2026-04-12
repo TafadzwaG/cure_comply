@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Models\LibraryFile;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Enums\PolicyState;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -24,6 +25,10 @@ class LibraryFileFactory extends Factory
             'mime_type' => 'application/pdf',
             'file_size' => fake()->numberBetween(20_000, 2_000_000),
             'uploaded_by' => User::factory(),
+            'is_policy' => false,
+            'policy_state' => PolicyState::Draft->value,
+            'current_policy_version_id' => null,
+            'current_policy_version_number' => null,
         ];
     }
 

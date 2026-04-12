@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\LibraryFile;
+use App\Models\LibraryFileVersion;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -38,7 +39,7 @@ class LibraryFileStorageService
         $oldPath = $libraryFile->file_path;
         $payload = $this->store($file, $tenantId);
 
-        if ($oldPath && Storage::disk('private')->exists($oldPath)) {
+        if ($oldPath && Storage::disk('private')->exists($oldPath) && ! $this->shouldPreserve($libraryFile, $oldPath)) {
             Storage::disk('private')->delete($oldPath);
         }
 
@@ -47,11 +48,12 @@ class LibraryFileStorageService
 
     public function download(LibraryFile $libraryFile)
     {
-        if (! Storage::disk('private')->exists($libraryFile->file_path)) {
-            abort(404, 'File not found.');
-        }
+        return $this->downloadPath($libraryFile->file_path, $libraryFile->original_name);
+    }
 
-        return Storage::disk('private')->download($libraryFile->file_path, $libraryFile->original_name);
+    public function downloadVersion(LibraryFileVersion $version)
+    {
+        return $this->downloadPath($version->file_path, $version->original_name);
     }
 
     protected function sanitizeFilename(string $filename): string
@@ -61,5 +63,25 @@ class LibraryFileStorageService
         $extension = preg_replace('/[^\w]/', '', pathinfo($filename, PATHINFO_EXTENSION));
 
         return Str::limit($name, 180, '').($extension ? '.'.$extension : '');
+    }
+
+    protected function shouldPreserve(LibraryFile $libraryFile, string $path): bool
+    {
+        if (! $libraryFile->is_policy) {
+            return false;
+        }
+
+        return $libraryFile->policyVersions()
+            ->where('file_path', $path)
+            ->exists();
+    }
+
+    protected function downloadPath(string $path, string $downloadName)
+    {
+        if (! Storage::disk('private')->exists($path)) {
+            abort(404, 'File not found.');
+        }
+
+        return Storage::disk('private')->download($path, $downloadName);
     }
 }

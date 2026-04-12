@@ -3,6 +3,7 @@ import moment from 'moment';
 import { DataIndexPage } from '@/components/data-index-page';
 import { EmptyState } from '@/components/empty-state';
 import { SortableTableHead } from '@/components/sortable-table-head';
+import { StatusBadge } from '@/components/status-badge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -16,7 +17,7 @@ import { Textarea } from '@/components/ui/textarea';
 import PlatformLayout from '@/layouts/platform-layout';
 import { IndexStat, LibraryFileSummary, Paginated, SharedData, TableFilters, Tenant } from '@/types';
 import { router, useForm, usePage } from '@inertiajs/react';
-import { Download, FileText, Files, FolderOpen, Loader2, MoreHorizontal, Pencil, ShieldCheck, Trash2, UploadCloud, X } from 'lucide-react';
+import { Archive, BookCheck, Download, FileText, Files, FolderOpen, Loader2, MoreHorizontal, Pencil, RefreshCcw, ShieldCheck, Trash2, UploadCloud, X } from 'lucide-react';
 import { DragEvent, ReactNode, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -62,7 +63,12 @@ export default function LibraryFilesIndex({ files, filters, stats, categories, t
     const { tenant } = usePage<SharedData>().props;
     const [dialogOpen, setDialogOpen] = useState(false);
     const [editingFile, setEditingFile] = useState<LibraryFileSummary | null>(null);
+    const [republishDialogOpen, setRepublishDialogOpen] = useState(false);
+    const [policyFile, setPolicyFile] = useState<LibraryFileSummary | null>(null);
     const currentScope = String(filters.scope ?? (isSuperAdmin ? 'all' : 'shared'));
+    const republishForm = useForm<{ due_date: string }>({
+        due_date: moment().add(7, 'days').format('YYYY-MM-DD'),
+    });
 
     const statItems: IndexStat[] = [
         { label: 'Visible files', value: stats.visible, detail: 'Documents accessible in the current workspace.', icon: Files },
@@ -159,6 +165,12 @@ export default function LibraryFilesIndex({ files, filters, stats, categories, t
                                             <TableCell>
                                                 <div className="space-y-1">
                                                     <p className="font-medium text-foreground">{file.title}</p>
+                                                    {file.policy.is_policy ? (
+                                                        <div className="flex flex-wrap items-center gap-2">
+                                                            <StatusBadge value={file.policy.state} />
+                                                            <Badge variant="outline">v{file.policy.current_version_number ?? '?'}</Badge>
+                                                        </div>
+                                                    ) : null}
                                                     <p className="text-xs text-muted-foreground">{file.original_name}</p>
                                                     {file.description ? <p className="max-w-md text-sm text-muted-foreground">{file.description}</p> : null}
                                                 </div>
@@ -205,6 +217,51 @@ export default function LibraryFilesIndex({ files, filters, stats, categories, t
                                                                     >
                                                                         <Pencil className="size-4" />
                                                                         Edit
+                                                                    </DropdownMenuItem>
+                                                                ) : null}
+                                                                {file.abilities.canPublishPolicy ? (
+                                                                    <DropdownMenuItem
+                                                                        onClick={() => {
+                                                                            if (window.confirm(`Publish "${file.title}" as a tracked policy?`)) {
+                                                                                router.post(route('files.policy.publish', file.id), {}, { preserveScroll: true });
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        <BookCheck className="size-4" />
+                                                                        Publish as policy
+                                                                    </DropdownMenuItem>
+                                                                ) : null}
+                                                                {file.abilities.canRepublishPolicy ? (
+                                                                    <DropdownMenuItem
+                                                                        onClick={() => {
+                                                                            setPolicyFile(file);
+                                                                            republishForm.setData('due_date', moment().add(7, 'days').format('YYYY-MM-DD'));
+                                                                            republishForm.clearErrors();
+                                                                            setRepublishDialogOpen(true);
+                                                                        }}
+                                                                    >
+                                                                        <RefreshCcw className="size-4" />
+                                                                        Republish policy version
+                                                                    </DropdownMenuItem>
+                                                                ) : null}
+                                                                {file.abilities.canArchivePolicy ? (
+                                                                    <DropdownMenuItem
+                                                                        onClick={() => {
+                                                                            if (window.confirm(`Archive "${file.title}"?`)) {
+                                                                                router.post(route('files.policy.archive', file.id), {}, { preserveScroll: true });
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        <Archive className="size-4" />
+                                                                        Archive policy
+                                                                    </DropdownMenuItem>
+                                                                ) : null}
+                                                                {file.policy.workspace_url ? (
+                                                                    <DropdownMenuItem asChild>
+                                                                        <a href={file.policy.workspace_url}>
+                                                                            <ShieldCheck className="size-4" />
+                                                                            Open policy workspace
+                                                                        </a>
                                                                     </DropdownMenuItem>
                                                                 ) : null}
                                                                 {file.abilities.canEdit && file.abilities.canDelete ? <DropdownMenuSeparator /> : null}
@@ -257,6 +314,58 @@ export default function LibraryFilesIndex({ files, filters, stats, categories, t
                     isSuperAdmin={isSuperAdmin}
                     currentTenant={tenant ?? null}
                 />
+
+                <Dialog
+                    open={republishDialogOpen}
+                    onOpenChange={(open) => {
+                        setRepublishDialogOpen(open);
+
+                        if (!open) {
+                            setPolicyFile(null);
+                            republishForm.reset();
+                            republishForm.clearErrors();
+                        }
+                    }}
+                >
+                    <DialogContent className="sm:max-w-lg">
+                        <DialogHeader>
+                            <DialogTitle>Republish policy version</DialogTitle>
+                            <DialogDescription>
+                                {policyFile
+                                    ? `Create a new immutable version for ${policyFile.title} and clone the previous audience into fresh assignments.`
+                                    : 'Set the due date for the new policy version.'}
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        <Field label="Due date for the new version" error={republishForm.errors.due_date}>
+                            <Input type="date" value={republishForm.data.due_date} onChange={(event) => republishForm.setData('due_date', event.target.value)} />
+                        </Field>
+
+                        <DialogFooter>
+                            <Button type="button" variant="outline" onClick={() => setRepublishDialogOpen(false)} disabled={republishForm.processing}>
+                                Cancel
+                            </Button>
+                            <Button
+                                type="button"
+                                disabled={republishForm.processing || !policyFile}
+                                onClick={() => {
+                                    if (!policyFile) {
+                                        return;
+                                    }
+
+                                    republishForm.post(route('files.policy.republish', policyFile.id), {
+                                        preserveScroll: true,
+                                        onSuccess: () => setRepublishDialogOpen(false),
+                                        onError: (errors) => toast.error(Object.values(errors).join('\n') || 'Could not republish policy version.'),
+                                    });
+                                }}
+                            >
+                                <RefreshCcw className="size-4" />
+                                Republish version
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
         </PlatformLayout>
     );

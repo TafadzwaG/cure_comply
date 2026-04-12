@@ -324,9 +324,89 @@ export interface LibraryFileSummary {
     created_at?: string | null;
     updated_at?: string | null;
     download_url: string;
+    policy: {
+        is_policy: boolean;
+        state?: string | null;
+        current_version_number?: number | null;
+        published_at?: string | null;
+        published_by?: {
+            id: number;
+            name: string;
+        } | null;
+        workspace_url?: string | null;
+    };
     abilities: {
         canEdit: boolean;
         canDelete: boolean;
         canDownload: boolean;
+        canPublishPolicy: boolean;
+        canRepublishPolicy: boolean;
+        canArchivePolicy: boolean;
     };
 }
+
+export interface PolicySummary {
+    id: number;
+    title: string;
+    description?: string | null;
+    category?: string | null;
+    scope: 'shared' | 'tenant';
+    scope_label: string;
+    tenant?: {
+        id: number;
+        name: string;
+    } | null;
+    original_name: string;
+    file_type: string;
+    current_version_number?: number | null;
+    policy_state?: string | null;
+    published_at?: string | null;
+    published_by?: {
+        id: number;
+        name: string;
+    } | null;
+    assignments_count: number;
+    pending_count: number;
+    overdue_count: number;
+    acknowledged_count: number;
+    abilities: {
+        canAssign: boolean;
+        canRepublish: boolean;
+        canArchive: boolean;
+    };
+}
+
+export interface PolicyAssignmentSummary {
+    id: number;
+    library_file_id: number;
+    policy_title: string;
+    policy_scope_label: string;
+    version_number?: number | null;
+    status?: string | null;
+    due_date?: string | null;
+    source_type: string;
+    source_department?: {
+        id: number;
+        name: string;
+    } | null;
+    assigned_to?: {
+        id: number;
+        name: string;
+        email: string;
+    } | null;
+    assigned_by?: {
+        id: number;
+        name: string;
+    } | null;
+    first_viewed_at?: string | null;
+    last_viewed_at?: string | null;
+    acknowledged_at?: string | null;
+    view_count: number;
+    open_url: string;
+    acknowledge_url: string;
+    abilities: {
+        canAcknowledge: boolean;
+    };
+}
+
+export type MyPolicyAssignment = PolicyAssignmentSummary;

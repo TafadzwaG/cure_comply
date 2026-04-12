@@ -123,4 +123,46 @@ class InvitationFlowTest extends TestCase
 
         Queue::assertPushed(SendQueuedNotifications::class, fn (SendQueuedNotifications $job) => $job->queue === 'mail');
     }
+
+    public function test_accepting_an_invitation_normalizes_the_phone_number(): void
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+
+        $tenant = Tenant::factory()->create(['status' => 'active']);
+        $inviter = User::factory()->create([
+            'tenant_id' => $tenant->id,
+            'status' => 'active',
+        ]);
+        $inviter->assignRole('company_admin');
+
+        $department = Department::factory()->create([
+            'tenant_id' => $tenant->id,
+            'name' => 'Operations',
+        ]);
+
+        $invitation = Invitation::query()->create([
+            'tenant_id' => $tenant->id,
+            'department_id' => $department->id,
+            'invited_by' => $inviter->id,
+            'name' => 'Assigned User',
+            'email' => 'assigned.user@example.com',
+            'role' => 'employee',
+            'token' => 'invite-token',
+            'expires_at' => now()->addDays(7),
+        ]);
+
+        $response = $this->post(route('invitations.accept.store', $invitation->token), [
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'job_title' => 'Analyst',
+            'phone' => '+263 0771 234 567',
+        ]);
+
+        $response->assertRedirect(route('dashboard'));
+
+        $this->assertDatabaseHas('employee_profiles', [
+            'user_id' => User::query()->where('email', 'assigned.user@example.com')->value('id'),
+            'phone' => '+263771234567',
+        ]);
+    }
 }
