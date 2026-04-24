@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\TenantStatus;
 use App\Http\Controllers\Concerns\InteractsWithIndexTables;
+use App\Http\Requests\TenantStoreRequest;
 use App\Http\Requests\TenantUpdateRequest;
 use App\Models\ComplianceSubmission;
 use App\Models\EvidenceFile;
@@ -71,6 +72,25 @@ class TenantController extends Controller
             ],
             'industries' => Tenant::query()->whereNotNull('industry')->distinct()->orderBy('industry')->pluck('industry')->values(),
         ]);
+    }
+
+    public function create(): Response
+    {
+        $this->authorize('create', Tenant::class);
+
+        return Inertia::render('tenants/create');
+    }
+
+    public function store(TenantStoreRequest $request): RedirectResponse
+    {
+        $this->authorize('create', Tenant::class);
+
+        $tenant = Tenant::query()->create($request->validated());
+        app(\App\Services\AuditLogService::class)->logModelCreated('tenant_created', $tenant);
+
+        return redirect()
+            ->route('tenants.show', $tenant)
+            ->with('success', 'Tenant created successfully.');
     }
 
     public function show(Tenant $tenant): Response

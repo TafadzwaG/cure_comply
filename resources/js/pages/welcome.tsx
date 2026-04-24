@@ -618,18 +618,42 @@ export default function Welcome() {
                         </div>
 
                         <nav className="hidden lg:flex" style={{ gap: 40, alignItems: 'center' }}>
-                            {['Product', 'Solutions', 'Pricing', 'Resources'].map((item) => (
-                                <a
-                                    key={item}
-                                    href={`#${item.toLowerCase()}`}
-                                    className="nav-link"
-                                    style={{ fontSize: 13, fontWeight: 500, color: '#434750', textDecoration: 'none', transition: 'color 0.2s' }}
-                                    onMouseEnter={e => (e.currentTarget.style.color = '#002753')}
-                                    onMouseLeave={e => (e.currentTarget.style.color = '#434750')}
-                                >
-                                    {item}
-                                </a>
-                            ))}
+                            <a
+                                href="#product"
+                                className="nav-link"
+                                style={{ fontSize: 13, fontWeight: 500, color: '#434750', textDecoration: 'none', transition: 'color 0.2s' }}
+                                onMouseEnter={e => (e.currentTarget.style.color = '#002753')}
+                                onMouseLeave={e => (e.currentTarget.style.color = '#434750')}
+                            >
+                                Product
+                            </a>
+                            <a
+                                href="#solutions"
+                                className="nav-link"
+                                style={{ fontSize: 13, fontWeight: 500, color: '#434750', textDecoration: 'none', transition: 'color 0.2s' }}
+                                onMouseEnter={e => (e.currentTarget.style.color = '#002753')}
+                                onMouseLeave={e => (e.currentTarget.style.color = '#434750')}
+                            >
+                                Solutions
+                            </a>
+                            <Link
+                                href={route('pricing')}
+                                className="nav-link"
+                                style={{ fontSize: 13, fontWeight: 500, color: '#434750', textDecoration: 'none', transition: 'color 0.2s' }}
+                                onMouseEnter={e => (e.currentTarget.style.color = '#002753')}
+                                onMouseLeave={e => (e.currentTarget.style.color = '#434750')}
+                            >
+                                Pricing
+                            </Link>
+                            <Link
+                                href={route('resources')}
+                                className="nav-link"
+                                style={{ fontSize: 13, fontWeight: 500, color: '#434750', textDecoration: 'none', transition: 'color 0.2s' }}
+                                onMouseEnter={e => (e.currentTarget.style.color = '#002753')}
+                                onMouseLeave={e => (e.currentTarget.style.color = '#434750')}
+                            >
+                                Resources
+                            </Link>
                         </nav>
 
                         <div className="welcome-header-cta" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -1206,17 +1230,30 @@ export default function Welcome() {
                             <span style={{ fontWeight: 700, fontSize: 14, color: '#002753' }}>Privacy Cure Compliance</span>
                         </div>
                         <div className="welcome-footer-links" style={{ display: 'flex', flexWrap: 'wrap', gap: 32 }}>
-                            {['Privacy Policy', 'Terms of Service', 'Support'].map((l) => (
-                                <a
-                                    key={l}
-                                    href="#"
-                                    style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#434750', textDecoration: 'none', transition: 'color 0.2s' }}
-                                    onMouseEnter={e => (e.currentTarget.style.color = '#002753')}
-                                    onMouseLeave={e => (e.currentTarget.style.color = '#434750')}
-                                >
-                                    {l}
-                                </a>
-                            ))}
+                            <Link
+                                href={route('privacy-policy')}
+                                style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#434750', textDecoration: 'none', transition: 'color 0.2s' }}
+                                onMouseEnter={e => (e.currentTarget.style.color = '#002753')}
+                                onMouseLeave={e => (e.currentTarget.style.color = '#434750')}
+                            >
+                                Privacy Policy
+                            </Link>
+                            <Link
+                                href={route('terms-and-conditions')}
+                                style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#434750', textDecoration: 'none', transition: 'color 0.2s' }}
+                                onMouseEnter={e => (e.currentTarget.style.color = '#002753')}
+                                onMouseLeave={e => (e.currentTarget.style.color = '#434750')}
+                            >
+                                Terms of Service
+                            </Link>
+                            <Link
+                                href={route('resources')}
+                                style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#434750', textDecoration: 'none', transition: 'color 0.2s' }}
+                                onMouseEnter={e => (e.currentTarget.style.color = '#002753')}
+                                onMouseLeave={e => (e.currentTarget.style.color = '#434750')}
+                            >
+                                Support
+                            </Link>
                         </div>
                         <p style={{ fontSize: 12, color: '#434750' }}>(c) 2026 Privacy Cure Compliance. All rights reserved.</p>
                     </div>

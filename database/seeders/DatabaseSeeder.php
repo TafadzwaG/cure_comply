@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
             RolesAndPermissionsSeeder::class,
             SuperAdminSeeder::class,
             FrameworkLibrarySeeder::class,
+            PrivacyCureAssessmentFrameworkSeeder::class,
             TrainingLibrarySeeder::class,
             DemoDataSeeder::class,
         ]);

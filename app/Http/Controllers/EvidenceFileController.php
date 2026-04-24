@@ -11,6 +11,7 @@ use App\Models\ComplianceSubmission;
 use App\Models\EvidenceFile;
 use App\Models\Tenant;
 use App\Services\EvidenceStorageService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -81,10 +82,10 @@ class EvidenceFileController extends Controller
         ]);
     }
 
-    public function store(EvidenceUploadRequest $request, ComplianceResponse $complianceResponse): RedirectResponse
+    public function store(EvidenceUploadRequest $request, ComplianceResponse $complianceResponse): RedirectResponse|JsonResponse
     {
         $this->authorize('create', EvidenceFile::class);
-        $this->authorize('view', $complianceResponse->submission);
+        $this->authorize('respond', $complianceResponse->submission);
 
         try {
             $evidenceFile = $this->evidenceStorageService->store(
@@ -104,6 +105,13 @@ class EvidenceFileController extends Controller
             return back()->with('error', 'Failed to upload evidence file. Please try again.');
         }
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Evidence uploaded.',
+                'response' => $this->responsePayload($complianceResponse->fresh()),
+            ]);
+        }
+
         return back()->with('success', 'Evidence uploaded.');
     }
 
@@ -111,9 +119,9 @@ class EvidenceFileController extends Controller
         EvidenceUploadRequest $request,
         ComplianceSubmission $complianceSubmission,
         ComplianceQuestion $complianceQuestion
-    ): RedirectResponse {
+    ): RedirectResponse|JsonResponse {
         $this->authorize('create', EvidenceFile::class);
-        $this->authorize('view', $complianceSubmission);
+        $this->authorize('respond', $complianceSubmission);
 
         $questionBelongsToFramework = $complianceSubmission->framework()
             ->whereHas('sections.questions', fn ($query) => $query->whereKey($complianceQuestion->id))
@@ -122,7 +130,7 @@ class EvidenceFileController extends Controller
         abort_unless($questionBelongsToFramework, 404);
 
         try {
-            DB::transaction(function () use ($request, $complianceSubmission, $complianceQuestion) {
+            $response = DB::transaction(function () use ($request, $complianceSubmission, $complianceQuestion) {
                 $response = ComplianceResponse::query()->firstOrCreate(
                     [
                         'tenant_id' => $complianceSubmission->tenant_id,
@@ -138,6 +146,8 @@ class EvidenceFileController extends Controller
 
                 $evidenceFile = $this->evidenceStorageService->store($response, $request->file('file'), $request->user()->id);
                 app(\App\Services\AuditLogService::class)->logModelCreated('evidence_uploaded', $evidenceFile);
+
+                return $response;
             });
         } catch (\RuntimeException $e) {
             Log::error('Evidence upload failed', [
@@ -148,6 +158,13 @@ class EvidenceFileController extends Controller
             ]);
 
             return back()->with('error', 'Failed to upload evidence file. Please try again.');
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Evidence uploaded.',
+                'response' => $this->responsePayload($response->fresh()),
+            ]);
         }
 
         return back()->with('success', 'Evidence uploaded.');
@@ -167,5 +184,45 @@ class EvidenceFileController extends Controller
         abort_unless($version->evidence_file_id === $evidenceFile->id, 404);
 
         return $this->evidenceStorageService->downloadVersion($version);
+    }
+
+    protected function responsePayload(ComplianceResponse $response): array
+    {
+        $response->loadMissing([
+            'evidenceFiles.uploader:id,name',
+            'evidenceFiles.reviews.reviewer:id,name',
+        ]);
+
+        return [
+            'id' => $response->id,
+            'compliance_question_id' => $response->compliance_question_id,
+            'answer_value' => $response->answer_value,
+            'answer_text' => $response->answer_text,
+            'comment_text' => $response->comment_text,
+            'response_score' => $response->response_score,
+            'status' => $response->status?->value ?? $response->status,
+            'evidence_files' => $response->evidenceFiles
+                ->map(fn (EvidenceFile $file) => [
+                    'id' => $file->id,
+                    'original_name' => $file->original_name,
+                    'mime_type' => $file->mime_type,
+                    'file_size' => $file->file_size,
+                    'uploaded_at' => optional($file->uploaded_at)?->toIso8601String(),
+                    'review_status' => $file->review_status?->value ?? $file->review_status,
+                    'uploader' => $file->uploader ? [
+                        'name' => $file->uploader->name,
+                    ] : null,
+                    'reviews' => $file->reviews->map(fn ($review) => [
+                        'id' => $review->id,
+                        'review_status' => $review->review_status?->value ?? $review->review_status,
+                        'review_comment' => $review->review_comment,
+                        'reviewed_at' => optional($review->reviewed_at)?->toIso8601String(),
+                        'reviewer' => $review->reviewer ? [
+                            'name' => $review->reviewer->name,
+                        ] : null,
+                    ])->values(),
+                ])
+                ->values(),
+        ];
     }
 }

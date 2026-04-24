@@ -640,6 +640,17 @@ function SectionEditor({
         is_active: true,
     });
 
+    const generateQuestionCode = () => {
+        questionForm.setData(
+            'code',
+            buildQuestionCode({
+                sectionName: section.name,
+                sectionSortOrder: section.sort_order,
+                questionSortOrder: questionForm.data.sort_order,
+            }),
+        );
+    };
+
     return (
         <div className="space-y-4">
             <Card className="border-[#14417A]/10 shadow-none">
@@ -753,6 +764,8 @@ function SectionEditor({
                         <QuestionEditor
                             key={question.id}
                             sectionId={section.id}
+                            sectionName={section.name}
+                            sectionSortOrder={section.sort_order}
                             question={question}
                             answerTypes={answerTypes}
                             editable={editable}
@@ -770,13 +783,24 @@ function SectionEditor({
 
                             <CardContent className="grid gap-4 md:grid-cols-2">
                                 <Field label="Code" error={questionForm.errors.code}>
-                                    <Input
-                                        value={questionForm.data.code}
-                                        onChange={(event) =>
-                                            questionForm.setData('code', event.target.value)
-                                        }
-                                        className="border-[#14417A]/15 focus-visible:ring-[#14417A]"
-                                    />
+                                    <div className="flex items-center gap-2">
+                                        <Input
+                                            value={questionForm.data.code}
+                                            onChange={(event) =>
+                                                questionForm.setData('code', event.target.value)
+                                            }
+                                            className="border-[#14417A]/15 focus-visible:ring-[#14417A]"
+                                        />
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            className="border-[#14417A]/20 text-[#14417A] hover:bg-[#14417A]/5 hover:text-[#14417A]"
+                                            onClick={generateQuestionCode}
+                                        >
+                                            <Sparkles className="mr-2 size-4" />
+                                            Auto generate
+                                        </Button>
+                                    </div>
                                 </Field>
 
                                 <Field label="Answer type" error={questionForm.errors.answer_type}>
@@ -925,11 +949,15 @@ function SectionEditor({
 
 function QuestionEditor({
     sectionId,
+    sectionName,
+    sectionSortOrder,
     question,
     answerTypes,
     editable,
 }: {
     sectionId: number;
+    sectionName: string;
+    sectionSortOrder: number;
     question: NonNullable<NonNullable<FrameworkData['sections']>[number]['questions']>[number];
     answerTypes: AnswerTypeOption[];
     editable: boolean;
@@ -944,6 +972,17 @@ function QuestionEditor({
         sort_order: String(question.sort_order),
         is_active: question.is_active,
     });
+
+    const generateQuestionCode = () => {
+        form.setData(
+            'code',
+            buildQuestionCode({
+                sectionName,
+                sectionSortOrder,
+                questionSortOrder: form.data.sort_order,
+            }),
+        );
+    };
 
     return (
         <div className="rounded-xl border border-[#14417A]/10 bg-background p-4">
@@ -976,12 +1015,24 @@ function QuestionEditor({
 
             <div className="grid gap-4 md:grid-cols-2">
                 <Field label="Code" error={form.errors.code}>
-                    <Input
-                        value={form.data.code}
-                        onChange={(event) => form.setData('code', event.target.value)}
-                        disabled={!editable}
-                        className="border-[#14417A]/15 focus-visible:ring-[#14417A]"
-                    />
+                    <div className="flex items-center gap-2">
+                        <Input
+                            value={form.data.code}
+                            onChange={(event) => form.setData('code', event.target.value)}
+                            disabled={!editable}
+                            className="border-[#14417A]/15 focus-visible:ring-[#14417A]"
+                        />
+                        <Button
+                            type="button"
+                            variant="outline"
+                            disabled={!editable}
+                            className="border-[#14417A]/20 text-[#14417A] hover:bg-[#14417A]/5 hover:text-[#14417A]"
+                            onClick={generateQuestionCode}
+                        >
+                            <Sparkles className="mr-2 size-4" />
+                            Auto generate
+                        </Button>
+                    </div>
                 </Field>
 
                 <Field label="Answer type" error={form.errors.answer_type}>
@@ -1201,4 +1252,53 @@ function Field({
             <InputError message={error} />
         </div>
     );
+}
+
+function buildQuestionCode({
+    sectionName,
+    sectionSortOrder,
+    questionSortOrder,
+}: {
+    sectionName: string;
+    sectionSortOrder: number | string;
+    questionSortOrder: number | string;
+}) {
+    const sectionToken = buildShortSectionCode(sectionName) || 'SEC';
+
+    return [
+        sectionToken,
+        formatQuestionCodeNumber(sectionSortOrder),
+        formatQuestionCodeNumber(questionSortOrder),
+    ].join('-');
+}
+
+function buildShortSectionCode(value: string) {
+    const words = value
+        .toUpperCase()
+        .split(/[^A-Z0-9]+/)
+        .filter(Boolean)
+        .filter((word) => !['AND', 'OF', 'THE', 'TO', 'FOR', 'IN', 'ON', 'WITH'].includes(word));
+
+    if (words.length === 0) {
+        return '';
+    }
+
+    if (words.length === 1) {
+        return words[0].slice(0, 4);
+    }
+
+    return words
+        .slice(0, 4)
+        .map((word) => word[0])
+        .join('');
+}
+
+function formatQuestionCodeNumber(value: number | string) {
+    const parsed = Number.parseInt(String(value), 10);
+
+    if (!Number.isFinite(parsed) || parsed < 1) {
+        return '01';
+    }
+
+    return String(parsed).padStart(2, '0');
 }

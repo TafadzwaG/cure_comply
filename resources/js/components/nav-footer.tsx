@@ -35,14 +35,14 @@ export function NavFooter({
                 </SidebarMenu>
 
                 {impersonation.active ? (
-                    <div className="mt-4 space-y-3 rounded-2xl bg-primary p-4 text-primary-foreground group-data-[collapsible=icon]:hidden">
+                    <div className="mt-4 space-y-3 rounded-2xl border border-[#0D3B73]/20 bg-gradient-to-br from-[#0F2E52] via-[#123867] to-[#14417A] p-4 text-white shadow-sm shadow-[#001833]/15 group-data-[collapsible=icon]:hidden dark:border-white/10">
                         <div className="flex items-start gap-3">
-                            <div className="rounded-xl bg-white/12 p-2.5">
+                            <div className="rounded-xl bg-white/12 p-2.5 text-white">
                                 <Eye className="size-4" />
                             </div>
                             <div className="space-y-1">
                                 <p className="text-sm font-semibold tracking-tight">Impersonation active</p>
-                                <p className="text-xs leading-5 text-blue-100/90">
+                                <p className="text-xs leading-5 text-blue-100/90 dark:text-white/80">
                                     {(impersonation.impersonator_name ?? 'A user')} is impersonating {auth.user?.name ?? 'user'}.
                                 </p>
                             </div>
@@ -51,7 +51,7 @@ export function NavFooter({
                         <Button
                             variant="secondary"
                             size="sm"
-                            className="w-full rounded-xl border-0 bg-white text-primary hover:bg-white/90 hover:text-primary dark:bg-white dark:text-primary dark:hover:bg-white/90 dark:hover:text-primary"
+                            className="w-full rounded-xl border-0 bg-white text-[#0F2E52] hover:bg-cyan-50 hover:text-[#0F2E52] dark:bg-white dark:text-[#0F2E52] dark:hover:bg-cyan-50 dark:hover:text-[#0F2E52]"
                             onClick={() => router.delete(route('impersonation.stop'))}
                         >
                             <ShieldX className="size-4" />

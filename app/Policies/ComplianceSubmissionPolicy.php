@@ -9,7 +9,18 @@ use App\Support\Permissions;
 
 class ComplianceSubmissionPolicy
 {
-    use HandlesPlatformAuthorization;
+    use HandlesPlatformAuthorization {
+        before as protected platformBefore;
+    }
+
+    public function before(User $user, string $ability): ?bool
+    {
+        if ($ability === 'respond') {
+            return null;
+        }
+
+        return $this->platformBefore($user, $ability);
+    }
 
     public function viewAny(User $user): bool
     {
@@ -39,8 +50,12 @@ class ComplianceSubmissionPolicy
 
     public function respond(User $user, ComplianceSubmission $complianceSubmission): bool
     {
-        if ($user->can(Permissions::MANAGE_COMPLIANCE_SUBMISSIONS)) {
-            return $this->sameTenant($user, $complianceSubmission);
+        if (! $this->sameTenant($user, $complianceSubmission)) {
+            return false;
+        }
+
+        if ($user->hasRole('company_admin')) {
+            return true;
         }
 
         return $user->can(Permissions::ANSWER_COMPLIANCE_QUESTIONS)

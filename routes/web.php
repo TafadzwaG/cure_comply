@@ -37,6 +37,10 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', fn () => Inertia::render('welcome'))->name('home');
+Route::get('pricing', fn () => Inertia::render('pricing'))->name('pricing');
+Route::get('resources', fn () => Inertia::render('resources'))->name('resources');
+Route::get('privacy-policy', fn () => Inertia::render('privacy-policy'))->name('privacy-policy');
+Route::get('terms-and-conditions', fn () => Inertia::render('terms-and-conditions'))->name('terms-and-conditions');
 
 Route::get('invitations/accept/{token}', [InvitationController::class, 'acceptShow'])->name('invitations.accept.show');
 Route::post('invitations/accept/{token}', [InvitationController::class, 'accept'])->name('invitations.accept.store');
@@ -67,7 +71,7 @@ Route::middleware(['auth', 'throttle:api', 'tenant', 'impersonation.audit'])->gr
     Route::get('policy-assignments/{policyAssignment}/open', [PolicyAssignmentController::class, 'open'])->name('policy-assignments.open');
     Route::post('policy-assignments/{policyAssignment}/acknowledge', [PolicyAssignmentController::class, 'acknowledge'])->name('policy-assignments.acknowledge');
 
-    Route::resource('tenants', TenantController::class)->only(['index', 'show', 'edit', 'update', 'destroy']);
+    Route::resource('tenants', TenantController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']);
     Route::post('tenants/{tenant}/activate', [TenantController::class, 'activate'])->name('tenants.activate');
     Route::post('tenants/{tenant}/deactivate', [TenantController::class, 'deactivate'])->name('tenants.deactivate');
     Route::get('users', [UserManagementController::class, 'index'])->name('users.index');

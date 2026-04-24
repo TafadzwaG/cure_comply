@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ComplianceSubmissionStatus;
+use App\Enums\UserStatus;
 use App\Http\Controllers\Concerns\InteractsWithIndexTables;
 use App\Http\Requests\ComplianceResponseRequest;
 use App\Http\Requests\ComplianceSubmissionRequest;
@@ -11,6 +13,8 @@ use App\Models\ComplianceSubmission;
 use App\Models\ComplianceSubmissionAssignment;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Notifications\SubmissionAssignedNotification;
+use App\Notifications\SubmissionSubmittedForReviewNotification;
 use App\Services\AppNotificationService;
 use App\Services\ComplianceScoringService;
 use App\Support\Permissions;
@@ -18,6 +22,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -41,7 +46,16 @@ class ComplianceSubmissionController extends Controller
             'tenant_id' => ['nullable', 'integer'],
         ]);
 
-        $query = ComplianceSubmission::query()->with(['framework', 'score', 'tenant:id,name']);
+        $query = ComplianceSubmission::query()
+            ->with([
+                'framework:id,name,version',
+                'framework.sections:id,compliance_framework_id',
+                'framework.sections.questions:id,compliance_section_id',
+                'score',
+                'tenant:id,name',
+                'assignments:id,compliance_submission_id,assigned_to_user_id',
+                'responses:id,compliance_submission_id,compliance_question_id,answer_value,answer_text',
+            ]);
         $this->scopeVisibleSubmissions($query, $request->user());
         $this->applySearch($query, $filters['search'] ?? null, ['title', 'framework.name', 'reporting_period', 'tenant.name']);
         $this->applyFilters($query, $filters, [
@@ -70,8 +84,13 @@ class ComplianceSubmissionController extends Controller
             return $this->queueTableExport($request, 'submissions.index', $filters, ['Title', 'Tenant', 'Framework', 'Period', 'Score', 'Status'], $rows, 'Submissions');
         }
 
+        $submissions = $query
+            ->paginate($this->perPage($filters))
+            ->through(fn (ComplianceSubmission $submission) => $this->submissionIndexItem($submission, $request->user()))
+            ->withQueryString();
+
         return Inertia::render('submissions/index', [
-            'submissions' => $query->paginate($this->perPage($filters))->withQueryString(),
+            'submissions' => $submissions,
             'frameworks' => ComplianceFramework::query()->orderBy('name')->get(),
             'filters' => $filters,
             'isSuperAdmin' => $request->user()?->isSuperAdmin() ?? false,
@@ -102,7 +121,6 @@ class ComplianceSubmissionController extends Controller
         $this->authorize('create', ComplianceSubmission::class);
 
         $validated = $request->validated();
-        $syncAssignments = array_key_exists('assigned_to_user_ids', $validated);
         $assigneeIds = collect($validated['assigned_to_user_ids'] ?? [])
             ->map(fn ($id) => (int) $id)
             ->unique()
@@ -120,8 +138,9 @@ class ComplianceSubmissionController extends Controller
             'status' => $request->input('status', 'draft'),
         ]);
 
-        $this->syncSubmissionAssignments($submission, $assigneeIds->all(), $request->user());
+        $newlyAssignedUsers = $this->syncSubmissionAssignments($submission, $assigneeIds->all(), $request->user());
         app(\App\Services\AuditLogService::class)->logModelCreated('submission_created', $submission);
+        $this->notifyAssignedUsers($submission, $newlyAssignedUsers, $request->user());
 
         return redirect()->route('submissions.show', $submission)->with('success', 'Submission created.');
     }
@@ -141,19 +160,17 @@ class ComplianceSubmissionController extends Controller
             'sectionScores.section',
         ]);
 
-        $responses = $complianceSubmission->responses->keyBy('compliance_question_id');
-        $questions = $complianceSubmission->framework?->sections?->flatMap->questions ?? collect();
-        $answeredCount = $questions->filter(fn ($question) => filled(optional($responses->get($question->id))->answer_value) || filled(optional($responses->get($question->id))->answer_text))->count();
-        $totalQuestions = $questions->count();
-        $completionPercentage = $totalQuestions > 0 ? (int) round(($answeredCount / $totalQuestions) * 100) : 0;
+        $progress = $this->submissionProgress($complianceSubmission);
 
         return Inertia::render('submissions/show', [
             'submission' => $complianceSubmission,
             'meta' => [
-                'completionPercentage' => $completionPercentage,
-                'answeredCount' => $answeredCount,
-                'totalQuestions' => $totalQuestions,
+                'completionPercentage' => $progress['completionPercentage'],
+                'answeredCount' => $progress['answeredCount'],
+                'totalQuestions' => $progress['totalQuestions'],
+                'isComplete' => $progress['isComplete'],
             ],
+            'abilities' => $this->submissionAbilities(request()->user(), $complianceSubmission, $progress),
         ]);
     }
 
@@ -161,6 +178,7 @@ class ComplianceSubmissionController extends Controller
     {
         $this->authorize('update', $complianceSubmission);
         $validated = $request->validated();
+        $syncAssignments = array_key_exists('assigned_to_user_ids', $validated);
         $assigneeIds = collect($validated['assigned_to_user_ids'] ?? [])
             ->map(fn ($id) => (int) $id)
             ->unique()
@@ -174,10 +192,12 @@ class ComplianceSubmissionController extends Controller
             'assigned_to_user_ids' => $complianceSubmission->assignments()->pluck('assigned_to_user_id')->all(),
         ];
         $complianceSubmission->update($validated);
+        $newlyAssignedUsers = collect();
         if ($syncAssignments) {
-            $this->syncSubmissionAssignments($complianceSubmission, $assigneeIds->all(), $request->user());
+            $newlyAssignedUsers = $this->syncSubmissionAssignments($complianceSubmission, $assigneeIds->all(), $request->user());
         }
         app(\App\Services\AuditLogService::class)->logModelUpdated('submission_updated', $complianceSubmission, $oldValues);
+        $this->notifyAssignedUsers($complianceSubmission, $newlyAssignedUsers, $request->user());
 
         return back()->with('success', 'Submission updated.');
     }
@@ -225,15 +245,22 @@ class ComplianceSubmissionController extends Controller
     public function submit(ComplianceSubmission $complianceSubmission): RedirectResponse
     {
         $this->authorize('update', $complianceSubmission);
+        $submittedBy = request()->user();
 
         try {
             $complianceSubmission->update([
                 'status' => 'submitted',
-                'submitted_by' => request()->user()?->id,
+                'submitted_by' => $submittedBy?->id,
                 'submitted_at' => now(),
             ]);
 
-            $this->complianceScoringService->scoreSubmission($complianceSubmission->fresh(), request()->user()?->id);
+            $complianceSubmission->loadMissing([
+                'tenant',
+                'framework',
+                'assignments.assigner',
+            ]);
+
+            $this->complianceScoringService->scoreSubmission($complianceSubmission->fresh(), $submittedBy?->id);
             app(\App\Services\AuditLogService::class)->logModel('submission_submitted', $complianceSubmission);
 
             $reviewers = User::query()
@@ -251,10 +278,12 @@ class ComplianceSubmissionController extends Controller
                     ['submission_id' => $complianceSubmission->id]
                 );
             }
+
+            $this->notifySubmissionAssignersOfSubmittedReview($complianceSubmission, $submittedBy);
         } catch (\Throwable $e) {
             Log::error('Compliance submission failed', [
                 'submission_id' => $complianceSubmission->id,
-                'user_id' => request()->user()?->id,
+                'user_id' => $submittedBy?->id,
                 'error' => $e->getMessage(),
             ]);
 
@@ -267,6 +296,17 @@ class ComplianceSubmissionController extends Controller
     public function recalculate(ComplianceSubmission $complianceSubmission): RedirectResponse
     {
         $this->authorize('update', $complianceSubmission);
+
+        $complianceSubmission->loadMissing([
+            'framework.sections.questions',
+            'responses',
+        ]);
+
+        $progress = $this->submissionProgress($complianceSubmission);
+
+        if (! $progress['isComplete']) {
+            return back()->with('error', 'Recalculation is only available after every assessment question has been answered.');
+        }
 
         try {
             $this->complianceScoringService->scoreSubmission($complianceSubmission, request()->user()?->id);
@@ -324,12 +364,25 @@ class ComplianceSubmissionController extends Controller
 
     protected function availableSubmissionAssignees(Request $request)
     {
+        $currentUserId = $request->user()?->id;
+
         return User::query()
-            ->select(['id', 'tenant_id', 'name', 'email'])
-            ->role('employee')
+            ->select(['id', 'tenant_id', 'name', 'email', 'status'])
+            ->with('roles:id,name')
+            ->where('status', UserStatus::Active)
+            ->whereHas('roles', fn (Builder $query) => $query->whereIn('name', ['employee', 'company_admin']))
             ->when(! $request->user()?->isSuperAdmin(), fn (Builder $query) => $query->where('tenant_id', $request->user()?->tenant_id))
             ->orderBy('name')
-            ->get();
+            ->get()
+            ->map(fn (User $user) => [
+                'id' => $user->id,
+                'tenant_id' => $user->tenant_id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role_label' => $user->hasRole('company_admin') ? 'Company Admin' : 'Employee',
+                'is_current_user' => $user->id === $currentUserId,
+            ])
+            ->values();
     }
 
     protected function submissionTenantId(ComplianceSubmissionRequest $request): int
@@ -353,10 +406,11 @@ class ComplianceSubmissionController extends Controller
             ->count() === count($assigneeIds);
     }
 
-    protected function syncSubmissionAssignments(ComplianceSubmission $submission, array $assigneeIds, ?User $assigner): void
+    protected function syncSubmissionAssignments(ComplianceSubmission $submission, array $assigneeIds, ?User $assigner)
     {
         $currentIds = $submission->assignments()->pluck('assigned_to_user_id')->all();
         $removeIds = array_diff($currentIds, $assigneeIds);
+        $newIds = array_values(array_diff($assigneeIds, $currentIds));
 
         if ($removeIds !== []) {
             $submission->assignments()->whereIn('assigned_to_user_id', $removeIds)->delete();
@@ -375,5 +429,149 @@ class ComplianceSubmissionController extends Controller
                 ],
             );
         }
+
+        return User::query()
+            ->whereIn('id', $newIds)
+            ->get();
+    }
+
+    protected function notifyAssignedUsers(ComplianceSubmission $submission, $users, ?User $assigner): void
+    {
+        foreach ($users as $user) {
+            app(AppNotificationService::class)->sendToUser(
+                $user,
+                'submission_assigned',
+                'A submission was assigned to you',
+                sprintf('%s assigned "%s" to you.', $assigner?->name ?: 'A manager', $submission->title),
+                route('submissions.show', $submission, false),
+                [
+                    'submission_id' => $submission->id,
+                    'framework_id' => $submission->compliance_framework_id,
+                    'assigned_by' => $assigner?->id,
+                ]
+            );
+
+            try {
+                $user->notify(new SubmissionAssignedNotification($submission->loadMissing(['tenant', 'framework']), $assigner));
+            } catch (\Throwable $exception) {
+                Log::error('Submission assignment email queue dispatch failed.', [
+                    'submission_id' => $submission->id,
+                    'tenant_id' => $submission->tenant_id,
+                    'assigned_to_user_id' => $user->id,
+                    'email' => $user->email,
+                    'queue' => 'mail',
+                    'assigned_by' => $assigner?->id,
+                    'message' => $exception->getMessage(),
+                ]);
+
+                report($exception);
+            }
+        }
+    }
+
+    protected function notifySubmissionAssignersOfSubmittedReview(ComplianceSubmission $submission, ?User $submittedBy): void
+    {
+        if (! $submittedBy) {
+            return;
+        }
+
+        $assignments = $submission->relationLoaded('assignments')
+            ? $submission->assignments
+            : $submission->assignments()->with('assigner:id,name,email')->get();
+
+        $assigners = $assignments
+            ->filter(fn (ComplianceSubmissionAssignment $assignment) => (int) $assignment->assigned_to_user_id === (int) $submittedBy->id)
+            ->map(fn (ComplianceSubmissionAssignment $assignment) => $assignment->assigner)
+            ->filter()
+            ->unique('id')
+            ->values();
+
+        foreach ($assigners as $assigner) {
+            try {
+                $assigner->notify(new SubmissionSubmittedForReviewNotification(
+                    $submission->loadMissing(['tenant', 'framework']),
+                    $submittedBy,
+                ));
+            } catch (\Throwable $exception) {
+                Log::error('Submission review email queue dispatch failed.', [
+                    'submission_id' => $submission->id,
+                    'tenant_id' => $submission->tenant_id,
+                    'submitted_by' => $submittedBy->id,
+                    'assigner_id' => $assigner->id,
+                    'email' => $assigner->email,
+                    'queue' => 'mail',
+                    'message' => $exception->getMessage(),
+                ]);
+
+                report($exception);
+            }
+        }
+    }
+
+    protected function submissionIndexItem(ComplianceSubmission $submission, ?User $user): array
+    {
+        $progress = $this->submissionProgress($submission);
+        $abilities = $this->submissionAbilities($user, $submission, $progress);
+
+        return [
+            'id' => $submission->id,
+            'title' => $submission->title,
+            'status' => $submission->status->value,
+            'reporting_period' => $submission->reporting_period,
+            'framework' => $submission->framework ? [
+                'id' => $submission->framework->id,
+                'name' => $submission->framework->name,
+            ] : null,
+            'score' => $submission->score ? [
+                'overall_score' => $submission->score->overall_score,
+            ] : null,
+            'tenant' => $submission->tenant ? [
+                'id' => $submission->tenant->id,
+                'name' => $submission->tenant->name,
+            ] : null,
+            'can_respond' => $abilities['canRespond'],
+            'can_recalculate' => $abilities['canRecalculate'],
+            'is_assigned_to_current_user' => $abilities['isAssignedToCurrentUser'],
+            'completion_percentage' => $progress['completionPercentage'],
+            'answered_questions_count' => $progress['answeredCount'],
+            'total_questions_count' => $progress['totalQuestions'],
+        ];
+    }
+
+    protected function submissionProgress(ComplianceSubmission $submission): array
+    {
+        $responses = $submission->responses instanceof Collection
+            ? $submission->responses->keyBy('compliance_question_id')
+            : $submission->responses()->get()->keyBy('compliance_question_id');
+        $questions = $submission->framework?->sections?->flatMap->questions ?? collect();
+        $answeredCount = $questions
+            ->filter(fn ($question) => filled(optional($responses->get($question->id))->answer_value) || filled(optional($responses->get($question->id))->answer_text))
+            ->count();
+        $totalQuestions = $questions->count();
+        $completionPercentage = $totalQuestions > 0 ? (int) round(($answeredCount / $totalQuestions) * 100) : 0;
+
+        return [
+            'completionPercentage' => $completionPercentage,
+            'answeredCount' => $answeredCount,
+            'totalQuestions' => $totalQuestions,
+            'isComplete' => $totalQuestions > 0 && $answeredCount === $totalQuestions,
+        ];
+    }
+
+    protected function submissionAbilities(?User $user, ComplianceSubmission $submission, ?array $progress = null): array
+    {
+        $progress ??= $this->submissionProgress($submission);
+        $canManage = (bool) $user?->can('update', $submission);
+        $assignments = $submission->relationLoaded('assignments')
+            ? $submission->assignments
+            : $submission->assignments()->get(['assigned_to_user_id']);
+
+        return [
+            'canRespond' => (bool) $user?->can('respond', $submission),
+            'canSubmit' => $canManage && $submission->status === ComplianceSubmissionStatus::Draft,
+            'canRecalculate' => $canManage && $progress['isComplete'],
+            'isAssignedToCurrentUser' => $user !== null
+                && $assignments->contains('assigned_to_user_id', $user->id),
+        ];
     }
 }

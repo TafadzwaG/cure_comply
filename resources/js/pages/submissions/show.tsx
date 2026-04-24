@@ -15,8 +15,9 @@ import PlatformLayout from '@/layouts/platform-layout';
 import { formatLongDateTime } from '@/lib/date';
 import { SharedData } from '@/types';
 import { router, useForm, usePage } from '@inertiajs/react';
-import { Building2, CalendarDays, CheckCircle2, ClipboardCheck, Download, FileSearch, FileText, Gauge, MessageSquareText, Paperclip, ShieldCheck, UploadCloud } from 'lucide-react';
-import { useRef, useState, type DragEvent } from 'react';
+import { Building2, CalendarDays, CheckCircle2, ClipboardCheck, Cloud, Download, FileSearch, FileText, Gauge, MessageSquareText, Paperclip, ShieldCheck, UploadCloud } from 'lucide-react';
+import { useEffect, useRef, useState, type DragEvent } from 'react';
+import { toast } from 'sonner';
 
 interface EvidenceReview {
     id: number;
@@ -105,22 +106,30 @@ interface ResponsePayload {
 export default function SubmissionShow({
     submission,
     meta,
+    abilities,
 }: {
     submission: SubmissionData;
     meta: {
         completionPercentage: number;
         answeredCount: number;
         totalQuestions: number;
+        isComplete: boolean;
+    };
+    abilities: {
+        canRespond: boolean;
+        canSubmit: boolean;
+        canRecalculate: boolean;
+        isAssignedToCurrentUser: boolean;
     };
 }) {
     const { auth } = usePage<SharedData>().props;
     const permissions = auth.permissions ?? [];
-    const canUploadEvidence = permissions.includes('upload evidence');
+    const canUploadEvidence = permissions.includes('upload evidence') && abilities.canRespond;
     const canReviewEvidence = permissions.includes('review evidence');
-    const canManageSubmissions = permissions.includes('manage compliance submissions');
+    const [responseState, setResponseState] = useState<ExistingResponse[]>(submission.responses ?? []);
 
     const sections = submission.framework?.sections ?? [];
-    const existingResponses = new Map((submission.responses ?? []).map((response) => [response.compliance_question_id, response]));
+    const existingResponses = new Map(responseState.map((response) => [response.compliance_question_id, response]));
     const initialResponses = sections.flatMap((section) =>
         section.questions.map((question) => {
             const response = existingResponses.get(question.id);
@@ -143,6 +152,25 @@ export default function SubmissionShow({
     const completionPercentage = meta.totalQuestions > 0 ? Math.round((answeredCount / meta.totalQuestions) * 100) : 0;
     const latestScore = submission.score?.overall_score ?? null;
     const defaultTab = sections[0] ? `section-${sections[0].id}` : 'review';
+    const floatingStatusLabel = submissionStatusLabel(submission.status);
+
+    useEffect(() => {
+        setResponseState(submission.responses ?? []);
+    }, [submission.responses]);
+
+    const saveDraftChanges = () => {
+        form.post(route('submissions.responses.store', submission.id, false), {
+            preserveScroll: true,
+            onSuccess: () => {
+                form.setDefaults();
+                router.reload({
+                    only: ['submission', 'meta', 'abilities'],
+                    preserveScroll: true,
+                    preserveState: true,
+                });
+            },
+        });
+    };
 
     const updateResponse = (questionId: number, patch: Partial<ResponsePayload>) => {
         form.setData(
@@ -156,6 +184,26 @@ export default function SubmissionShow({
                     : response,
             ),
         );
+    };
+
+    const syncUploadedResponse = (uploadedResponse: ExistingResponse) => {
+        setResponseState((currentResponses) => {
+            const existingIndex = currentResponses.findIndex(
+                (response) => response.compliance_question_id === uploadedResponse.compliance_question_id,
+            );
+
+            if (existingIndex === -1) {
+                return [...currentResponses, uploadedResponse];
+            }
+
+            const nextResponses = [...currentResponses];
+            nextResponses[existingIndex] = {
+                ...nextResponses[existingIndex],
+                ...uploadedResponse,
+            };
+
+            return nextResponses;
+        });
     };
 
     return (
@@ -262,11 +310,21 @@ export default function SubmissionShow({
                                                         </div>
                                                     </CardHeader>
                                                     <CardContent className="space-y-5">
-                                                        <AnswerField question={question} response={response} onChange={(patch) => updateResponse(question.id, patch)} />
+                                                        <AnswerField
+                                                            question={question}
+                                                            response={response}
+                                                            disabled={!abilities.canRespond}
+                                                            onChange={(patch) => updateResponse(question.id, patch)}
+                                                        />
 
                                                         <div className="space-y-2">
                                                             <Label>Context / comments</Label>
-                                                            <Textarea value={response.comment_text} onChange={(event) => updateResponse(question.id, { comment_text: event.target.value })} placeholder="Add implementation notes, caveats, or reviewer context." />
+                                                            <Textarea
+                                                                value={response.comment_text}
+                                                                disabled={!abilities.canRespond}
+                                                                onChange={(event) => updateResponse(question.id, { comment_text: event.target.value })}
+                                                                placeholder="Add implementation notes, caveats, or reviewer context."
+                                                            />
                                                         </div>
 
                                                         <EvidencePanel
@@ -277,6 +335,7 @@ export default function SubmissionShow({
                                                             requiresEvidence={question.requires_evidence}
                                                             canUploadEvidence={canUploadEvidence}
                                                             canReviewEvidence={canReviewEvidence}
+                                                            onUploaded={syncUploadedResponse}
                                                         />
                                                     </CardContent>
                                                 </Card>
@@ -332,16 +391,26 @@ export default function SubmissionShow({
                                 <CardDescription>Save progress throughout the cycle, then submit for review and scoring when ready.</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-3">
-                                <Button className="w-full" onClick={() => form.post(route('submissions.responses.store', submission.id, false))}>
-                                    <MessageSquareText className="size-4" />
-                                    Save draft responses
-                                </Button>
-                                {canManageSubmissions && (
+                                {abilities.canRespond ? (
+                                    <Button className="w-full" onClick={saveDraftChanges} disabled={form.processing}>
+                                        <MessageSquareText className="size-4" />
+                                        {form.processing ? 'Saving draft...' : 'Save draft responses'}
+                                    </Button>
+                                ) : (
+                                    <div className="rounded-xl border border-dashed border-border/70 bg-background/60 p-4 text-sm text-muted-foreground">
+                                        Only the company admin or users assigned to this submission can answer the assessment.
+                                    </div>
+                                )}
+                                {abilities.canSubmit && (
                                     <>
                                         <Button variant="outline" className="w-full" onClick={() => router.post(route('submissions.submit', submission.id, false))}>
                                             <ShieldCheck className="size-4" />
                                             Submit for review
                                         </Button>
+                                    </>
+                                )}
+                                {abilities.canRecalculate && (
+                                    <>
                                         <Button variant="outline" className="w-full" onClick={() => router.post(route('submissions.recalculate', submission.id, false))}>
                                             <Gauge className="size-4" />
                                             Recalculate score
@@ -366,6 +435,17 @@ export default function SubmissionShow({
                         </Card>
                     </div>
                 </div>
+
+                <FloatingSubmissionBubble
+                    status={floatingStatusLabel}
+                    answeredCount={answeredCount}
+                    totalQuestions={meta.totalQuestions}
+                    completionPercentage={completionPercentage}
+                    hasUnsavedChanges={form.isDirty}
+                    canSave={abilities.canRespond}
+                    isSaving={form.processing}
+                    onSave={saveDraftChanges}
+                />
             </div>
         </PlatformLayout>
     );
@@ -379,6 +459,7 @@ function EvidencePanel({
     requiresEvidence,
     canUploadEvidence,
     canReviewEvidence,
+    onUploaded,
 }: {
     submissionId: number;
     questionId: number;
@@ -387,39 +468,87 @@ function EvidencePanel({
     requiresEvidence: boolean;
     canUploadEvidence: boolean;
     canReviewEvidence: boolean;
+    onUploaded: (response: ExistingResponse) => void;
 }) {
-    const uploadForm = useForm<{ file: File | null }>({ file: null });
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [isDragging, setIsDragging] = useState(false);
-    const selectedFile = uploadForm.data.file;
-
-    const setUploadFile = (file?: File | null) => {
-        uploadForm.setData('file', file ?? null);
-    };
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [uploadError, setUploadError] = useState<string | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
 
     const handleDrop = (event: DragEvent<HTMLDivElement>) => {
         event.preventDefault();
         event.stopPropagation();
         setIsDragging(false);
-        setUploadFile(event.dataTransfer.files?.[0] ?? null);
+        setUploadError(null);
+        setSelectedFile(event.dataTransfer.files?.[0] ?? null);
     };
 
-    const handleUpload = () => {
+    const resetUpload = () => {
+        setSelectedFile(null);
+        setUploadError(null);
+
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
+    const handleUpload = async () => {
         if (!selectedFile) {
             return;
         }
 
-        uploadForm.post(route('submissions.questions.evidence.store', { complianceSubmission: submissionId, complianceQuestion: questionId }, false), {
-            forceFormData: true,
-            preserveScroll: true,
-            onSuccess: () => {
-                uploadForm.reset();
+        setIsUploading(true);
+        setUploadError(null);
 
-                if (fileInputRef.current) {
-                    fileInputRef.current.value = '';
-                }
-            },
-        });
+        try {
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            const csrfToken = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content;
+            const response = await fetch(
+                route(
+                    'submissions.questions.evidence.store',
+                    { complianceSubmission: submissionId, complianceQuestion: questionId },
+                    false,
+                ),
+                {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {}),
+                    },
+                    credentials: 'same-origin',
+                    body: formData,
+                },
+            );
+
+            const payload = (await response.json().catch(() => null)) as
+                | { message?: string; response?: ExistingResponse; errors?: Record<string, string[]> }
+                | null;
+
+            if (!response.ok) {
+                const message = payload?.errors?.file?.[0] ?? payload?.message ?? 'Failed to upload evidence file.';
+                setUploadError(message);
+                toast.error(message);
+
+                return;
+            }
+
+            if (payload?.response) {
+                onUploaded(payload.response);
+            }
+
+            toast.success(payload?.message ?? 'Evidence uploaded.');
+            resetUpload();
+        } catch {
+            const message = 'Failed to upload evidence file. Please try again.';
+            setUploadError(message);
+            toast.error(message);
+        } finally {
+            setIsUploading(false);
+        }
     };
 
     return (
@@ -467,7 +596,10 @@ function EvidencePanel({
                                     type="file"
                                     className="sr-only"
                                     accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.png,.jpg,.jpeg"
-                                    onChange={(event) => setUploadFile(event.target.files?.[0] ?? null)}
+                                    onChange={(event) => {
+                                        setUploadError(null);
+                                        setSelectedFile(event.target.files?.[0] ?? null);
+                                    }}
                                 />
                                 <div className="mb-3 rounded-xl bg-[#14417A]/10 p-3 text-[#14417A]">
                                     <UploadCloud className="size-6" />
@@ -484,7 +616,7 @@ function EvidencePanel({
                                     </p>
                                 ) : null}
                             </div>
-                            <InputError message={uploadForm.errors.file} />
+                            <InputError message={uploadError ?? undefined} />
                             <p className="text-xs text-muted-foreground">
                                 Uploading here automatically creates the draft response record if it does not exist yet.
                             </p>
@@ -492,22 +624,16 @@ function EvidencePanel({
                         <div className="flex flex-wrap gap-2">
                             <Button
                                 onClick={handleUpload}
-                                disabled={uploadForm.processing || !selectedFile}
+                                disabled={isUploading || !selectedFile}
                             >
                                 <UploadCloud className="size-4" />
-                                {uploadForm.processing ? 'Uploading...' : responseId ? 'Upload evidence' : 'Create response and upload'}
+                                {isUploading ? 'Uploading...' : responseId ? 'Upload evidence' : 'Create response and upload'}
                             </Button>
                             {selectedFile ? (
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    onClick={() => {
-                                        uploadForm.reset();
-
-                                        if (fileInputRef.current) {
-                                            fileInputRef.current.value = '';
-                                        }
-                                    }}
+                                    onClick={resetUpload}
                                 >
                                     Clear file
                                 </Button>
@@ -556,7 +682,17 @@ function EvidencePanel({
     );
 }
 
-function AnswerField({ question, response, onChange }: { question: SubmissionQuestion; response: ResponsePayload; onChange: (patch: Partial<ResponsePayload>) => void }) {
+function AnswerField({
+    question,
+    response,
+    disabled = false,
+    onChange,
+}: {
+    question: SubmissionQuestion;
+    response: ResponsePayload;
+    disabled?: boolean;
+    onChange: (patch: Partial<ResponsePayload>) => void;
+}) {
     if (question.answer_type === 'yes_no_partial') {
         return (
             <div className="space-y-3">
@@ -567,8 +703,8 @@ function AnswerField({ question, response, onChange }: { question: SubmissionQue
                         { value: 'partial', label: 'Partial' },
                         { value: 'no', label: 'No' },
                     ].map((option) => (
-                        <label key={option.value} className="flex cursor-pointer items-start gap-3 rounded-xl border border-border/70 bg-muted/20 p-4">
-                            <RadioGroupItem value={option.value} className="mt-1" />
+                        <label key={option.value} className={`flex items-start gap-3 rounded-xl border border-border/70 bg-muted/20 p-4 ${disabled ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}>
+                            <RadioGroupItem value={option.value} disabled={disabled} className="mt-1" />
                             <div>
                                 <p className="font-medium">{option.label}</p>
                                 <p className="text-sm text-muted-foreground">Select the best maturity signal for this control.</p>
@@ -581,14 +717,14 @@ function AnswerField({ question, response, onChange }: { question: SubmissionQue
     }
 
     if (question.answer_type === 'text') {
-        return <div className="space-y-2"><Label>Answer</Label><Textarea value={response.answer_text} onChange={(event) => onChange({ answer_text: event.target.value })} placeholder="Write the narrative response for this control." /></div>;
+        return <div className="space-y-2"><Label>Answer</Label><Textarea value={response.answer_text} disabled={disabled} onChange={(event) => onChange({ answer_text: event.target.value })} placeholder="Write the narrative response for this control." /></div>;
     }
 
     if (question.answer_type === 'score') {
-        return <div className="space-y-2"><Label>Numeric score</Label><Input type="number" min="0" step="0.01" value={response.answer_value} onChange={(event) => onChange({ answer_value: event.target.value })} placeholder="Enter score" /></div>;
+        return <div className="space-y-2"><Label>Numeric score</Label><Input type="number" min="0" step="0.01" value={response.answer_value} disabled={disabled} onChange={(event) => onChange({ answer_value: event.target.value })} placeholder="Enter score" /></div>;
     }
 
-    return <div className="space-y-2"><Label>Date answer</Label><Input type="date" value={response.answer_value} onChange={(event) => onChange({ answer_value: event.target.value })} /></div>;
+    return <div className="space-y-2"><Label>Date answer</Label><Input type="date" value={response.answer_value} disabled={disabled} onChange={(event) => onChange({ answer_value: event.target.value })} /></div>;
 }
 
 function MetricCard({ title, value, detail, icon: Icon }: { title: string; value: string; detail: string; icon: typeof ClipboardCheck }) {
@@ -610,6 +746,86 @@ function ReviewStat({ label, value }: { label: string; value: string }) {
     return <div className="rounded-xl border border-border/70 bg-muted/15 p-4"><p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{label}</p><p className="mt-2 text-2xl font-semibold tracking-tight">{value}</p></div>;
 }
 
+function FloatingSubmissionBubble({
+    status,
+    answeredCount,
+    totalQuestions,
+    completionPercentage,
+    hasUnsavedChanges,
+    canSave,
+    isSaving,
+    onSave,
+}: {
+    status: string;
+    answeredCount: number;
+    totalQuestions: number;
+    completionPercentage: number;
+    hasUnsavedChanges: boolean;
+    canSave: boolean;
+    isSaving: boolean;
+    onSave: () => void;
+}) {
+    return (
+        <div className="pointer-events-none fixed left-4 right-4 top-20 z-40 sm:left-auto sm:right-6 sm:w-[340px]">
+            <div className="pointer-events-auto relative overflow-visible">
+                <div className="absolute -left-2 top-7 h-14 w-14 rounded-full border border-[#14417A]/15 bg-background/95 shadow-xl dark:border-blue-900/40 dark:bg-slate-950/90" />
+                <div className="absolute left-10 top-0 h-16 w-16 rounded-full border border-[#14417A]/15 bg-background/95 shadow-xl dark:border-blue-900/40 dark:bg-slate-950/90" />
+                <div className="absolute right-16 -top-2 h-12 w-12 rounded-full border border-[#14417A]/15 bg-background/95 shadow-xl dark:border-blue-900/40 dark:bg-slate-950/90" />
+                <div className="absolute right-3 top-6 h-14 w-14 rounded-full border border-[#14417A]/15 bg-background/95 shadow-xl dark:border-blue-900/40 dark:bg-slate-950/90" />
+
+                <div className="relative rounded-[32px] border border-[#14417A]/15 bg-background/95 p-4 shadow-2xl backdrop-blur dark:border-blue-900/40 dark:bg-slate-950/90">
+                    <div className="flex items-start gap-3">
+                        <div className="rounded-2xl bg-[#14417A]/10 p-2.5 text-[#14417A] dark:bg-blue-950/50 dark:text-blue-300">
+                            <Cloud className="size-4" />
+                        </div>
+                        <div className="min-w-0 flex-1 space-y-1">
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm font-semibold text-[#0F2E52] dark:text-blue-100">{status}</span>
+                                {hasUnsavedChanges ? (
+                                    <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.16em] text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-300">
+                                        Unsaved changes
+                                    </span>
+                                ) : null}
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                                {answeredCount} {answeredCount === 1 ? 'draft question answered' : 'draft questions answered'}
+                                {totalQuestions > 0 ? ` of ${totalQuestions}` : ''}
+                            </p>
+                            <div className="flex items-center gap-2">
+                                <div className="h-2 flex-1 overflow-hidden rounded-full bg-[#14417A]/10 dark:bg-blue-950/50">
+                                    <div
+                                        className="h-full rounded-full bg-[#14417A] transition-all dark:bg-blue-400"
+                                        style={{ width: `${completionPercentage}%` }}
+                                    />
+                                </div>
+                                <span className="text-xs font-medium text-[#14417A] dark:text-blue-300">{completionPercentage}%</span>
+                            </div>
+                            {canSave ? (
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    className="mt-2 h-8 rounded-full bg-[#14417A] px-3 text-white hover:bg-[#0F2E52] dark:bg-blue-500 dark:text-slate-950 dark:hover:bg-blue-400"
+                                    onClick={onSave}
+                                    disabled={!hasUnsavedChanges || isSaving}
+                                >
+                                    <MessageSquareText className="size-3.5" />
+                                    {isSaving ? 'Saving...' : 'Save draft'}
+                                </Button>
+                            ) : null}
+                        </div>
+                    </div>
+                </div>
+                <div className="absolute -bottom-1 left-24 h-6 w-10 rounded-full border border-[#14417A]/15 bg-background/95 shadow-lg dark:border-blue-900/40 dark:bg-slate-950/90" />
+                <div className="absolute bottom-1 left-32 h-4 w-6 rounded-full border border-[#14417A]/15 bg-background/95 shadow-lg dark:border-blue-900/40 dark:bg-slate-950/90" />
+                <div className="absolute -bottom-2 left-28 h-5 w-5 rounded-full border border-[#14417A]/15 bg-background/95 shadow-lg dark:border-blue-900/40 dark:bg-slate-950/90" />
+                <div className="absolute -bottom-1 left-28 text-[#14417A] dark:text-blue-300">
+                    <ClipboardCheck className="size-3.5" />
+                </div>
+            </div>
+        </div>
+    );
+}
+
 function GuidanceRow({ icon: Icon, title, description }: { icon: typeof ClipboardCheck; title: string; description: string }) {
     return (
         <div className="flex items-start gap-3">
@@ -628,6 +844,18 @@ function emptyResponse(questionId: number): ResponsePayload {
 
 function filledResponse(response: ResponsePayload | undefined) {
     return Boolean(response?.answer_value || response?.answer_text);
+}
+
+function submissionStatusLabel(status: string) {
+    const labels: Record<string, string> = {
+        draft: 'Draft assessment',
+        submitted: 'Submitted for review',
+        in_review: 'In review',
+        scored: 'Scored assessment',
+        closed: 'Closed submission',
+    };
+
+    return labels[status?.toLowerCase()] ?? status;
 }
 
 function formatFileSize(size?: number | null) {

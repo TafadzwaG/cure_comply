@@ -45,23 +45,20 @@ class ComplianceResponseRequest extends FormRequest
 
                     $value = $payload['answer_value'] ?? null;
                     $text = $payload['answer_text'] ?? null;
+                    $comment = $payload['comment_text'] ?? null;
 
-                    if ($question->answer_type === ComplianceAnswerType::YesNoPartial) {
+                    if (blank($value) && blank($text) && blank($comment)) {
+                        continue;
+                    }
+
+                    if ($question->answer_type === ComplianceAnswerType::YesNoPartial && filled($value)) {
                         if (! in_array($value, ['yes', 'no', 'partial'], true)) {
                             $validator->errors()->add("responses.{$index}.answer_value", 'Yes / No / Partial questions require a valid choice.');
                         }
                     }
 
-                    if ($question->answer_type === ComplianceAnswerType::Text && blank($text)) {
-                        $validator->errors()->add("responses.{$index}.answer_text", 'Text questions require a written answer.');
-                    }
-
-                    if ($question->answer_type === ComplianceAnswerType::Score && (! is_numeric($value))) {
+                    if ($question->answer_type === ComplianceAnswerType::Score && filled($value) && (! is_numeric($value))) {
                         $validator->errors()->add("responses.{$index}.answer_value", 'Score questions require a numeric value.');
-                    }
-
-                    if ($question->answer_type === ComplianceAnswerType::Date && blank($value)) {
-                        $validator->errors()->add("responses.{$index}.answer_value", 'Date questions require a date value.');
                     }
                 }
             },

@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import PlatformLayout from '@/layouts/platform-layout';
 import { useForm } from '@inertiajs/react';
-import { CalendarClock, ClipboardCheck, FileSpreadsheet, ShieldCheck } from 'lucide-react';
+import { CalendarClock, ClipboardCheck, FileSpreadsheet, ShieldCheck, Star } from 'lucide-react';
 import { useMemo } from 'react';
 
 interface EmployeeOption {
@@ -17,6 +17,8 @@ interface EmployeeOption {
     tenant_id: number | null;
     name: string;
     email: string;
+    role_label?: string;
+    is_current_user?: boolean;
 }
 
 export default function SubmissionsCreate({
@@ -39,15 +41,19 @@ export default function SubmissionsCreate({
     });
 
     const assignableEmployees = useMemo(() => {
-        if (!isSuperAdmin) {
-            return employees;
-        }
+        const scopedEmployees = !isSuperAdmin
+            ? employees
+            : !form.data.tenant_id
+              ? []
+              : employees.filter((employee) => String(employee.tenant_id) === form.data.tenant_id);
 
-        if (!form.data.tenant_id) {
-            return [];
-        }
+        return [...scopedEmployees].sort((left, right) => {
+            if (left.is_current_user === right.is_current_user) {
+                return left.name.localeCompare(right.name);
+            }
 
-        return employees.filter((employee) => String(employee.tenant_id) === form.data.tenant_id);
+            return left.is_current_user ? -1 : 1;
+        });
     }, [employees, form.data.tenant_id, isSuperAdmin]);
 
     const toggleAssignee = (employeeId: number, checked: boolean) => {
@@ -102,9 +108,9 @@ export default function SubmissionsCreate({
                             </div>
                             <div className="rounded-xl border border-border/70 bg-muted/20 p-4">
                                 <div className="mb-4 space-y-1">
-                                    <h3 className="text-sm font-medium text-foreground">Assign employees</h3>
+                                    <h3 className="text-sm font-medium text-foreground">Assign users</h3>
                                     <p className="text-xs text-muted-foreground">
-                                        Employees only see submissions assigned to them by a company admin or super admin.
+                                        Select employees and tenant company admins who should work on this submission.
                                     </p>
                                 </div>
 
@@ -119,8 +125,19 @@ export default function SubmissionsCreate({
                                                 onCheckedChange={(checked) => toggleAssignee(employee.id, checked === true)}
                                             />
                                             <span className="flex flex-col">
-                                                <span className="font-medium text-foreground">{employee.name}</span>
-                                                <span className="text-xs text-muted-foreground">{employee.email}</span>
+                                                <span className="flex items-center gap-2 font-medium text-foreground">
+                                                    <span>{employee.name}</span>
+                                                    {employee.is_current_user ? (
+                                                        <span className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-muted/40 px-2 py-0.5 text-[11px] font-medium text-foreground">
+                                                            <Star className="size-3 fill-current" />
+                                                            Assign to self
+                                                        </span>
+                                                    ) : null}
+                                                </span>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {employee.email}
+                                                    {employee.role_label ? ` - ${employee.role_label}` : ''}
+                                                </span>
                                             </span>
                                         </Label>
                                     ))}
@@ -128,8 +145,8 @@ export default function SubmissionsCreate({
                                     {assignableEmployees.length === 0 && (
                                         <div className="rounded-lg border border-dashed border-border p-4 text-sm text-muted-foreground">
                                             {isSuperAdmin && !form.data.tenant_id
-                                                ? 'Select a tenant to choose employee assignees.'
-                                                : 'No employees are available for this tenant yet.'}
+                                                ? 'Select a tenant to choose submission assignees.'
+                                                : 'No active employees or company admins are available for this tenant yet.'}
                                         </div>
                                     )}
                                 </div>

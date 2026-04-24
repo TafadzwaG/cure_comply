@@ -38,6 +38,12 @@ interface Submission {
     framework?: { id: number; name: string } | null;
     score?: { overall_score?: number | null } | null;
     tenant?: { id: number; name: string } | null;
+    can_respond?: boolean;
+    can_recalculate?: boolean;
+    is_assigned_to_current_user?: boolean;
+    completion_percentage?: number;
+    answered_questions_count?: number;
+    total_questions_count?: number;
 }
 
 function StatusPill({ value }: { value: string }) {
@@ -111,6 +117,19 @@ function ScoreDonut({ score }: { score?: number | null }) {
             <span className="text-sm font-semibold text-[#0F2E52] dark:text-blue-200">{value}%</span>
         </div>
     );
+}
+
+function submissionActionLabel(submission: Submission, viewLabel = 'View') {
+    const isAssignedDraft =
+        submission.status === 'draft' && submission.is_assigned_to_current_user;
+
+    if (!isAssignedDraft) {
+        return viewLabel;
+    }
+
+    const hasStartedDraft = (submission.answered_questions_count ?? 0) > 0;
+
+    return hasStartedDraft ? 'Continue Assessment' : 'Start Assessment';
 }
 
 export default function SubmissionsIndex({
@@ -351,11 +370,11 @@ export default function SubmissionsIndex({
                                                         >
                                                             <Link href={route('submissions.show', submission.id)}>
                                                                 <Eye className="mr-2 h-4 w-4" />
-                                                                View
+                                                                {submissionActionLabel(submission, 'View Assessment')}
                                                             </Link>
                                                         </Button>
 
-                                                        {canManageSubmissions && (
+                                                        {submission.can_recalculate && (
                                                             <Button
                                                                 size="sm"
                                                                 className="bg-emerald-600 text-white hover:bg-emerald-700"
@@ -368,7 +387,7 @@ export default function SubmissionsIndex({
                                                             </Button>
                                                         )}
 
-                                                        {canManageSubmissions && (
+                                                        {submission.can_recalculate && (
                                                             <DropdownMenu>
                                                                 <DropdownMenuTrigger asChild>
                                                                     <Button
@@ -385,7 +404,7 @@ export default function SubmissionsIndex({
                                                                     <DropdownMenuItem asChild>
                                                                         <Link href={route('submissions.show', submission.id)}>
                                                                             <Eye className="mr-2 h-4 w-4" />
-                                                                            View submission
+                                                                            {submissionActionLabel(submission, 'View Assessment')}
                                                                         </Link>
                                                                     </DropdownMenuItem>
 

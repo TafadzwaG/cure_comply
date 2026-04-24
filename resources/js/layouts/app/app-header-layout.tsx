@@ -1,6 +1,7 @@
 import { AppContent } from '@/components/app-content';
 import { AppHeader } from '@/components/app-header';
 import { AppShell } from '@/components/app-shell';
+import IdleSessionGuard from '@/components/idle-session-guard';
 import { type BreadcrumbItem } from '@/types';
 
 interface AppHeaderLayoutProps {
@@ -11,6 +12,7 @@ interface AppHeaderLayoutProps {
 export default function AppHeaderLayout({ children, breadcrumbs }: AppHeaderLayoutProps) {
     return (
         <AppShell>
+            <IdleSessionGuard />
             <AppHeader breadcrumbs={breadcrumbs} />
             <AppContent>{children}</AppContent>
         </AppShell>

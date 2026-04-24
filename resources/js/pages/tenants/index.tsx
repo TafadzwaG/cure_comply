@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import PlatformLayout from '@/layouts/platform-layout';
 import { IndexStat, Paginated, TableFilters, Tenant } from '@/types';
 import { Link } from '@inertiajs/react';
-import { Building2, CirclePause, ShieldAlert, ShieldCheck, ShieldX } from 'lucide-react';
+import { Building2, CirclePause, Plus, ShieldAlert, ShieldCheck, ShieldX } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface TenantRow extends Tenant {
@@ -78,7 +78,10 @@ export default function TenantsIndex({
                 title="Tenants"
                 description="Review companies, support their workspace setup, and manage lifecycle status from one table."
                 stats={statItems}
-                actions={[{ label: 'Review Pending Tenants', href: route('tenants.index', { status: 'pending' }), icon: ShieldAlert }]}
+                actions={[
+                    { label: 'Create tenant', href: route('tenants.create'), icon: Plus },
+                    { label: 'Review Pending Tenants', href: route('tenants.index', { status: 'pending' }), icon: ShieldAlert, variant: 'outline' },
+                ]}
                 filters={filters}
                 filterConfigs={[
                     {
