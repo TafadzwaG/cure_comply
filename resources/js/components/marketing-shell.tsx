@@ -66,6 +66,111 @@ export default function MarketingShell({ title, description, current, children }
                         border-radius: 8px !important;
                     }
 
+                    .public-marketing-shell main > section:first-child {
+                        position: relative;
+                        overflow: hidden;
+                        min-height: min(720px, calc(100vh - 84px));
+                        display: flex;
+                        align-items: center;
+                        background:
+                            linear-gradient(
+                                to right,
+                                rgba(247, 249, 251, 0.98) 0%,
+                                rgba(247, 249, 251, 0.92) 42%,
+                                rgba(247, 249, 251, 0.62) 72%,
+                                rgba(247, 249, 251, 0.5) 100%
+                            ),
+                            url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=1800&q=80&auto=format&fit=crop')
+                                right center / cover no-repeat;
+                    }
+
+                    .dark .public-marketing-shell main > section:first-child {
+                        background:
+                            linear-gradient(
+                                to right,
+                                rgba(8, 26, 51, 0.98) 0%,
+                                rgba(8, 26, 51, 0.94) 42%,
+                                rgba(8, 26, 51, 0.72) 72%,
+                                rgba(8, 26, 51, 0.66) 100%
+                            ),
+                            url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=1800&q=80&auto=format&fit=crop')
+                                right center / cover no-repeat;
+                    }
+
+                    .public-marketing-shell main > section:first-child::before {
+                        content: '';
+                        position: absolute;
+                        inset: 0;
+                        pointer-events: none;
+                        background-image:
+                            linear-gradient(to right, rgba(0, 218, 243, 0.08) 1px, transparent 1px),
+                            linear-gradient(to bottom, rgba(0, 39, 83, 0.08) 1px, transparent 1px);
+                        background-size: 54px 54px;
+                        opacity: 0.55;
+                    }
+
+                    .public-marketing-shell main > section:first-child > div {
+                        position: relative;
+                        z-index: 1;
+                    }
+
+                    .public-marketing-shell main > section:first-child h1 {
+                        font-size: clamp(2.9rem, 7vw, 6.75rem);
+                        line-height: 0.94;
+                        font-weight: 300;
+                        max-width: 980px;
+                    }
+
+                    .public-marketing-shell main > section:first-child p {
+                        max-width: 640px;
+                    }
+
+                    .public-marketing-shell main > section:not(:first-child) {
+                        position: relative;
+                    }
+
+                    .public-marketing-shell main > section:nth-child(even) {
+                        background-color: rgba(242, 244, 246, 0.72);
+                    }
+
+                    .dark .public-marketing-shell main > section:nth-child(even) {
+                        background-color: rgba(11, 34, 65, 0.72);
+                    }
+
+                    .public-marketing-shell .border {
+                        border-color: rgba(195, 198, 209, 0.42) !important;
+                    }
+
+                    .dark .public-marketing-shell .border {
+                        border-color: rgba(255, 255, 255, 0.12) !important;
+                    }
+
+                    .public-marketing-shell [class*='shadow-'] {
+                        box-shadow: none !important;
+                    }
+
+                    .public-marketing-shell [class*='rounded-full'][class*='uppercase'] {
+                        border-radius: 4px !important;
+                    }
+
+                    .public-marketing-shell [class*='bg-white'] {
+                        background-color: rgba(255, 255, 255, 0.92);
+                    }
+
+                    .public-marketing-shell [class*='text-5xl'],
+                    .public-marketing-shell [class*='text-6xl'] {
+                        line-height: 0.98;
+                    }
+
+                    .public-marketing-shell main > section h2 {
+                        font-weight: 300;
+                        line-height: 1;
+                    }
+
+                    .public-marketing-shell main > section h3 {
+                        font-weight: 400;
+                    }
+
                     .public-marketing-shell::before {
                         content: '';
                         position: fixed;

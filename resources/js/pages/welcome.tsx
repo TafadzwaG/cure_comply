@@ -172,10 +172,18 @@ export default function Welcome() {
 
                     /* ── Hero ── */
                     .hero-section {
-                        background: #002753;
+                        background:
+                            linear-gradient(
+                                to right,
+                                rgba(0,39,83,0.98) 0%,
+                                rgba(0,39,83,0.94) 44%,
+                                rgba(0,39,83,0.78) 72%,
+                                rgba(0,39,83,0.7) 100%
+                            ),
+                            url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=1800&q=80&auto=format&fit=crop') right center / cover no-repeat;
                         position: relative;
                         overflow: hidden;
-                        min-height: 100vh;                       
+                        min-height: min(760px, calc(100vh - 76px));
                         flex-direction: column;
                         justify-content: center;
                     }
@@ -187,6 +195,30 @@ export default function Welcome() {
                             linear-gradient(90deg, rgba(0,218,243,0.06) 1px, transparent 1px);
                         background-size: 60px 60px;
                         animation: gridPulse 4s ease-in-out infinite;
+                    }
+                    .hero-content-wrap {
+                        display: grid;
+                        grid-template-columns: 170px minmax(0, 1fr);
+                        column-gap: 48px;
+                        transform: none !important;
+                    }
+                    .hero-content-wrap::before {
+                        content: 'v 4.0 -- public edition\\A Privacy, training, evidence and audit workflows held in one operating system.\\A\\A Vol. 01 -- Compliance studio';
+                        white-space: pre-line;
+                        grid-column: 1;
+                        grid-row: 1 / span 4;
+                        max-width: 150px;
+                        padding-top: 4px;
+                        font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+                        font-size: 10px;
+                        line-height: 1.8;
+                        letter-spacing: 0.14em;
+                        text-transform: uppercase;
+                        color: rgba(214,227,255,0.5);
+                        border-top: 1px solid rgba(0,218,243,0.6);
+                    }
+                    .hero-content-wrap > * {
+                        grid-column: 2;
                     }
                     .hero-radial {
                         position: absolute;
@@ -337,10 +369,19 @@ export default function Welcome() {
                     }
 
                     /* Bento tiles */
-                    .bento-dark  { background: #002753; color: #fff; border-radius: 20px; }
-                    .bento-cyan  { background: #00daf3; border-radius: 20px; }
-                    .bento-light { background: #f2f4f6; border-radius: 20px; }
-                    .bento-mid   { background: #083d77; color: #fff; border-radius: 20px; }
+                    .bento-dark  { background: #002753; color: #fff; border-radius: 8px; }
+                    .bento-cyan  { background: #00daf3; border-radius: 8px; }
+                    .bento-light { background: #f2f4f6; border-radius: 8px; }
+                    .bento-mid   { background: #083d77; color: #fff; border-radius: 8px; }
+
+                    .bento-card,
+                    .role-card,
+                    .reporting-card,
+                    .workflow-step-badge,
+                    .cta-panel {
+                        border-radius: 8px !important;
+                        box-shadow: none !important;
+                    }
 
                     /* Step connector */
                     .step-line {
@@ -378,7 +419,9 @@ export default function Welcome() {
                         .hero-content-wrap {
                             transform: none !important;
                             padding-bottom: 88px !important;
+                            display: block !important;
                         }
+                        .hero-content-wrap::before { display: none !important; }
                         .hero-stat-row {
                             gap: 20px !important;
                         }

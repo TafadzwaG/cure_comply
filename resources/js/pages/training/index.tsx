@@ -23,9 +23,22 @@ export default function TrainingIndex({ courses }: { courses: PublicCourse[] }) 
             description="Public training materials and acknowledgement links for Privacy Cure Compliance learners."
             current="training"
         >
-            <section className="bg-white py-16 dark:bg-[#061427]">
-                <div className="mx-auto grid w-full max-w-[1440px] gap-8 px-6 lg:grid-cols-[0.85fr_1.15fr] lg:px-16">
-                    <div className="space-y-5">
+            <section className="border-b border-[#c3c6d1]/20 px-6 py-20 lg:px-16 lg:py-28 dark:border-white/10">
+                <div className="mx-auto grid w-full max-w-[1440px] gap-8 lg:grid-cols-12">
+                    <aside className="hidden lg:col-span-2 lg:block">
+                        <div className="sticky top-28 space-y-4 text-[10px] font-medium tracking-[0.18em] text-[#002753]/55 uppercase dark:text-white/55">
+                            <div className="flex items-center gap-2">
+                                <span className="h-1.5 w-1.5 rounded-full bg-[#00daf3]" />
+                                <span>Public library</span>
+                            </div>
+                            <div className="h-px w-12 bg-[#00daf3]" />
+                            <p className="max-w-[150px] text-[11px] leading-6 tracking-normal normal-case">
+                                Share published materials without opening the authenticated workspace.
+                            </p>
+                        </div>
+                    </aside>
+
+                    <div className="space-y-5 lg:col-span-6">
                         <Badge className="w-fit bg-[#002753] text-white hover:bg-[#002753]">Public training</Badge>
                         <div className="space-y-4">
                             <h1 className="max-w-xl text-4xl font-semibold tracking-tight text-[#002753] md:text-5xl dark:text-white">
@@ -37,7 +50,7 @@ export default function TrainingIndex({ courses }: { courses: PublicCourse[] }) 
                         </div>
                     </div>
 
-                    <div className="grid gap-4 sm:grid-cols-3">
+                    <div className="grid gap-px overflow-hidden rounded-lg border border-[#c3c6d1]/35 bg-[#c3c6d1]/35 sm:grid-cols-3 lg:col-span-4 lg:grid-cols-1 dark:border-white/10 dark:bg-white/10">
                         <Metric label="Published courses" value={courses.length} icon={GraduationCap} />
                         <Metric
                             label="Lessons"
@@ -53,12 +66,15 @@ export default function TrainingIndex({ courses }: { courses: PublicCourse[] }) 
                 </div>
             </section>
 
-            <section className="py-12">
-                <div className="mx-auto w-full max-w-[1440px] px-6 lg:px-16">
+            <section className="px-6 py-16 lg:px-16 lg:py-24">
+                <div className="mx-auto w-full max-w-[1440px]">
                     {courses.length ? (
-                        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                        <div className="grid gap-px overflow-hidden rounded-lg border border-[#c3c6d1]/35 bg-[#c3c6d1]/35 md:grid-cols-2 xl:grid-cols-3 dark:border-white/10 dark:bg-white/10">
                             {courses.map((course) => (
-                                <Card key={course.id} className="overflow-hidden border-[#c3c6d1]/50 shadow-none">
+                                <Card
+                                    key={course.id}
+                                    className="group overflow-hidden rounded-none border-0 bg-white shadow-none transition-colors hover:bg-[#f7f9fb] dark:bg-white/5 dark:hover:bg-white/10"
+                                >
                                     {course.image_url ? (
                                         <img src={course.image_url} alt="" className="h-44 w-full object-cover" />
                                     ) : (
@@ -71,7 +87,7 @@ export default function TrainingIndex({ courses }: { courses: PublicCourse[] }) 
                                             <Badge variant="outline">{course.modules_count ?? 0} modules</Badge>
                                             <Badge variant="outline">{course.published_lessons_count ?? 0} lessons</Badge>
                                         </div>
-                                        <CardTitle className="text-xl text-[#002753] dark:text-white">{course.title}</CardTitle>
+                                        <CardTitle className="text-2xl text-[#002753] dark:text-white">{course.title}</CardTitle>
                                         <CardDescription className="line-clamp-3">{course.description ?? 'No summary provided.'}</CardDescription>
                                     </CardHeader>
                                     <CardContent className="flex items-center justify-between gap-3">
@@ -110,7 +126,7 @@ export default function TrainingIndex({ courses }: { courses: PublicCourse[] }) 
 
 function Metric({ label, value, icon: Icon }: { label: string; value: number; icon: typeof GraduationCap }) {
     return (
-        <Card className="border-[#c3c6d1]/40 bg-[#f7f9fb] shadow-none dark:border-white/10 dark:bg-white/5">
+        <Card className="rounded-none border-0 bg-white shadow-none dark:bg-white/5">
             <CardContent className="space-y-4 p-5">
                 <div className="flex items-center justify-between gap-3">
                     <p className="text-sm font-medium text-[#434750] dark:text-white/70">{label}</p>

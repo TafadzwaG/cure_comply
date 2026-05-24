@@ -50,9 +50,22 @@ export default function TrainingShow({ course, tenants }: { course: PublicCourse
 
     return (
         <MarketingShell title={course.title} description={course.description ?? 'Public training material.'} current="training">
-            <section className="bg-white py-10 dark:bg-[#061427]">
-                <div className="mx-auto grid w-full max-w-[1440px] gap-8 px-6 lg:grid-cols-[1fr_360px] lg:px-16">
-                    <div className="space-y-5">
+            <section className="border-b border-[#c3c6d1]/20 px-6 py-16 lg:px-16 lg:py-24 dark:border-white/10">
+                <div className="mx-auto grid w-full max-w-[1440px] gap-8 lg:grid-cols-12">
+                    <aside className="hidden lg:col-span-2 lg:block">
+                        <div className="sticky top-28 space-y-4 text-[10px] font-medium tracking-[0.18em] text-[#002753]/55 uppercase dark:text-white/55">
+                            <div className="flex items-center gap-2">
+                                <span className="h-1.5 w-1.5 rounded-full bg-[#00daf3]" />
+                                <span>Shareable course</span>
+                            </div>
+                            <div className="h-px w-12 bg-[#00daf3]" />
+                            <p className="max-w-[150px] text-[11px] leading-6 tracking-normal normal-case">
+                                Review the material and acknowledge completion at the end.
+                            </p>
+                        </div>
+                    </aside>
+
+                    <div className="space-y-5 lg:col-span-7">
                         <Button asChild variant="outline" className="w-fit rounded-full">
                             <Link href={route('training.index')}>
                                 <ArrowLeft className="size-4" />
@@ -69,7 +82,7 @@ export default function TrainingShow({ course, tenants }: { course: PublicCourse
                         </div>
                     </div>
 
-                    <Card className="h-fit border-[#c3c6d1]/50 shadow-none">
+                    <Card className="h-fit rounded-lg border-[#c3c6d1]/50 bg-white/95 shadow-none lg:col-span-3 dark:bg-white/5">
                         <CardContent className="grid gap-4 p-5">
                             <SummaryRow label="Modules" value={course.modules.length} icon={<BookOpen className="size-4" />} />
                             <SummaryRow label="Lessons" value={lessons.length} icon={<FileText className="size-4" />} />
@@ -83,11 +96,11 @@ export default function TrainingShow({ course, tenants }: { course: PublicCourse
                 </div>
             </section>
 
-            <section className="py-10">
-                <div className="mx-auto grid w-full max-w-[1440px] gap-6 px-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:px-16">
+            <section className="px-6 py-16 lg:px-16 lg:py-24">
+                <div className="mx-auto grid w-full max-w-[1440px] gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
                     <div className="space-y-5">
                         {course.modules.map((module, moduleIndex) => (
-                            <Card key={module.id} className="border-[#c3c6d1]/50 shadow-none">
+                            <Card key={module.id} className="overflow-hidden rounded-lg border-[#c3c6d1]/50 bg-white/95 shadow-none dark:bg-white/5">
                                 <CardHeader>
                                     <Badge variant="outline" className="w-fit">
                                         Module {moduleIndex + 1}
@@ -100,7 +113,7 @@ export default function TrainingShow({ course, tenants }: { course: PublicCourse
                                         module.lessons.map((lesson, lessonIndex) => (
                                             <div
                                                 key={lesson.id}
-                                                className="rounded-xl border border-[#c3c6d1]/45 bg-white p-5 dark:border-white/10 dark:bg-white/5"
+                                                className="rounded-lg border border-[#c3c6d1]/45 bg-[#f7f9fb]/85 p-5 dark:border-white/10 dark:bg-white/5"
                                             >
                                                 <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
                                                     <div className="space-y-2">
@@ -128,7 +141,7 @@ export default function TrainingShow({ course, tenants }: { course: PublicCourse
                     </div>
 
                     <div className="lg:sticky lg:top-24 lg:h-fit">
-                        <Card className="border-[#c3c6d1]/50 shadow-none">
+                        <Card className="overflow-hidden rounded-lg border-[#c3c6d1]/50 bg-white/95 shadow-none dark:bg-white/5">
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2 text-[#002753] dark:text-white">
                                     <CheckCircle2 className="size-5" />
