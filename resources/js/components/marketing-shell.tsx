@@ -1,4 +1,4 @@
-import { MarketingChromeStyles, MarketingFooter, MarketingHeader, MarketingThemeToggle, type MarketingCurrent } from '@/components/marketing-chrome';
+import { MarketingChromeStyles, MarketingFooter, MarketingHeader, MarketingThemeToggle, StudioHeroBackgroundStyles, type MarketingCurrent } from '@/components/marketing-chrome';
 import { type SharedData } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import type { PropsWithChildren } from 'react';
@@ -27,10 +27,15 @@ export default function MarketingShell({ title, description, current, children }
                         --public-ink: #002753;
                         --public-mid: #083d77;
                         --public-cyan: #00daf3;
-                        --public-paper: #f7f9fb;
-                        --public-soft: #f2f4f6;
+                        --public-paper: #f5f7fb;
+                        --public-soft: #eaf0f9;
                         font-family: 'Instrument Sans', Arial, Helvetica, sans-serif;
                         font-feature-settings: 'ss01', 'ss02', 'cv11';
+                        background: var(--public-paper);
+                    }
+
+                    .dark .public-marketing-shell {
+                        background: #0b1220;
                     }
 
                     .public-marketing-shell h1,
@@ -89,54 +94,7 @@ export default function MarketingShell({ title, description, current, children }
                         border-radius: 8px !important;
                     }
 
-                    .public-marketing-shell main > section:first-child {
-                        position: relative;
-                        overflow: hidden;
-                        min-height: min(720px, calc(100vh - 84px));
-                        display: flex;
-                        align-items: center;
-                        background:
-                            linear-gradient(
-                                to right,
-                                rgba(247, 249, 251, 0.98) 0%,
-                                rgba(247, 249, 251, 0.92) 42%,
-                                rgba(247, 249, 251, 0.62) 72%,
-                                rgba(247, 249, 251, 0.5) 100%
-                            ),
-                            url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=1800&q=80&auto=format&fit=crop')
-                                right center / cover no-repeat;
-                    }
-
-                    .dark .public-marketing-shell main > section:first-child {
-                        background:
-                            linear-gradient(
-                                to right,
-                                rgba(8, 26, 51, 0.98) 0%,
-                                rgba(8, 26, 51, 0.94) 42%,
-                                rgba(8, 26, 51, 0.72) 72%,
-                                rgba(8, 26, 51, 0.66) 100%
-                            ),
-                            url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=1800&q=80&auto=format&fit=crop')
-                                right center / cover no-repeat;
-                    }
-
-                    .public-marketing-shell main > section:first-child::before {
-                        content: '';
-                        position: absolute;
-                        inset: 0;
-                        pointer-events: none;
-                        background-image:
-                            linear-gradient(to right, rgba(0, 218, 243, 0.08) 1px, transparent 1px),
-                            linear-gradient(to bottom, rgba(0, 39, 83, 0.08) 1px, transparent 1px);
-                        background-size: 54px 54px;
-                        opacity: 0.55;
-                    }
-
-                    .public-marketing-shell main > section:first-child > div {
-                        position: relative;
-                        z-index: 1;
-                    }
-
+                    .public-marketing-shell .marketing-hero-section h1,
                     .public-marketing-shell main > section:first-child h1 {
                         font-size: clamp(2.9rem, 7vw, 6.75rem);
                         line-height: 0.94;
@@ -197,11 +155,18 @@ export default function MarketingShell({ title, description, current, children }
                         z-index: 0;
                         pointer-events: none;
                         background-image:
-                            radial-gradient(rgba(0, 39, 83, 0.06) 1px, transparent 1px),
-                            radial-gradient(rgba(0, 218, 243, 0.08) 1px, transparent 1px);
-                        background-position: 0 0, 2px 3px;
+                            radial-gradient(rgba(14, 42, 94, 0.05) 1px, transparent 1px),
+                            radial-gradient(rgba(31, 70, 148, 0.04) 1px, transparent 1px);
+                        background-position: 0 0, 3px 4px;
                         background-size: 4px 4px, 11px 11px;
-                        opacity: 0.28;
+                        opacity: 0.35;
+                    }
+
+                    .dark .public-marketing-shell::before {
+                        opacity: 0.22;
+                        background-image:
+                            radial-gradient(rgba(168, 193, 237, 0.06) 1px, transparent 1px),
+                            radial-gradient(rgba(168, 193, 237, 0.04) 1px, transparent 1px);
                     }
 
                     .public-marketing-shell::after {
@@ -211,11 +176,18 @@ export default function MarketingShell({ title, description, current, children }
                         z-index: 0;
                         pointer-events: none;
                         background-image:
-                            linear-gradient(to right, rgba(0, 218, 243, 0.08) 1px, transparent 1px),
-                            linear-gradient(to bottom, rgba(0, 39, 83, 0.06) 1px, transparent 1px);
+                            linear-gradient(to right, rgba(0, 218, 243, 0.05) 1px, transparent 1px),
+                            linear-gradient(to bottom, rgba(0, 39, 83, 0.04) 1px, transparent 1px);
                         background-size: 56px 56px;
-                        mask-image: linear-gradient(to bottom, black, transparent 70%);
-                        opacity: 0.45;
+                        mask-image: linear-gradient(to bottom, black, transparent 72%);
+                        opacity: 0.28;
+                    }
+
+                    .dark .public-marketing-shell::after {
+                        opacity: 0.18;
+                        background-image:
+                            linear-gradient(to right, rgba(168, 193, 237, 0.06) 1px, transparent 1px),
+                            linear-gradient(to bottom, rgba(168, 193, 237, 0.04) 1px, transparent 1px);
                     }
 
                     @keyframes marketingPageEnter {
@@ -243,9 +215,10 @@ export default function MarketingShell({ title, description, current, children }
                 `}</style>
             </Head>
 
+            <StudioHeroBackgroundStyles />
             <MarketingChromeStyles />
 
-            <div className="public-marketing-shell wc-root relative min-h-screen bg-[#f7f9fb] text-[#191c1e] dark:bg-[#081a33] dark:text-white">
+            <div className="public-marketing-shell wc-root relative min-h-screen text-[#191c1e] dark:text-white">
                 <MarketingHeader current={current} />
 
                 <main key={currentUrl} className="marketing-page-enter relative z-10">

@@ -22,7 +22,7 @@ export default function TrainingIndex({ courses }: { courses: PublicCourse[] }) 
             description="Public training materials and acknowledgement links for Privacy Cure Compliance learners."
             current="training"
         >
-            <section className="border-b border-[#c3c6d1]/20 px-6 py-20 lg:px-16 lg:py-28 dark:border-white/10">
+            <section className="marketing-hero-section border-b border-[#c3c6d1]/20 px-6 py-20 lg:px-16 lg:py-28 dark:border-white/10">
                 <div className="mx-auto grid w-full max-w-[1440px] gap-8 lg:grid-cols-12">
                     <aside className="hidden lg:col-span-2 lg:block">
                         <div className="sticky top-28 space-y-4 text-[10px] font-medium tracking-[0.18em] text-[#002753]/55 uppercase dark:text-white/55">
@@ -49,19 +49,38 @@ export default function TrainingIndex({ courses }: { courses: PublicCourse[] }) 
                         </div>
                     </div>
 
-                    <div className="grid gap-px overflow-hidden rounded-lg border border-[#c3c6d1]/35 bg-[#c3c6d1]/35 sm:grid-cols-3 lg:col-span-4 lg:grid-cols-1 dark:border-white/10 dark:bg-white/10">
-                        <Metric label="Published courses" value={courses.length} icon={GraduationCap} />
-                        <Metric
-                            label="Lessons"
-                            value={courses.reduce((total, course) => total + (course.published_lessons_count ?? 0), 0)}
-                            icon={FileText}
-                        />
-                        <Metric
-                            label="Self paced"
-                            value={courses.filter((course) => !course.estimated_minutes).length || courses.length}
-                            icon={Clock3}
-                        />
-                    </div>
+                    <aside className="flex flex-col overflow-hidden rounded-2xl border border-[#c3c6d1]/30 bg-white shadow-[0_18px_44px_-28px_rgba(0,39,83,0.2)] lg:col-span-4 dark:border-white/10 dark:bg-[#0b2241]/85 dark:shadow-[0_18px_44px_-28px_rgba(0,0,0,0.5)]">
+                        <div className="border-b border-[#c3c6d1]/25 px-5 py-4 dark:border-white/10">
+                            <div className="flex items-center justify-between gap-3">
+                                <div className="flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] text-[#00b9ce] uppercase">
+                                    <span className="h-1.5 w-1.5 rounded-full bg-[#00daf3]" aria-hidden="true" />
+                                    Library snapshot
+                                </div>
+                                <span className="font-[Fraunces] text-sm italic text-[#002753]/25 dark:text-white/20">2026</span>
+                            </div>
+                        </div>
+
+                        <div className="divide-y divide-[#c3c6d1]/20 dark:divide-white/10">
+                            <TrainingStat
+                                label="Published courses"
+                                detail="Live in the public catalog"
+                                value={courses.length}
+                                icon={GraduationCap}
+                            />
+                            <TrainingStat
+                                label="Lessons"
+                                detail="Available to review now"
+                                value={courses.reduce((total, course) => total + (course.published_lessons_count ?? 0), 0)}
+                                icon={FileText}
+                            />
+                            <TrainingStat
+                                label="Self paced"
+                                detail="Learn on your own schedule"
+                                value={courses.filter((course) => !course.estimated_minutes).length || courses.length}
+                                icon={Clock3}
+                            />
+                        </div>
+                    </aside>
                 </div>
             </section>
 
@@ -157,16 +176,27 @@ export default function TrainingIndex({ courses }: { courses: PublicCourse[] }) 
     );
 }
 
-function Metric({ label, value, icon: Icon }: { label: string; value: number; icon: typeof GraduationCap }) {
+function TrainingStat({
+    label,
+    detail,
+    value,
+    icon: Icon,
+}: {
+    label: string;
+    detail: string;
+    value: number;
+    icon: typeof GraduationCap;
+}) {
     return (
-        <Card className="rounded-none border-0 bg-white shadow-none dark:bg-[#0b2241]/90">
-            <CardContent className="space-y-4 p-5">
-                <div className="flex items-center justify-between gap-3">
-                    <p className="text-sm font-medium text-[#434750] dark:text-white/70">{label}</p>
-                    <Icon className="size-5 text-[#002753] dark:text-white" />
-                </div>
-                <p className="text-3xl font-semibold tracking-tight text-[#002753] dark:text-white">{value}</p>
-            </CardContent>
-        </Card>
+        <div className="group flex items-start gap-4 px-5 py-4 transition-colors hover:bg-[#f7f9fb]/80 dark:hover:bg-white/[0.03]">
+            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-[#00daf3]/22 bg-[#00daf3]/8 text-[#00b9ce] transition-colors group-hover:border-[#00daf3]/35 group-hover:bg-[#00daf3]/12 dark:border-[#00daf3]/18 dark:bg-[#00daf3]/10 dark:text-[#9cf0ff]">
+                <Icon className="size-5" strokeWidth={1.75} />
+            </div>
+            <div className="min-w-0 flex-1">
+                <p className="font-[Fraunces] text-[2rem] leading-none tracking-tight text-[#002753] dark:text-white">{value}</p>
+                <p className="mt-1.5 text-sm font-medium text-[#002753] dark:text-white/90">{label}</p>
+                <p className="mt-0.5 text-xs leading-5 text-[#434750] dark:text-white/55">{detail}</p>
+            </div>
+        </div>
     );
 }

@@ -862,6 +862,17 @@ export default function Welcome() {
                     .cure-section { padding-top: 128px; padding-bottom: 128px; position: relative; }
                     @media (max-width: 800px) { .cure-section { padding-top: 80px; padding-bottom: 80px; } }
 
+                    .cure-section.cure-hero {
+                        padding-top: 32px;
+                        padding-bottom: 80px;
+                    }
+                    @media (max-width: 800px) {
+                        .cure-section.cure-hero {
+                            padding-top: 24px;
+                            padding-bottom: 64px;
+                        }
+                    }
+
                     .cure-rule { height: 1px; background: rgba(37,38,39,0.12); }
                     .cure-divider { display:flex; align-items:center; gap: 14px; }
                     .cure-divider-line { flex:1; height:1px; background: rgba(37,38,39,0.14); }
@@ -921,9 +932,71 @@ export default function Welcome() {
 
                     /* ── Hero ─────────────────────────────────────────────── */
                     .cure-hero {
-                        padding-top: 96px;
-                        padding-bottom: 140px;
+                        padding-top: 0;
+                        padding-bottom: 0;
                         position: relative;
+                        overflow: hidden;
+                        isolation: isolate;
+                        background: var(--paper);
+                        border-bottom: 1px solid rgba(14, 42, 94, 0.08);
+                    }
+                    .cure-hero-backdrop {
+                        position: absolute;
+                        inset: 0;
+                        z-index: 0;
+                        pointer-events: none;
+                        overflow: hidden;
+                    }
+                    .cure-hero-backdrop-photo {
+                        position: absolute;
+                        inset: 0;
+                        background-image: url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=1800&q=80&auto=format&fit=crop');
+                        background-position: right center;
+                        background-size: cover;
+                        background-repeat: no-repeat;
+                        transform: scale(1.03);
+                    }
+                    .cure-hero-backdrop-overlay {
+                        position: absolute;
+                        inset: 0;
+                        background:
+                            radial-gradient(ellipse 90% 70% at 100% -5%, rgba(31, 70, 148, 0.14), transparent 60%),
+                            radial-gradient(ellipse 75% 60% at -8% 100%, rgba(0, 218, 243, 0.1), transparent 55%),
+                            linear-gradient(
+                                to right,
+                                rgba(245, 247, 251, 0.98) 0%,
+                                rgba(245, 247, 251, 0.94) 34%,
+                                rgba(245, 247, 251, 0.72) 58%,
+                                rgba(245, 247, 251, 0.42) 100%
+                            );
+                    }
+                    .cure-hero-backdrop-grain {
+                        position: absolute;
+                        inset: 0;
+                        opacity: 0.55;
+                        background-image:
+                            radial-gradient(rgba(14, 42, 94, 0.06) 1px, transparent 1px),
+                            radial-gradient(rgba(31, 70, 148, 0.04) 1px, transparent 1px);
+                        background-position: 0 0, 3px 4px;
+                        background-size: 4px 4px, 11px 11px;
+                    }
+                    .cure-hero-backdrop-grid {
+                        position: absolute;
+                        inset: 0;
+                        opacity: 0.32;
+                        background-image:
+                            linear-gradient(to right, rgba(0, 218, 243, 0.07) 1px, transparent 1px),
+                            linear-gradient(to bottom, rgba(0, 39, 83, 0.05) 1px, transparent 1px);
+                        background-size: 56px 56px;
+                        mask-image: linear-gradient(to bottom, black 0%, black 50%, transparent 100%);
+                    }
+                    .cure-hero .cure-shell {
+                        position: relative;
+                        z-index: 1;
+                    }
+                    .cure-hero .cure-hero-side {
+                        position: absolute;
+                        z-index: 1;
                     }
                     .cure-hero-grid {
                         display: grid;
@@ -933,7 +1006,6 @@ export default function Welcome() {
                     }
                     @media (max-width: 980px) {
                         .cure-hero-grid { grid-template-columns: 1fr; gap: 56px; }
-                        .cure-hero { padding-bottom: 90px; }
                     }
 
                     .cure-hero-h1 {
@@ -1008,7 +1080,7 @@ export default function Welcome() {
                     .cure-hero-side {
                         position: absolute;
                         left: 18px;
-                        top: 110px;
+                        top: 72px;
                         font-family: 'JetBrains Mono', monospace;
                         font-size: 10px;
                         letter-spacing: 0.24em;
@@ -1025,16 +1097,101 @@ export default function Welcome() {
                         background: var(--paper-2);
                         border-top: 1px solid rgba(37,38,39,0.10);
                         border-bottom: 1px solid rgba(37,38,39,0.10);
+                        position: relative;
+                        overflow: hidden;
+                        padding-top: 96px;
+                        padding-bottom: 96px;
                     }
-                    .cure-manifesto-intro {
+                    @media (max-width: 800px) {
+                        .cure-manifesto { padding-top: 72px; padding-bottom: 72px; }
+                    }
+                    .cure-manifesto-watermark {
+                        position: absolute;
+                        top: -0.12em;
+                        right: -0.04em;
+                        font-family: 'Fraunces', Georgia, serif;
+                        font-size: clamp(9rem, 18vw, 16rem);
+                        font-weight: 300;
+                        line-height: 1;
+                        letter-spacing: -0.04em;
+                        color: rgba(14,42,94,0.04);
+                        pointer-events: none;
+                        user-select: none;
+                    }
+                    .dark .cure-manifesto-watermark {
+                        color: rgba(168,193,237,0.05);
+                    }
+                    .cure-manifesto-grid {
                         display: grid;
-                        grid-template-columns: 1fr 1.3fr;
-                        gap: 60px;
-                        margin-bottom: 80px;
-                        align-items: end;
+                        grid-template-columns: minmax(280px, 0.95fr) minmax(0, 1.05fr);
+                        gap: 56px 72px;
+                        align-items: start;
+                        position: relative;
+                        z-index: 1;
                     }
-                    @media (max-width: 900px) {
-                        .cure-manifesto-intro { grid-template-columns: 1fr; gap: 28px; }
+                    @media (max-width: 960px) {
+                        .cure-manifesto-grid { grid-template-columns: 1fr; gap: 40px; }
+                    }
+                    .cure-manifesto-rail {
+                        position: sticky;
+                        top: 96px;
+                    }
+                    @media (max-width: 960px) {
+                        .cure-manifesto-rail { position: static; }
+                    }
+                    .cure-manifesto-ledger {
+                        margin-top: 28px;
+                        padding: 22px 24px;
+                        border-left: 3px solid var(--sand);
+                        background: rgba(255,255,255,0.55);
+                        border-radius: 0 12px 12px 0;
+                        box-shadow: inset 0 0 0 1px rgba(14,42,94,0.06);
+                    }
+                    .dark .cure-manifesto-ledger {
+                        background: rgba(24,35,63,0.65);
+                        box-shadow: inset 0 0 0 1px rgba(168,193,237,0.1);
+                        border-left-color: var(--sand-2);
+                    }
+                    .cure-manifesto-ledger p {
+                        margin: 0;
+                        font-size: 15px;
+                        line-height: 1.75;
+                        color: var(--ink-2);
+                    }
+                    .cure-manifesto-ledger strong {
+                        color: var(--ink);
+                        font-weight: 600;
+                    }
+                    .cure-manifesto-tension {
+                        margin-top: 32px;
+                        display: flex;
+                        align-items: center;
+                        gap: 0;
+                    }
+                    .cure-manifesto-tension-line {
+                        flex: 1;
+                        height: 1px;
+                        background: linear-gradient(90deg, var(--sand), rgba(31,70,148,0.15));
+                    }
+                    .cure-manifesto-tension-dot {
+                        width: 8px;
+                        height: 8px;
+                        border-radius: 999px;
+                        border: 1.5px solid var(--sand);
+                        background: var(--paper-2);
+                        flex-shrink: 0;
+                    }
+                    .cure-manifesto-tension-dot.is-active {
+                        background: var(--sand);
+                        box-shadow: 0 0 0 4px rgba(31,70,148,0.12);
+                    }
+                    .dark .cure-manifesto-tension-dot {
+                        background: var(--paper-2);
+                        border-color: var(--sand-2);
+                    }
+                    .dark .cure-manifesto-tension-dot.is-active {
+                        background: var(--sand);
+                        box-shadow: 0 0 0 4px rgba(168,193,237,0.15);
                     }
                     .cure-section-title {
                         font-size: clamp(36px, 5vw, 68px);
@@ -1044,207 +1201,635 @@ export default function Welcome() {
                     }
                     .cure-section-title em { font-style: italic; color: var(--sand); font-weight: 400; }
 
-                    .cure-commits {
-                        display: grid;
-                        grid-template-columns: repeat(3, minmax(0,1fr));
-                        gap: 0;
-                    }
-                    @media (max-width: 900px) {
-                        .cure-commits { grid-template-columns: 1fr; }
-                    }
-                    .cure-commit {
-                        padding: 36px 36px 36px 0;
-                        border-right: 1px solid rgba(37,38,39,0.14);
-                    }
-                    .cure-commits .cure-commit:nth-child(2) { padding-left: 36px; }
-                    .cure-commits .cure-commit:nth-child(3) { padding-left: 36px; border-right: none; }
-                    @media (max-width: 900px) {
-                        .cure-commit { padding: 28px 0 !important; border-right: none; border-bottom: 1px solid rgba(37,38,39,0.14); }
-                        .cure-commits .cure-commit:last-child { border-bottom: none; }
-                    }
-                    .cure-commit-num {
-                        font-family: 'Fraunces', Georgia, serif;
-                        font-style: italic;
-                        font-size: 28px;
-                        color: var(--sand);
-                        margin-bottom: 16px;
-                    }
-                    .cure-commit h3 {
-                        font-size: 28px;
-                        font-weight: 400;
-                        line-height: 1.1;
-                        margin-bottom: 14px;
-                    }
-                    .cure-commit p {
-                        font-size: 15px;
-                        line-height: 1.65;
-                        color: var(--ink-2);
-                    }
-
-                    /* ── Four-act method ──────────────────────────────────── */
-                    .cure-method-intro {
-                        display: grid;
-                        grid-template-columns: 1fr 1fr;
-                        gap: 60px;
-                        margin-bottom: 64px;
-                        align-items: end;
-                    }
-                    @media (max-width: 900px) {
-                        .cure-method-intro { grid-template-columns: 1fr; gap: 28px; }
-                    }
-
-                    .cure-acts {
-                        display: grid;
-                        grid-template-columns: repeat(4, minmax(0,1fr));
-                        gap: 20px;
-                    }
-                    @media (max-width: 1100px) { .cure-acts { grid-template-columns: repeat(2, 1fr); } }
-                    @media (max-width: 600px)  { .cure-acts { grid-template-columns: 1fr; } }
-
-                    .cure-act {
-                        background: var(--cream);
-                        border: 1px solid rgba(37,38,39,0.14);
-                        border-radius: 18px;
-                        padding: 32px;
-                        min-height: 360px;
+                    .cure-manifesto-cards {
                         display: flex;
                         flex-direction: column;
-                        gap: 18px;
-                        transition: transform .35s ease, border-color .35s ease, background .35s ease;
+                        gap: 16px;
+                        position: relative;
                     }
-                    .cure-act:hover {
-                        transform: translateY(-4px);
-                        border-color: var(--ink);
+                    .cure-manifesto-spine {
+                        position: absolute;
+                        left: 23px;
+                        top: 28px;
+                        bottom: 28px;
+                        width: 1px;
+                        background: linear-gradient(180deg, transparent, rgba(31,70,148,0.22) 12%, rgba(31,70,148,0.22) 88%, transparent);
+                        pointer-events: none;
                     }
-                    .cure-act-tag {
-                        display: inline-flex;
+                    .dark .cure-manifesto-spine {
+                        background: linear-gradient(180deg, transparent, rgba(168,193,237,0.2) 12%, rgba(168,193,237,0.2) 88%, transparent);
+                    }
+                    @media (max-width: 600px) {
+                        .cure-manifesto-spine { display: none; }
+                    }
+                    .cure-commit-card {
+                        display: grid;
+                        grid-template-columns: auto 1fr;
+                        gap: 20px 24px;
+                        padding: 28px 28px 28px 24px;
+                        background: var(--cream);
+                        border: 1px solid rgba(14,42,94,0.1);
+                        border-radius: 16px;
+                        position: relative;
+                        transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+                    }
+                    .cure-commit-card:hover {
+                        transform: translateX(4px);
+                        border-color: rgba(31,70,148,0.28);
+                        box-shadow: 0 16px 40px -24px rgba(14,42,94,0.35);
+                    }
+                    .dark .cure-commit-card {
+                        background: var(--cream);
+                        border-color: rgba(168,193,237,0.12);
+                    }
+                    .dark .cure-commit-card:hover {
+                        border-color: rgba(168,193,237,0.28);
+                        box-shadow: 0 16px 40px -24px rgba(0,0,0,0.45);
+                    }
+                    .cure-commit-card-marker {
+                        display: flex;
+                        flex-direction: column;
                         align-items: center;
-                        gap: 10px;
-                        font-family: 'JetBrains Mono', monospace;
-                        font-size: 10px;
-                        letter-spacing: 0.2em;
-                        text-transform: uppercase;
-                        color: var(--stone);
+                        gap: 12px;
+                        padding-top: 2px;
                     }
-                    .cure-act-num {
+                    .cure-commit-card-dot {
+                        width: 12px;
+                        height: 12px;
+                        border-radius: 999px;
+                        border: 2px solid var(--sand);
+                        background: var(--cream);
+                        flex-shrink: 0;
+                        position: relative;
+                        z-index: 1;
+                    }
+                    .cure-commit-card-num {
                         font-family: 'Fraunces', Georgia, serif;
                         font-style: italic;
-                        font-size: 60px;
+                        font-size: 22px;
                         line-height: 1;
                         color: var(--sand);
-                        font-weight: 400;
                     }
-                    .cure-act h3 {
-                        font-size: 28px;
-                        line-height: 1;
-                        font-weight: 400;
+                    .cure-commit-card-body {
+                        min-width: 0;
                     }
-                    .cure-act p {
-                        font-size: 14.5px;
-                        line-height: 1.65;
-                        color: var(--ink-2);
-                        margin-top: auto;
-                    }
-                    .cure-act-foot {
-                        margin-top: 14px;
-                        padding-top: 14px;
-                        border-top: 1px solid rgba(37,38,39,0.10);
+                    .cure-commit-card-head {
                         display: flex;
+                        flex-wrap: wrap;
                         align-items: center;
                         justify-content: space-between;
+                        gap: 12px 16px;
+                        margin-bottom: 10px;
+                    }
+                    .cure-commit-card-head h3 {
+                        font-size: clamp(1.35rem, 2vw, 1.65rem);
+                        font-weight: 400;
+                        line-height: 1.15;
+                        margin: 0;
+                        letter-spacing: -0.01em;
+                    }
+                    .cure-commit-card-tag {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 8px;
+                        padding: 6px 12px;
+                        border-radius: 999px;
+                        border: 1px solid rgba(31,70,148,0.14);
+                        background: rgba(31,70,148,0.06);
+                        font-family: 'JetBrains Mono', monospace;
+                        font-size: 10px;
+                        font-weight: 500;
+                        letter-spacing: 0.14em;
+                        text-transform: uppercase;
+                        color: var(--sand);
+                    }
+                    .dark .cure-commit-card-tag {
+                        border-color: rgba(168,193,237,0.18);
+                        background: rgba(168,193,237,0.08);
+                    }
+                    .cure-commit-card p {
+                        margin: 0;
+                        font-size: 15px;
+                        line-height: 1.7;
+                        color: var(--ink-2);
+                        max-width: 36rem;
+                    }
+                    .cure-commit-card-foot {
+                        margin-top: 16px;
+                        padding-top: 14px;
+                        border-top: 1px solid rgba(14,42,94,0.08);
                         font-family: 'JetBrains Mono', monospace;
                         font-size: 10px;
                         letter-spacing: 0.16em;
                         text-transform: uppercase;
                         color: var(--stone);
                     }
-                    .cure-act-dot {
-                        width: 6px; height: 6px; border-radius: 50%;
-                        background: var(--pine);
+                    .dark .cure-commit-card-foot {
+                        border-top-color: rgba(168,193,237,0.1);
+                    }
+                    @media (max-width: 600px) {
+                        .cure-commit-card {
+                            grid-template-columns: 1fr;
+                            gap: 14px;
+                            padding: 22px 20px;
+                        }
+                        .cure-commit-card-marker {
+                            flex-direction: row;
+                        }
+                    }
+
+                    /* ── Four-act method ──────────────────────────────────── */
+                    .cure-method {
+                        position: relative;
+                        overflow: hidden;
+                        padding-top: 96px;
+                        padding-bottom: 96px;
+                    }
+                    @media (max-width: 800px) {
+                        .cure-method { padding-top: 72px; padding-bottom: 72px; }
+                    }
+                    .cure-method-watermark {
+                        position: absolute;
+                        top: -0.08em;
+                        left: -0.02em;
+                        font-family: 'Fraunces', Georgia, serif;
+                        font-size: clamp(9rem, 18vw, 16rem);
+                        font-weight: 300;
+                        line-height: 1;
+                        letter-spacing: -0.04em;
+                        color: rgba(14,42,94,0.035);
+                        pointer-events: none;
+                        user-select: none;
+                    }
+                    .dark .cure-method-watermark {
+                        color: rgba(168,193,237,0.045);
+                    }
+                    .cure-method-header {
+                        display: grid;
+                        grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+                        gap: 48px 64px;
+                        align-items: end;
+                        margin-bottom: 56px;
+                        position: relative;
+                        z-index: 1;
+                    }
+                    @media (max-width: 900px) {
+                        .cure-method-header { grid-template-columns: 1fr; gap: 24px; }
+                    }
+                    .cure-method-lede {
+                        margin: 0;
+                        font-size: 16px;
+                        line-height: 1.75;
+                        color: var(--ink-2);
+                        max-width: 28rem;
+                    }
+                    .cure-method-rhythm {
+                        margin-top: 24px;
+                        display: inline-flex;
+                        flex-wrap: wrap;
+                        align-items: center;
+                        gap: 8px 10px;
+                        padding: 10px 14px;
+                        border-radius: 999px;
+                        border: 1px solid rgba(14,42,94,0.1);
+                        background: rgba(31,70,148,0.05);
+                        font-family: 'JetBrains Mono', monospace;
+                        font-size: 10px;
+                        letter-spacing: 0.14em;
+                        text-transform: uppercase;
+                        color: var(--stone);
+                    }
+                    .dark .cure-method-rhythm {
+                        border-color: rgba(168,193,237,0.14);
+                        background: rgba(168,193,237,0.06);
+                    }
+                    .cure-method-rhythm-arrow {
+                        color: var(--sand);
+                    }
+                    .cure-method-track {
+                        position: relative;
+                        z-index: 1;
+                        margin-bottom: 28px;
+                        padding: 0 12px;
+                    }
+                    .cure-method-track-line {
+                        position: absolute;
+                        left: 12.5%;
+                        right: 12.5%;
+                        top: 18px;
+                        height: 2px;
+                        background: linear-gradient(90deg, rgba(31,70,148,0.12), rgba(31,70,148,0.45) 25%, rgba(31,70,148,0.45) 75%, rgba(31,70,148,0.12));
+                        border-radius: 999px;
+                    }
+                    .dark .cure-method-track-line {
+                        background: linear-gradient(90deg, rgba(168,193,237,0.1), rgba(168,193,237,0.35) 25%, rgba(168,193,237,0.35) 75%, rgba(168,193,237,0.1));
+                    }
+                    .cure-method-track-nodes {
+                        display: grid;
+                        grid-template-columns: repeat(4, minmax(0, 1fr));
+                        gap: 0;
+                        position: relative;
+                    }
+                    .cure-method-node {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        gap: 10px;
+                    }
+                    .cure-method-node-badge {
+                        width: 36px;
+                        height: 36px;
+                        border-radius: 999px;
+                        border: 2px solid var(--sand);
+                        background: var(--paper);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-family: 'Fraunces', Georgia, serif;
+                        font-style: italic;
+                        font-size: 14px;
+                        color: var(--sand);
+                        position: relative;
+                        z-index: 1;
+                        box-shadow: 0 0 0 6px var(--paper);
+                    }
+                    .dark .cure-method-node-badge {
+                        background: var(--paper);
+                        box-shadow: 0 0 0 6px var(--paper);
+                    }
+                    .cure-method-node-label {
+                        font-family: 'JetBrains Mono', monospace;
+                        font-size: 9px;
+                        letter-spacing: 0.16em;
+                        text-transform: uppercase;
+                        color: var(--stone);
+                        text-align: center;
+                    }
+                    .cure-method-steps {
+                        display: grid;
+                        grid-template-columns: repeat(4, minmax(0, 1fr));
+                        gap: 16px;
+                        position: relative;
+                        z-index: 1;
+                    }
+                    @media (max-width: 1100px) {
+                        .cure-method-track { display: none; }
+                        .cure-method-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+                    }
+                    @media (max-width: 600px) {
+                        .cure-method-steps { grid-template-columns: 1fr; }
+                    }
+                    .cure-method-step {
+                        background: var(--cream);
+                        border: 1px solid rgba(14,42,94,0.1);
+                        border-radius: 16px;
+                        padding: 24px 22px 20px;
+                        min-height: 0;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 14px;
+                        position: relative;
+                        overflow: hidden;
+                        transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+                    }
+                    .cure-method-step::before {
+                        content: '';
+                        position: absolute;
+                        inset: 0 auto 0 0;
+                        width: 3px;
+                        background: linear-gradient(180deg, var(--sand), rgba(31,70,148,0.15));
+                        opacity: 0;
+                        transition: opacity 0.35s ease;
+                    }
+                    .cure-method-step:hover {
+                        transform: translateY(-4px);
+                        border-color: rgba(31,70,148,0.24);
+                        box-shadow: 0 20px 44px -28px rgba(14,42,94,0.35);
+                    }
+                    .cure-method-step:hover::before {
+                        opacity: 1;
+                    }
+                    .dark .cure-method-step {
+                        background: var(--cream);
+                        border-color: rgba(168,193,237,0.12);
+                    }
+                    .dark .cure-method-step:hover {
+                        border-color: rgba(168,193,237,0.28);
+                        box-shadow: 0 20px 44px -28px rgba(0,0,0,0.45);
+                    }
+                    .cure-method-step-top {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        gap: 12px;
+                    }
+                    .cure-method-step-tag {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 8px;
+                        padding: 6px 11px;
+                        border-radius: 999px;
+                        border: 1px solid rgba(31,70,148,0.12);
+                        background: rgba(31,70,148,0.05);
+                        font-family: 'JetBrains Mono', monospace;
+                        font-size: 10px;
+                        letter-spacing: 0.14em;
+                        text-transform: uppercase;
+                        color: var(--sand);
+                    }
+                    .dark .cure-method-step-tag {
+                        border-color: rgba(168,193,237,0.16);
+                        background: rgba(168,193,237,0.07);
+                    }
+                    .cure-method-step-index {
+                        font-family: 'Fraunces', Georgia, serif;
+                        font-style: italic;
+                        font-size: 2rem;
+                        line-height: 1;
+                        color: rgba(31,70,148,0.14);
+                    }
+                    .dark .cure-method-step-index {
+                        color: rgba(168,193,237,0.18);
+                    }
+                    .cure-method-step h3 {
+                        font-size: clamp(1.35rem, 2vw, 1.55rem);
+                        font-weight: 400;
+                        line-height: 1.1;
+                        margin: 0;
+                        letter-spacing: -0.01em;
+                    }
+                    .cure-method-step p {
+                        margin: 0;
+                        font-size: 14.5px;
+                        line-height: 1.68;
+                        color: var(--ink-2);
+                        flex: 1;
+                    }
+                    .cure-method-step-foot {
+                        margin-top: auto;
+                        padding-top: 14px;
+                        border-top: 1px solid rgba(14,42,94,0.08);
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        gap: 12px;
+                        font-family: 'JetBrains Mono', monospace;
+                        font-size: 10px;
+                        letter-spacing: 0.14em;
+                        text-transform: uppercase;
+                        color: var(--stone);
+                    }
+                    .dark .cure-method-step-foot {
+                        border-top-color: rgba(168,193,237,0.1);
+                    }
+                    .cure-method-step-pulse {
+                        width: 6px;
+                        height: 6px;
+                        border-radius: 50%;
+                        background: var(--sand);
                         animation: cureBlink 2.4s ease-in-out infinite;
-                        display: inline-block;
-                        margin-right: 8px;
+                        flex-shrink: 0;
+                    }
+                    @media (max-width: 1100px) {
+                        .cure-method-step-top { display: none; }
+                        .cure-method-step-top-mobile {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 10px;
+                            margin-bottom: 4px;
+                        }
+                        .cure-method-step-index-mobile {
+                            font-family: 'Fraunces', Georgia, serif;
+                            font-style: italic;
+                            font-size: 1.25rem;
+                            color: var(--sand);
+                        }
+                    }
+                    @media (min-width: 1101px) {
+                        .cure-method-step-top-mobile { display: none; }
                     }
 
                     /* ── Roles / Lenses ───────────────────────────────────── */
                     .cure-roles {
-                        background: var(--ink);
-                        color: var(--paper);
+                        background: linear-gradient(165deg, #0e2a5e 0%, #091833 52%, #061224 100%);
+                        color: #e6ecf6;
+                        position: relative;
+                        overflow: hidden;
+                        padding-top: 96px;
+                        padding-bottom: 96px;
+                    }
+                    @media (max-width: 800px) {
+                        .cure-roles { padding-top: 72px; padding-bottom: 72px; }
+                    }
+                    .cure-roles::before {
+                        content: '';
+                        position: absolute;
+                        inset: 0;
+                        background-image:
+                            radial-gradient(rgba(168,193,237,0.07) 1px, transparent 1px),
+                            radial-gradient(rgba(0,218,243,0.04) 1px, transparent 1px);
+                        background-size: 28px 28px, 18px 18px;
+                        background-position: 0 0, 12px 12px;
+                        pointer-events: none;
+                        opacity: 0.55;
+                    }
+                    .cure-roles-watermark {
+                        position: absolute;
+                        top: -0.08em;
+                        right: -0.02em;
+                        font-family: 'Fraunces', Georgia, serif;
+                        font-size: clamp(9rem, 18vw, 16rem);
+                        font-weight: 300;
+                        line-height: 1;
+                        letter-spacing: -0.04em;
+                        color: rgba(255,255,255,0.04);
+                        pointer-events: none;
+                        user-select: none;
+                        z-index: 0;
+                    }
+                    .cure-roles-header {
+                        display: grid;
+                        grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+                        gap: 48px 64px;
+                        align-items: end;
+                        margin-bottom: 48px;
+                        position: relative;
+                        z-index: 1;
+                    }
+                    @media (max-width: 900px) {
+                        .cure-roles-header { grid-template-columns: 1fr; gap: 24px; }
                     }
                     .cure-roles h2,
                     .cure-roles h3,
-                    .cure-roles h4 { color: var(--paper); }
-                    .cure-roles .cure-eyebrow { color: rgba(246,242,231,0.65); }
-                    .cure-roles .cure-eyebrow .dash { background: var(--sand); }
-
-                    .cure-roles-intro {
-                        display: grid;
-                        grid-template-columns: 1fr 1fr;
-                        gap: 60px;
-                        margin-bottom: 64px;
-                        align-items: end;
-                    }
-                    @media (max-width: 900px) { .cure-roles-intro { grid-template-columns: 1fr; gap: 28px; } }
-                    .cure-roles-sub {
+                    .cure-roles h4 { color: #f8fafc; }
+                    .cure-roles .cure-eyebrow { color: rgba(168,193,237,0.75); }
+                    .cure-roles .cure-eyebrow .dash { background: #00daf3; }
+                    .cure-roles .cure-section-title em { color: #9cf0ff; }
+                    .cure-roles-lede {
+                        margin: 0;
                         font-size: 16px;
-                        line-height: 1.65;
-                        color: rgba(246,242,231,0.72);
+                        line-height: 1.75;
+                        color: rgba(226,232,240,0.78);
+                        max-width: 28rem;
                     }
-
-                    .cure-role-grid {
-                        display: grid;
-                        grid-template-columns: repeat(4, minmax(0,1fr));
-                        gap: 0;
-                        border-top: 1px solid rgba(246,242,231,0.16);
-                        border-bottom: 1px solid rgba(246,242,231,0.16);
-                    }
-                    @media (max-width: 1024px) { .cure-role-grid { grid-template-columns: repeat(2,1fr); } }
-                    @media (max-width: 560px)  { .cure-role-grid { grid-template-columns: 1fr; } }
-
-                    .cure-role {
-                        padding: 36px 28px;
-                        border-right: 1px solid rgba(246,242,231,0.16);
-                        position: relative;
-                        transition: background .3s ease;
-                    }
-                    .cure-role:last-child { border-right: none; }
-                    .cure-role:hover { background: rgba(246,242,231,0.04); }
-                    @media (max-width: 1024px) {
-                        .cure-role:nth-child(2) { border-right: none; }
-                        .cure-role:nth-child(-n+2) { border-bottom: 1px solid rgba(246,242,231,0.16); }
-                    }
-                    @media (max-width: 560px) {
-                        .cure-role { border-right: none; border-bottom: 1px solid rgba(246,242,231,0.16); }
-                        .cure-role:last-child { border-bottom: none; }
-                    }
-                    .cure-role-mark {
+                    .cure-roles-truth {
+                        margin-top: 24px;
+                        display: inline-flex;
+                        flex-wrap: wrap;
+                        align-items: center;
+                        gap: 8px 10px;
+                        padding: 10px 14px;
+                        border-radius: 999px;
+                        border: 1px solid rgba(0,218,243,0.18);
+                        background: rgba(0,218,243,0.06);
                         font-family: 'JetBrains Mono', monospace;
                         font-size: 10px;
-                        letter-spacing: 0.22em;
-                        color: var(--sand);
-                        margin-bottom: 22px;
+                        letter-spacing: 0.14em;
                         text-transform: uppercase;
+                        color: rgba(168,193,237,0.85);
                     }
-                    .cure-role-icon {
-                        width: 44px; height: 44px;
+                    .cure-roles-truth-core {
+                        color: #9cf0ff;
+                    }
+                    .cure-roles-grid {
+                        display: grid;
+                        grid-template-columns: repeat(4, minmax(0, 1fr));
+                        gap: 14px;
+                        position: relative;
+                        z-index: 1;
+                    }
+                    @media (max-width: 1100px) {
+                        .cure-roles-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+                    }
+                    @media (max-width: 600px) {
+                        .cure-roles-grid { grid-template-columns: 1fr; }
+                    }
+                    .cure-lens-card {
+                        background: rgba(255,255,255,0.035);
+                        border: 1px solid rgba(168,193,237,0.14);
+                        border-radius: 16px;
+                        padding: 24px 22px 20px;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 14px;
+                        min-height: 100%;
+                        position: relative;
+                        overflow: hidden;
+                        backdrop-filter: blur(8px);
+                        -webkit-backdrop-filter: blur(8px);
+                        transition: transform 0.35s ease, border-color 0.35s ease, background 0.35s ease, box-shadow 0.35s ease;
+                    }
+                    .cure-lens-card::after {
+                        content: '';
+                        position: absolute;
+                        inset: auto 0 0 0;
+                        height: 2px;
+                        background: linear-gradient(90deg, transparent, rgba(0,218,243,0.55), transparent);
+                        opacity: 0;
+                        transition: opacity 0.35s ease;
+                    }
+                    .cure-lens-card:hover {
+                        transform: translateY(-4px);
+                        background: rgba(255,255,255,0.055);
+                        border-color: rgba(0,218,243,0.28);
+                        box-shadow: 0 22px 48px -28px rgba(0,0,0,0.55);
+                    }
+                    .cure-lens-card:hover::after {
+                        opacity: 1;
+                    }
+                    .cure-lens-card-top {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        gap: 12px;
+                    }
+                    .cure-lens-card-mark {
+                        font-family: 'JetBrains Mono', monospace;
+                        font-size: 10px;
+                        letter-spacing: 0.18em;
+                        text-transform: uppercase;
+                        color: rgba(156,240,255,0.85);
+                    }
+                    .cure-lens-card-icon {
+                        width: 40px;
+                        height: 40px;
                         border-radius: 999px;
-                        border: 1px solid rgba(246,242,231,0.4);
+                        border: 1px solid rgba(0,218,243,0.22);
+                        background: rgba(0,218,243,0.08);
+                        color: #9cf0ff;
                         display: inline-flex;
                         align-items: center;
                         justify-content: center;
-                        color: var(--sand);
-                        margin-bottom: 22px;
+                        flex-shrink: 0;
                     }
-                    .cure-role h3 {
-                        font-size: 26px;
+                    .cure-lens-card h3 {
+                        font-size: clamp(1.25rem, 2vw, 1.45rem);
                         font-weight: 400;
-                        line-height: 1.05;
-                        margin-bottom: 14px;
+                        line-height: 1.12;
+                        margin: 0;
+                        letter-spacing: -0.01em;
                     }
-                    .cure-role p {
+                    .cure-lens-card p {
+                        margin: 0;
                         font-size: 14px;
-                        line-height: 1.65;
-                        color: rgba(246,242,231,0.72);
+                        line-height: 1.68;
+                        color: rgba(203,213,225,0.82);
+                        flex: 1;
+                    }
+                    .cure-lens-card-foot {
+                        margin-top: auto;
+                        padding-top: 14px;
+                        border-top: 1px solid rgba(168,193,237,0.12);
+                        font-family: 'JetBrains Mono', monospace;
+                        font-size: 10px;
+                        letter-spacing: 0.14em;
+                        text-transform: uppercase;
+                        color: rgba(148,163,184,0.9);
+                    }
+                    .cure-roles-shared {
+                        margin-top: 28px;
+                        position: relative;
+                        z-index: 1;
+                        display: flex;
+                        flex-wrap: wrap;
+                        align-items: center;
+                        justify-content: space-between;
+                        gap: 16px 24px;
+                        padding: 16px 20px;
+                        border-radius: 12px;
+                        border: 1px solid rgba(168,193,237,0.14);
+                        background: rgba(6,18,36,0.55);
+                    }
+                    .cure-roles-shared-label {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 10px;
+                        font-family: 'JetBrains Mono', monospace;
+                        font-size: 10px;
+                        letter-spacing: 0.16em;
+                        text-transform: uppercase;
+                        color: #9cf0ff;
+                    }
+                    .cure-roles-shared-dot {
+                        width: 7px;
+                        height: 7px;
+                        border-radius: 999px;
+                        background: #00daf3;
+                        animation: cureBlink 2.4s ease-in-out infinite;
+                        flex-shrink: 0;
+                    }
+                    .cure-roles-shared-items {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 8px 14px;
+                        font-family: 'JetBrains Mono', monospace;
+                        font-size: 10px;
+                        letter-spacing: 0.14em;
+                        text-transform: uppercase;
+                        color: rgba(148,163,184,0.95);
+                    }
+                    .dark .cure-roles {
+                        background: linear-gradient(165deg, #050a18 0%, #071222 52%, #030810 100%);
                     }
 
                     /* ── Numbers, kept honest. ────────────────────────────── */
@@ -1445,6 +2030,34 @@ export default function Welcome() {
                             radial-gradient(rgba(168,193,237,0.04) 1px, transparent 1px);
                     }
                     .dark .cure-welcome > header.welcome-header { background: rgba(11,18,32,0.92) !important; }
+                    .dark .cure-hero {
+                        background: var(--paper);
+                        border-bottom-color: rgba(168, 193, 237, 0.1);
+                    }
+                    .dark .cure-hero-backdrop-overlay {
+                        background:
+                            radial-gradient(ellipse 90% 70% at 100% -5%, rgba(168, 193, 237, 0.16), transparent 60%),
+                            radial-gradient(ellipse 75% 60% at -8% 100%, rgba(0, 218, 243, 0.08), transparent 55%),
+                            linear-gradient(
+                                to right,
+                                rgba(11, 18, 32, 0.98) 0%,
+                                rgba(11, 18, 32, 0.94) 34%,
+                                rgba(11, 18, 32, 0.78) 58%,
+                                rgba(11, 18, 32, 0.62) 100%
+                            );
+                    }
+                    .dark .cure-hero-backdrop-grain {
+                        opacity: 0.35;
+                        background-image:
+                            radial-gradient(rgba(168, 193, 237, 0.06) 1px, transparent 1px),
+                            radial-gradient(rgba(168, 193, 237, 0.04) 1px, transparent 1px);
+                    }
+                    .dark .cure-hero-backdrop-grid {
+                        opacity: 0.2;
+                        background-image:
+                            linear-gradient(to right, rgba(168, 193, 237, 0.08) 1px, transparent 1px),
+                            linear-gradient(to bottom, rgba(168, 193, 237, 0.05) 1px, transparent 1px);
+                    }
                     .dark .welcome-theme-toggle {
                         background: rgba(11,18,32,0.92);
                         border-color: rgba(168,193,237,0.2);
@@ -1455,7 +2068,8 @@ export default function Welcome() {
                         background: rgba(11,18,32,0.98);
                         border-top-color: rgba(168,193,237,0.12);
                     }
-                    .dark .cure-act,
+                    .dark .cure-method-step,
+                    .dark .cure-commit-card,
                     .dark .cure-ledger-card,
                     .dark .cure-ledger-stat .cell {
                         background: var(--cream);
@@ -1469,7 +2083,6 @@ export default function Welcome() {
                         border-top-color: rgba(168,193,237,0.12);
                         border-bottom-color: rgba(168,193,237,0.12);
                     }
-                    .dark .cure-roles { background: #050a18; }
                     .dark .cure-welcome .btn-primary {
                         background: var(--sand) !important;
                         color: var(--paper) !important;
@@ -1495,9 +2108,15 @@ export default function Welcome() {
                 <main>
                     {/* ───────────── HERO ───────────── */}
                     <section className="cure-section cure-hero">
+                        <div className="cure-hero-backdrop" aria-hidden="true">
+                            <div className="cure-hero-backdrop-photo" />
+                            <div className="cure-hero-backdrop-overlay" />
+                            <div className="cure-hero-backdrop-grain" />
+                            <div className="cure-hero-backdrop-grid" />
+                        </div>
                         <div className="cure-hero-side">v 4.0 — public edition · vol. 01 — compliance studio</div>
                         <div className="cure-shell">
-                            <div className="cure-divider" style={{ marginBottom: 56 }} data-reveal>
+                            <div className="cure-divider" style={{ marginBottom: 36 }} data-reveal>
                                 <span className="cure-eyebrow">
                                     <span className="dash" />
                                     The Cure Studio · Compliance
@@ -1569,9 +2188,12 @@ export default function Welcome() {
 
                     {/* ───────────── MANIFESTO ───────────── */}
                     <section id="product" className="cure-section cure-manifesto">
+                        <div className="cure-manifesto-watermark" aria-hidden="true">
+                            01
+                        </div>
                         <div className="cure-shell">
-                            <div className="cure-manifesto-intro" data-reveal>
-                                <div>
+                            <div className="cure-manifesto-grid">
+                                <aside className="cure-manifesto-rail" data-reveal>
                                     <span className="cure-eyebrow">
                                         <span className="dash" />
                                         01 — Manifesto
@@ -1579,46 +2201,79 @@ export default function Welcome() {
                                     <h2 className="cure-section-title" style={{ marginTop: 22 }}>
                                         Three commitments. <em>Held in tension.</em> Never traded.
                                     </h2>
-                                </div>
-                                <p style={{ fontSize: 16, lineHeight: 1.7, color: 'var(--ink-2)' }}>
-                                    Compliance is the ledger, not the last conversation. We capture it as it happens — so when the audit arrives, the
-                                    evidence is already in order.
-                                </p>
-                            </div>
+                                    <div className="cure-manifesto-ledger">
+                                        <p>
+                                            Compliance is the <strong>ledger</strong>, not the last conversation. We capture it as it happens — so when
+                                            the audit arrives, the evidence is already in order.
+                                        </p>
+                                    </div>
+                                    <div className="cure-manifesto-tension" aria-hidden="true">
+                                        <span className="cure-manifesto-tension-dot is-active" />
+                                        <span className="cure-manifesto-tension-line" />
+                                        <span className="cure-manifesto-tension-dot is-active" />
+                                        <span className="cure-manifesto-tension-line" />
+                                        <span className="cure-manifesto-tension-dot is-active" />
+                                    </div>
+                                </aside>
 
-                            <div className="cure-commits">
-                                <article className="cure-commit" data-reveal data-delay="1">
-                                    <div className="cure-commit-num">i.</div>
-                                    <h3>Evidence over recall</h3>
-                                    <p>
-                                        Every control traces back to an artefact. Submissions are time-stamped, attributable, and immutable — never
-                                        reconstructed from memory.
-                                    </p>
-                                </article>
-                                <article className="cure-commit" data-reveal data-delay="2">
-                                    <div className="cure-commit-num">ii.</div>
-                                    <h3>Calibrate before crowning</h3>
-                                    <p>
-                                        Reviewer queues, distribution guardrails, and second-pair sign-off. Decisions are made with calibration as the
-                                        default, not the exception.
-                                    </p>
-                                </article>
-                                <article className="cure-commit" data-reveal data-delay="3">
-                                    <div className="cure-commit-num">iii.</div>
-                                    <h3>Numbers, kept honest</h3>
-                                    <p>
-                                        Real-time scoring with exception surfacing. Boards see the truth before the regulator does — and stakeholders
-                                        see the trail behind every figure.
-                                    </p>
-                                </article>
+                                <div className="cure-manifesto-cards">
+                                    <div className="cure-manifesto-spine" aria-hidden="true" />
+                                    {[
+                                        {
+                                            num: 'i.',
+                                            icon: <ScrollText size={14} strokeWidth={2} />,
+                                            tag: 'Artefacts',
+                                            title: 'Evidence over recall',
+                                            desc: 'Every control traces back to an artefact. Submissions are time-stamped, attributable, and immutable — never reconstructed from memory.',
+                                            foot: 'Immutable · Attributed · Time-stamped',
+                                        },
+                                        {
+                                            num: 'ii.',
+                                            icon: <ClipboardCheck size={14} strokeWidth={2} />,
+                                            tag: 'Calibration',
+                                            title: 'Calibrate before crowning',
+                                            desc: 'Reviewer queues, distribution guardrails, and second-pair sign-off. Decisions are made with calibration as the default, not the exception.',
+                                            foot: 'Queues · Guardrails · Sign-off',
+                                        },
+                                        {
+                                            num: 'iii.',
+                                            icon: <Gauge size={14} strokeWidth={2} />,
+                                            tag: 'Assurance',
+                                            title: 'Numbers, kept honest',
+                                            desc: 'Real-time scoring with exception surfacing. Boards see the truth before the regulator does — and stakeholders see the trail behind every figure.',
+                                            foot: 'Scoring · Exceptions · Audit trail',
+                                        },
+                                    ].map((commit, i) => (
+                                        <article key={commit.title} className="cure-commit-card" data-reveal data-delay={`${i + 1}` as const}>
+                                            <div className="cure-commit-card-marker">
+                                                <div className="cure-commit-card-dot" />
+                                                <div className="cure-commit-card-num">{commit.num}</div>
+                                            </div>
+                                            <div className="cure-commit-card-body">
+                                                <div className="cure-commit-card-head">
+                                                    <h3>{commit.title}</h3>
+                                                    <span className="cure-commit-card-tag">
+                                                        {commit.icon}
+                                                        {commit.tag}
+                                                    </span>
+                                                </div>
+                                                <p>{commit.desc}</p>
+                                                <div className="cure-commit-card-foot">{commit.foot}</div>
+                                            </div>
+                                        </article>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </section>
 
                     {/* ───────────── FOUR-ACT METHOD ───────────── */}
-                    <section id="solutions" className="cure-section">
+                    <section id="solutions" className="cure-section cure-method">
+                        <div className="cure-method-watermark" aria-hidden="true">
+                            02
+                        </div>
                         <div className="cure-shell">
-                            <div className="cure-method-intro" data-reveal>
+                            <header className="cure-method-header" data-reveal>
                                 <div>
                                     <span className="cure-eyebrow">
                                         <span className="dash" />
@@ -1629,19 +2284,42 @@ export default function Welcome() {
                                         <br />
                                         from onboard to audit.
                                     </h2>
+                                    <div className="cure-method-rhythm" aria-label="Operating rhythm">
+                                        <span>Register</span>
+                                        <span className="cure-method-rhythm-arrow">→</span>
+                                        <span>Train</span>
+                                        <span className="cure-method-rhythm-arrow">→</span>
+                                        <span>Collect</span>
+                                        <span className="cure-method-rhythm-arrow">→</span>
+                                        <span>Score</span>
+                                    </div>
                                 </div>
-                                <p style={{ fontSize: 16, lineHeight: 1.7, color: 'var(--ink-2)' }}>
+                                <p className="cure-method-lede">
                                     A guided operating rhythm keeps every stakeholder synchronised — from the first registration to the final risk
                                     score. Each act has its own dashboard, its own rituals, its own evidence trail.
                                 </p>
+                            </header>
+
+                            <div className="cure-method-track" aria-hidden="true">
+                                <div className="cure-method-track-line" />
+                                <div className="cure-method-track-nodes">
+                                    {['i.', 'ii.', 'iii.', 'iv.'].map((num, i) => (
+                                        <div key={num} className="cure-method-node">
+                                            <div className="cure-method-node-badge">{num}</div>
+                                            <span className="cure-method-node-label">
+                                                {['Identity', 'Learning', 'Evidence', 'Assurance'][i]}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
 
-                            <div className="cure-acts">
+                            <div className="cure-method-steps">
                                 {[
                                     {
                                         num: 'i.',
                                         tag: 'Identity',
-                                        icon: <UserPlus size={18} />,
+                                        icon: <UserPlus size={14} strokeWidth={2} />,
                                         title: 'Register',
                                         desc: 'Onboard teams and entities, map ownership, define the perimeter of who owns which control.',
                                         foot: 'Tenants · Roles',
@@ -1649,7 +2327,7 @@ export default function Welcome() {
                                     {
                                         num: 'ii.',
                                         tag: 'Learning',
-                                        icon: <BookOpen size={18} />,
+                                        icon: <BookOpen size={14} strokeWidth={2} />,
                                         title: 'Train',
                                         desc: 'Launch role-based curriculum, monitor completion, issue certificates — training as a continuous discipline.',
                                         foot: 'Cohorts · Scores',
@@ -1657,7 +2335,7 @@ export default function Welcome() {
                                     {
                                         num: 'iii.',
                                         tag: 'Evidence',
-                                        icon: <CloudUpload size={18} />,
+                                        icon: <CloudUpload size={14} strokeWidth={2} />,
                                         title: 'Collect',
                                         desc: 'Submit, verify, and time-stamp operational artefacts. Review queues that close, not pile up.',
                                         foot: 'Artefacts · Queues',
@@ -1665,23 +2343,32 @@ export default function Welcome() {
                                     {
                                         num: 'iv.',
                                         tag: 'Assurance',
-                                        icon: <FolderCog size={18} />,
+                                        icon: <FolderCog size={14} strokeWidth={2} />,
                                         title: 'Score',
                                         desc: 'Compute readiness, surface exceptions instantly, export board-grade reports without manual rework.',
                                         foot: 'Index · Exceptions',
                                     },
                                 ].map((act, i) => (
-                                    <article key={act.title} className="cure-act" data-reveal data-delay={`${i + 1}` as const}>
-                                        <div className="cure-act-tag">
-                                            {act.icon}
-                                            {act.tag}
+                                    <article key={act.title} className="cure-method-step" data-reveal data-delay={`${i + 1}` as const}>
+                                        <div className="cure-method-step-top-mobile">
+                                            <span className="cure-method-step-index-mobile">{act.num}</span>
+                                            <span className="cure-method-step-tag">
+                                                {act.icon}
+                                                {act.tag}
+                                            </span>
                                         </div>
-                                        <div className="cure-act-num">{act.num}</div>
+                                        <div className="cure-method-step-top">
+                                            <span className="cure-method-step-tag">
+                                                {act.icon}
+                                                {act.tag}
+                                            </span>
+                                            <span className="cure-method-step-index">{act.num}</span>
+                                        </div>
                                         <h3>{act.title}</h3>
                                         <p>{act.desc}</p>
-                                        <div className="cure-act-foot">
-                                            <span>
-                                                <span className="cure-act-dot" />
+                                        <div className="cure-method-step-foot">
+                                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                                                <span className="cure-method-step-pulse" />
                                                 Act {act.num.replace('.', '')}
                                             </span>
                                             <span>{act.foot}</span>
@@ -1707,8 +2394,11 @@ export default function Welcome() {
 
                     {/* ───────────── ROLES ───────────── */}
                     <section id="roles" className="cure-section cure-roles">
+                        <div className="cure-roles-watermark" aria-hidden="true">
+                            03
+                        </div>
                         <div className="cure-shell">
-                            <div className="cure-roles-intro" data-reveal>
+                            <header className="cure-roles-header" data-reveal>
                                 <div>
                                     <span className="cure-eyebrow">
                                         <span className="dash" />
@@ -1719,47 +2409,71 @@ export default function Welcome() {
                                         <br />
                                         <em>Four lenses</em> on the same truth.
                                     </h2>
+                                    <div className="cure-roles-truth" aria-label="Shared platform truth">
+                                        <span>Four roles</span>
+                                        <span>→</span>
+                                        <span className="cure-roles-truth-core">One evidence layer</span>
+                                    </div>
                                 </div>
-                                <p className="cure-roles-sub">
+                                <p className="cure-roles-lede">
                                     Every role sees the same artefacts, but only the actions that belong to them. Calibrated permissions; shared
                                     evidence; no parallel spreadsheets.
                                 </p>
-                            </div>
+                            </header>
 
-                            <div className="cure-role-grid">
+                            <div className="cure-roles-grid">
                                 {[
                                     {
                                         mark: 'Role · I',
-                                        icon: <ShieldCheck size={18} />,
+                                        icon: <ShieldCheck size={16} strokeWidth={2} />,
                                         title: 'Super Admin',
                                         desc: 'Global governance, tenant policy enforcement, and the strategic view across the platform.',
+                                        foot: 'Policy · Tenants · Oversight',
                                     },
                                     {
                                         mark: 'Role · II',
-                                        icon: <UserCog size={18} />,
+                                        icon: <UserCog size={16} strokeWidth={2} />,
                                         title: 'Company Admin',
                                         desc: 'Operational delivery — schedules, deadlines, and entity-level readiness for each line of business.',
+                                        foot: 'Schedules · Entities · Readiness',
                                     },
                                     {
                                         mark: 'Role · III',
-                                        icon: <UsersRound size={18} />,
+                                        icon: <UsersRound size={16} strokeWidth={2} />,
                                         title: 'Reviewer',
                                         desc: 'Evidence verification, closure decisions, calibration sessions, and submission quality control.',
+                                        foot: 'Queues · Calibration · Closure',
                                     },
                                     {
                                         mark: 'Role · IV',
-                                        icon: <User size={18} />,
+                                        icon: <User size={16} strokeWidth={2} />,
                                         title: 'Employee',
                                         desc: 'Training tasks, assignment completion, and a single personal record of every compliance step.',
+                                        foot: 'Training · Tasks · Record',
                                     },
-                                ].map((r, i) => (
-                                    <article key={r.title} className="cure-role" data-reveal data-delay={`${i + 1}` as const}>
-                                        <div className="cure-role-mark">{r.mark}</div>
-                                        <div className="cure-role-icon">{r.icon}</div>
-                                        <h3>{r.title}</h3>
-                                        <p>{r.desc}</p>
+                                ].map((role, i) => (
+                                    <article key={role.title} className="cure-lens-card" data-reveal data-delay={`${i + 1}` as const}>
+                                        <div className="cure-lens-card-top">
+                                            <span className="cure-lens-card-mark">{role.mark}</span>
+                                            <span className="cure-lens-card-icon">{role.icon}</span>
+                                        </div>
+                                        <h3>{role.title}</h3>
+                                        <p>{role.desc}</p>
+                                        <div className="cure-lens-card-foot">{role.foot}</div>
                                     </article>
                                 ))}
+                            </div>
+
+                            <div className="cure-roles-shared" data-reveal data-delay="4">
+                                <span className="cure-roles-shared-label">
+                                    <span className="cure-roles-shared-dot" />
+                                    Shared evidence layer
+                                </span>
+                                <div className="cure-roles-shared-items">
+                                    <span>Same artefacts</span>
+                                    <span>Calibrated permissions</span>
+                                    <span>No parallel spreadsheets</span>
+                                </div>
                             </div>
                         </div>
                     </section>

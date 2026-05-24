@@ -1225,6 +1225,121 @@ export function MarketingFooterStyles() {
     return <style>{marketingFooterStyles}</style>;
 }
 
+export const studioHeroBackgroundStyles = `
+    /* Shared studio hero — marketing pages */
+    .studio-hero-bg,
+    .public-marketing-shell .marketing-hero-section,
+    .public-marketing-shell main > section:first-child {
+        position: relative;
+        overflow: hidden;
+        background-color: #f5f7fb;
+        background-image:
+            radial-gradient(ellipse 85% 65% at 100% -10%, rgba(31, 70, 148, 0.08), transparent 58%),
+            radial-gradient(ellipse 70% 55% at -5% 105%, rgba(0, 218, 243, 0.07), transparent 52%),
+            linear-gradient(
+                to right,
+                rgba(245, 247, 251, 0.98) 0%,
+                rgba(245, 247, 251, 0.93) 40%,
+                rgba(245, 247, 251, 0.68) 68%,
+                rgba(245, 247, 251, 0.52) 100%
+            ),
+            url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=1800&q=80&auto=format&fit=crop');
+        background-position: 0 0, 0 0, 0 0, right center;
+        background-size: auto, auto, auto, cover;
+        background-repeat: no-repeat;
+    }
+
+    .dark .studio-hero-bg,
+    .dark .public-marketing-shell .marketing-hero-section,
+    .dark .public-marketing-shell main > section:first-child {
+        background-color: #0b1220;
+        background-image:
+            radial-gradient(ellipse 85% 65% at 100% -10%, rgba(168, 193, 237, 0.12), transparent 58%),
+            radial-gradient(ellipse 70% 55% at -5% 105%, rgba(0, 218, 243, 0.06), transparent 52%),
+            linear-gradient(
+                to right,
+                rgba(11, 18, 32, 0.98) 0%,
+                rgba(11, 18, 32, 0.94) 40%,
+                rgba(11, 18, 32, 0.76) 68%,
+                rgba(11, 18, 32, 0.68) 100%
+            ),
+            url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=1800&q=80&auto=format&fit=crop');
+    }
+
+    .studio-hero-bg::before,
+    .public-marketing-shell .marketing-hero-section::before,
+    .public-marketing-shell main > section:first-child::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        background-image:
+            radial-gradient(rgba(14, 42, 94, 0.05) 1px, transparent 1px),
+            radial-gradient(rgba(31, 70, 148, 0.04) 1px, transparent 1px);
+        background-position: 0 0, 3px 4px;
+        background-size: 4px 4px, 11px 11px;
+        opacity: 0.55;
+    }
+
+    .dark .studio-hero-bg::before,
+    .dark .public-marketing-shell .marketing-hero-section::before,
+    .dark .public-marketing-shell main > section:first-child::before {
+        opacity: 0.35;
+        background-image:
+            radial-gradient(rgba(168, 193, 237, 0.06) 1px, transparent 1px),
+            radial-gradient(rgba(168, 193, 237, 0.04) 1px, transparent 1px);
+    }
+
+    .studio-hero-bg::after,
+    .public-marketing-shell .marketing-hero-section::after,
+    .public-marketing-shell main > section:first-child::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        background-image:
+            linear-gradient(to right, rgba(0, 218, 243, 0.06) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(0, 39, 83, 0.05) 1px, transparent 1px);
+        background-size: 56px 56px;
+        opacity: 0.35;
+        mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 100%);
+    }
+
+    .dark .studio-hero-bg::after,
+    .dark .public-marketing-shell .marketing-hero-section::after,
+    .dark .public-marketing-shell main > section:first-child::after {
+        opacity: 0.22;
+        background-image:
+            linear-gradient(to right, rgba(168, 193, 237, 0.07) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(168, 193, 237, 0.05) 1px, transparent 1px);
+    }
+
+    .studio-hero-bg > *,
+    .public-marketing-shell .marketing-hero-section > div,
+    .public-marketing-shell main > section:first-child > div {
+        position: relative;
+        z-index: 1;
+    }
+
+    .public-marketing-shell .marketing-hero-section,
+    .public-marketing-shell main > section:first-child {
+        min-height: min(720px, calc(100vh - 84px));
+        display: flex;
+        align-items: center;
+    }
+
+    .public-marketing-shell .marketing-hero-section > div,
+    .public-marketing-shell main > section:first-child > div {
+        width: 100%;
+    }
+`;
+
+export function StudioHeroBackgroundStyles() {
+    return <style>{studioHeroBackgroundStyles}</style>;
+}
+
 export function MarketingChromeStyles() {
     return <style>{marketingChromeStyles}</style>;
 }
