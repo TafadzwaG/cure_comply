@@ -2,6 +2,7 @@ import privacyCureLogo from '@/images/privacycure-logo.png';
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
+    ArrowRight,
     BarChart3,
     BookOpen,
     Building2,
@@ -13,6 +14,8 @@ import {
     FolderCog,
     Gauge,
     GraduationCap,
+    LogIn,
+    PlayCircle,
     ShieldCheck,
     User,
     UserCog,
@@ -333,6 +336,10 @@ export default function Welcome() {
                         transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
                         position: relative;
                         overflow: hidden;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 10px;
                     }
                     .btn-primary::after {
                         content: '';
@@ -354,6 +361,10 @@ export default function Welcome() {
                         text-transform: uppercase;
                         border-radius: 4px;
                         transition: border-color 0.2s, background 0.2s;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 10px;
                     }
                     .btn-outline:hover { border-color: #00daf3; background: rgba(0,218,243,0.08); }
 
@@ -815,8 +826,12 @@ export default function Welcome() {
                                         textTransform: 'uppercase',
                                         color: '#002753',
                                         textDecoration: 'none',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: 8,
                                     }}
                                 >
+                                    <Gauge size={14} />
                                     Dashboard
                                 </Link>
                             ) : (
@@ -830,16 +845,21 @@ export default function Welcome() {
                                         textTransform: 'uppercase',
                                         color: '#002753',
                                         textDecoration: 'none',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: 8,
                                     }}
                                 >
+                                    <LogIn size={14} />
                                     Sign in
                                 </Link>
                             )}
                             <Link
                                 href={auth.user ? route('dashboard') : route('register')}
                                 className="btn-primary"
-                                style={{ padding: '10px 18px', textDecoration: 'none', display: 'inline-block' }}
+                                style={{ padding: '10px 18px', textDecoration: 'none' }}
                             >
+                                {auth.user ? <Gauge size={14} /> : <UserPlus size={14} />}
                                 {auth.user ? 'Open dashboard' : 'Get started'}
                             </Link>
                         </div>
@@ -991,15 +1011,18 @@ export default function Welcome() {
                                 <Link
                                     href={auth.user ? route('dashboard') : route('register')}
                                     className="btn-primary"
-                                    style={{ padding: '16px 32px', fontSize: 15, textDecoration: 'none', display: 'inline-block' }}
+                                    style={{ padding: '16px 32px', fontSize: 15, textDecoration: 'none' }}
                                 >
+                                    {auth.user ? <Gauge size={15} /> : <UserPlus size={15} />}
                                     {auth.user ? 'Open dashboard' : 'Create workspace'}
+                                    <ArrowRight size={15} />
                                 </Link>
                                 <Link
                                     href={route('login')}
                                     className="btn-outline"
-                                    style={{ padding: '16px 32px', fontSize: 15, textDecoration: 'none', display: 'inline-block' }}
+                                    style={{ padding: '16px 32px', fontSize: 15, textDecoration: 'none' }}
                                 >
+                                    <PlayCircle size={15} />
                                     See a demo
                                 </Link>
                             </div>
@@ -1864,9 +1887,11 @@ export default function Welcome() {
                                     <Link
                                         href={auth.user ? route('dashboard') : route('register')}
                                         className="btn-primary"
-                                        style={{ padding: '18px 40px', fontSize: 16, textDecoration: 'none', display: 'inline-block' }}
+                                        style={{ padding: '18px 40px', fontSize: 16, textDecoration: 'none' }}
                                     >
+                                        {auth.user ? <Gauge size={15} /> : <UserPlus size={15} />}
                                         {auth.user ? 'Open dashboard' : 'Create tenant workspace'}
+                                        <ArrowRight size={15} />
                                     </Link>
                                 </div>
                                 <div

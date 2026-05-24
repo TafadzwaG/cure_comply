@@ -1,5 +1,5 @@
 import MarketingShell from '@/components/marketing-shell';
-import { BadgeCheck, Building2, CheckCircle2, ShieldCheck, Sparkles, UsersRound } from 'lucide-react';
+import { ArrowRight, BadgeCheck, Building2, CheckCircle2, ShieldCheck, Sparkles, UsersRound } from 'lucide-react';
 
 const plans = [
     {
@@ -89,20 +89,20 @@ export default function PricingPage() {
             title="Pricing | Privacy Cure Compliance"
             description="Zimbabwe-benchmarked pricing for training, compliance workflows, evidence review, and role-based workspaces."
         >
-            <section className="border-b border-[#c3c6d1]/20 bg-[radial-gradient(circle_at_top_right,_rgba(0,218,243,0.15),_transparent_30%),linear-gradient(180deg,#ffffff_0%,#f2f4f6_100%)] px-6 py-20 dark:border-white/10 dark:bg-[radial-gradient(circle_at_top_right,_rgba(0,218,243,0.15),_transparent_30%),linear-gradient(180deg,#0b2241_0%,#081a33_100%)] lg:px-16 lg:py-28">
+            <section className="border-b border-[#c3c6d1]/20 bg-[radial-gradient(circle_at_top_right,_rgba(0,218,243,0.15),_transparent_30%),linear-gradient(180deg,#ffffff_0%,#f2f4f6_100%)] px-6 py-20 lg:px-16 lg:py-28 dark:border-white/10 dark:bg-[radial-gradient(circle_at_top_right,_rgba(0,218,243,0.15),_transparent_30%),linear-gradient(180deg,#0b2241_0%,#081a33_100%)]">
                 <div className="mx-auto grid w-full max-w-[1440px] gap-10 lg:grid-cols-[1.2fr_0.8fr]">
                     <div>
-                        <div className="inline-flex items-center gap-2 rounded-full border border-[#00b9ce]/20 bg-[#00daf3]/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#004f58] dark:border-[#00daf3]/20 dark:bg-[#00daf3]/10 dark:text-[#9cf0ff]">
+                        <div className="inline-flex items-center gap-2 rounded-full border border-[#00b9ce]/20 bg-[#00daf3]/10 px-3 py-1 text-[10px] font-semibold tracking-[0.22em] text-[#004f58] uppercase dark:border-[#00daf3]/20 dark:bg-[#00daf3]/10 dark:text-[#9cf0ff]">
                             <Sparkles className="size-3.5" />
                             Zimbabwe pricing
                         </div>
-                        <h1 className="mt-6 max-w-4xl text-4xl font-semibold tracking-[-0.04em] text-[#002753] dark:text-white md:text-6xl">
+                        <h1 className="mt-6 max-w-4xl text-4xl font-semibold tracking-[-0.04em] text-[#002753] md:text-6xl dark:text-white">
                             Pricing built for the Zimbabwean market, without splitting the core compliance workflow into add-ons.
                         </h1>
-                        <p className="mt-6 max-w-2xl text-base leading-8 text-[#434750] dark:text-white/70 md:text-lg">
-                            The plan structure is benchmarked against current Zimbabwe cloud software pricing and packaged around how
-                            local teams actually buy software: predictable USD billing, clear user bands, and a practical path from one
-                            company workspace to a larger operational rollout.
+                        <p className="mt-6 max-w-2xl text-base leading-8 text-[#434750] md:text-lg dark:text-white/70">
+                            The plan structure is benchmarked against current Zimbabwe cloud software pricing and packaged around how local teams
+                            actually buy software: predictable USD billing, clear user bands, and a practical path from one company workspace to a
+                            larger operational rollout.
                         </p>
                     </div>
 
@@ -112,7 +112,7 @@ export default function PricingPage() {
                                 key={benchmark.title}
                                 className="rounded-2xl border border-[#c3c6d1]/25 bg-white/90 p-6 shadow-[0_20px_50px_-30px_rgba(0,39,83,0.3)] dark:border-white/10 dark:bg-white/5"
                             >
-                                <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#00b9ce] dark:text-[#9cf0ff]">
+                                <div className="text-[10px] font-semibold tracking-[0.22em] text-[#00b9ce] uppercase dark:text-[#9cf0ff]">
                                     {benchmark.title}
                                 </div>
                                 <div className="mt-3 text-3xl font-semibold tracking-tight text-[#002753] dark:text-white">{benchmark.value}</div>
@@ -127,16 +127,14 @@ export default function PricingPage() {
                 <div className="mx-auto w-full max-w-[1440px]">
                     <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
                         <div>
-                            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#00b9ce] dark:text-[#9cf0ff]">
-                                Public plans
-                            </p>
-                            <h2 className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-[#002753] dark:text-white md:text-5xl">
+                            <p className="text-[10px] font-semibold tracking-[0.22em] text-[#00b9ce] uppercase dark:text-[#9cf0ff]">Public plans</p>
+                            <h2 className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-[#002753] md:text-5xl dark:text-white">
                                 Clear tiers. USD billing. Two months free on annual.
                             </h2>
                         </div>
                         <p className="max-w-xl text-sm leading-7 text-[#434750] dark:text-white/65">
-                            These plans are positioned against local ERP, payroll, and compliance tooling already priced in Zimbabwe.
-                            If your rollout spans multiple entities or needs custom approval workflows, Enterprise is the right route.
+                            These plans are positioned against local ERP, payroll, and compliance tooling already priced in Zimbabwe. If your rollout
+                            spans multiple entities or needs custom approval workflows, Enterprise is the right route.
                         </p>
                     </div>
 
@@ -151,14 +149,14 @@ export default function PricingPage() {
                                 }`}
                             >
                                 <div className="flex items-center justify-between gap-4">
-                                    <div className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-inherit/80">
+                                    <div className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[10px] font-semibold tracking-[0.22em] text-inherit/80 uppercase">
                                         {index === 0 && <ShieldCheck className="size-3.5" />}
                                         {index === 1 && <UsersRound className="size-3.5" />}
                                         {index === 2 && <Building2 className="size-3.5" />}
                                         {plan.badge}
                                     </div>
                                     {index === 1 && (
-                                        <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#9cf0ff]">
+                                        <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[10px] font-semibold tracking-[0.18em] text-[#9cf0ff] uppercase">
                                             <BadgeCheck className="size-3.5" />
                                             Recommended
                                         </div>
@@ -188,12 +186,11 @@ export default function PricingPage() {
                                 <a
                                     href={plan.name === 'Enterprise' ? route('resources') : route('register')}
                                     className={`mt-8 inline-flex w-full items-center justify-center rounded-full px-5 py-3 text-sm font-semibold transition-transform hover:scale-[1.01] ${
-                                        index === 1
-                                            ? 'bg-[#00daf3] text-[#002753]'
-                                            : 'bg-[#002753] text-white dark:bg-white dark:text-[#002753]'
+                                        index === 1 ? 'bg-[#00daf3] text-[#002753]' : 'bg-[#002753] text-white dark:bg-white dark:text-[#002753]'
                                     }`}
                                 >
                                     {plan.name === 'Enterprise' ? 'View rollout options' : 'Start with this plan'}
+                                    <ArrowRight className="size-4" />
                                 </a>
                             </div>
                         ))}
@@ -201,22 +198,20 @@ export default function PricingPage() {
                 </div>
             </section>
 
-            <section className="border-y border-[#c3c6d1]/20 bg-[#f2f4f6] px-6 py-16 dark:border-white/10 dark:bg-[#0b2241] lg:px-16">
+            <section className="border-y border-[#c3c6d1]/20 bg-[#f2f4f6] px-6 py-16 lg:px-16 dark:border-white/10 dark:bg-[#0b2241]">
                 <div className="mx-auto grid w-full max-w-[1440px] gap-8 lg:grid-cols-[0.9fr_1.1fr]">
                     <div>
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#00b9ce] dark:text-[#9cf0ff]">
-                            Packaging logic
-                        </p>
-                        <h2 className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-[#002753] dark:text-white md:text-5xl">
+                        <p className="text-[10px] font-semibold tracking-[0.22em] text-[#00b9ce] uppercase dark:text-[#9cf0ff]">Packaging logic</p>
+                        <h2 className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-[#002753] md:text-5xl dark:text-white">
                             Why these numbers fit the market.
                         </h2>
                     </div>
                     <div className="rounded-2xl border border-[#c3c6d1]/25 bg-white p-8 dark:border-white/10 dark:bg-white/5">
                         <p className="text-base leading-8 text-[#434750] dark:text-white/70">
-                            Small Zimbabwe business software plans commonly start around the lower double digits per month, while
-                            payroll and more compliance-heavy systems quickly move into the $50 to $200 range once the team size and
-                            workflows grow. Privacy Cure is positioned above basic record-keeping tools and below heavy consulting-led
-                            enterprise programmes, which is why the public tiers focus on workspace value rather than raw per-feature billing.
+                            Small Zimbabwe business software plans commonly start around the lower double digits per month, while payroll and more
+                            compliance-heavy systems quickly move into the $50 to $200 range once the team size and workflows grow. Privacy Cure is
+                            positioned above basic record-keeping tools and below heavy consulting-led enterprise programmes, which is why the public
+                            tiers focus on workspace value rather than raw per-feature billing.
                         </p>
                     </div>
                 </div>
@@ -225,10 +220,8 @@ export default function PricingPage() {
             <section id="faq" className="px-6 py-16 lg:px-16 lg:py-24">
                 <div className="mx-auto w-full max-w-[1440px]">
                     <div className="mb-10">
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#00b9ce] dark:text-[#9cf0ff]">
-                            FAQ
-                        </p>
-                        <h2 className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-[#002753] dark:text-white md:text-5xl">
+                        <p className="text-[10px] font-semibold tracking-[0.22em] text-[#00b9ce] uppercase dark:text-[#9cf0ff]">FAQ</p>
+                        <h2 className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-[#002753] md:text-5xl dark:text-white">
                             Commercial questions, answered directly.
                         </h2>
                     </div>

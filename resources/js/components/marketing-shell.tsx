@@ -1,7 +1,7 @@
 import privacyCureLogo from '@/images/privacycure-logo.png';
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { ArrowRight, LogIn } from 'lucide-react';
+import { ArrowRight, LayoutDashboard, LogIn } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
 
 type MarketingShellProps = PropsWithChildren<{
@@ -328,6 +328,7 @@ export default function MarketingShell({ title, description, current, children }
                                     href={route('dashboard')}
                                     className="inline-flex items-center gap-2 rounded-sm border border-[#083d77]/20 px-4 py-2 text-[11px] font-medium tracking-[0.14em] text-[#002753] uppercase transition-colors hover:border-[#083d77]/40 hover:bg-[#083d77]/5 dark:border-white/15 dark:text-white dark:hover:bg-white/5"
                                 >
+                                    <LayoutDashboard className="size-4" />
                                     Dashboard
                                 </Link>
                             ) : (
