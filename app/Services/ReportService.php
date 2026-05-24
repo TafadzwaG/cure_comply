@@ -5,7 +5,9 @@ namespace App\Services;
 use App\Models\ComplianceSubmission;
 use App\Models\CourseAssignment;
 use App\Models\EvidenceFile;
+use App\Models\PublicTrainingAcknowledgement;
 use App\Models\TestAttempt;
+use App\Models\User;
 
 class ReportService
 {
@@ -22,6 +24,25 @@ class ReportService
                 'progress' => $assignment->status,
                 'completion_status' => $assignment->status,
                 'due_date' => optional($assignment->due_date)->format('Y-m-d'),
+            ])
+            ->all();
+    }
+
+    public function publicTrainingAcknowledgements(array $filters, ?User $user): array
+    {
+        return PublicTrainingAcknowledgement::query()
+            ->with(['course:id,title', 'tenant:id,name'])
+            ->when(! $user?->isSuperAdmin(), fn ($query) => $query->where('tenant_id', $user?->tenant_id))
+            ->when($user?->isSuperAdmin() && data_get($filters, 'tenant_id'), fn ($query, $tenantId) => $query->where('tenant_id', $tenantId))
+            ->when(data_get($filters, 'date_from'), fn ($query, $date) => $query->whereDate('acknowledged_at', '>=', $date))
+            ->when(data_get($filters, 'date_to'), fn ($query, $date) => $query->whereDate('acknowledged_at', '<=', $date))
+            ->latest('acknowledged_at')
+            ->get()
+            ->map(fn (PublicTrainingAcknowledgement $acknowledgement) => [
+                'full_name' => $acknowledgement->full_name,
+                'tenant' => $acknowledgement->tenant?->name,
+                'course' => $acknowledgement->course?->title,
+                'acknowledged_at' => optional($acknowledgement->acknowledged_at)->format('Y-m-d H:i'),
             ])
             ->all();
     }

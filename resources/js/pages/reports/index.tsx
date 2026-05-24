@@ -13,8 +13,8 @@ import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PlatformLayout from '@/layouts/platform-layout';
+import { SharedData } from '@/types';
 import { router, usePage } from '@inertiajs/react';
-import { ExportRequestSummary, SharedData } from '@/types';
 import {
     ArrowRight,
     BarChart3,
@@ -46,6 +46,7 @@ interface Filters {
 interface Props {
     reports: {
         employeeTraining: Array<Record<string, unknown>>;
+        publicTrainingAcknowledgements: Array<Record<string, unknown>>;
         testPerformance: Array<Record<string, unknown>>;
         complianceSummary: Array<Record<string, unknown>>;
         evidenceStatus: Array<Record<string, unknown>>;
@@ -88,6 +89,16 @@ const reportMeta: Record<
         pdfRoute: 'reports.employee-training',
         emptyMessage: 'No employee training rows match the current filters.',
         eyebrow: 'Learning operations',
+    },
+    publicTrainingAcknowledgements: {
+        value: 'public-training',
+        title: 'Public Training Acknowledgements',
+        description: 'Names, tenants, courses, and acknowledgement dates submitted from shareable public training links.',
+        icon: CheckCircle2,
+        excelRoute: 'reports.public-training-acknowledgements',
+        pdfRoute: 'reports.public-training-acknowledgements',
+        emptyMessage: 'No public training acknowledgements match the current filters.',
+        eyebrow: 'Public learning records',
     },
     testPerformance: {
         value: 'tests',
@@ -140,6 +151,12 @@ export default function ReportsIndex({ reports, filters, filterOptions }: Props)
                 value: reports.employeeTraining.length,
                 detail: 'Employee course assignment and completion output.',
                 icon: GraduationCap,
+            },
+            {
+                label: 'Public acknowledgements',
+                value: reports.publicTrainingAcknowledgements.length,
+                detail: 'Public training link completion acknowledgements.',
+                icon: CheckCircle2,
             },
             {
                 label: 'Assessment records',
@@ -216,8 +233,11 @@ export default function ReportsIndex({ reports, filters, filterOptions }: Props)
     return (
         <PlatformLayout>
             <div className="space-y-6">
-                <PageHeader title="Reports" description="A monochrome reporting workspace for filtered previews, operational exports, and compliance-ready snapshots.">
-                    <Badge variant="outline" className="rounded-full px-3 py-1 text-[11px] uppercase tracking-[0.22em]">
+                <PageHeader
+                    title="Reports"
+                    description="A monochrome reporting workspace for filtered previews, operational exports, and compliance-ready snapshots."
+                >
+                    <Badge variant="outline" className="rounded-full px-3 py-1 text-[11px] tracking-[0.22em] uppercase">
                         Raw shadcn workspace
                     </Badge>
                 </PageHeader>
@@ -227,14 +247,16 @@ export default function ReportsIndex({ reports, filters, filterOptions }: Props)
                         <CardContent className="space-y-6 p-6">
                             <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
                                 <div className="space-y-3">
-                                    <Badge variant="outline" className="rounded-full px-3 py-1 text-[11px] uppercase tracking-[0.22em]">
+                                    <Badge variant="outline" className="rounded-full px-3 py-1 text-[11px] tracking-[0.22em] uppercase">
                                         Reporting command center
                                     </Badge>
                                     <div className="space-y-2">
-                                        <h2 className="text-3xl font-semibold tracking-tight">Preview, compare, and export from the same monochrome workspace</h2>
-                                        <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-                                            Every report uses the same filter state, gives you a structured preview, and exposes one-click Excel or PDF exports
-                                            without leaving the page.
+                                        <h2 className="text-3xl font-semibold tracking-tight">
+                                            Preview, compare, and export from the same monochrome workspace
+                                        </h2>
+                                        <p className="text-muted-foreground max-w-2xl text-sm leading-6">
+                                            Every report uses the same filter state, gives you a structured preview, and exposes one-click Excel or
+                                            PDF exports without leaving the page.
                                         </p>
                                     </div>
                                 </div>
@@ -264,7 +286,9 @@ export default function ReportsIndex({ reports, filters, filterOptions }: Props)
                         title="Filter control rail"
                         description="Adjust the reporting scope before preview or export."
                         className="bg-muted/20"
-                        headerRight={<IconChip icon={<Filter className="size-4" />} className="border border-border/70 bg-background p-2.5 text-foreground" />}
+                        headerRight={
+                            <IconChip icon={<Filter className="size-4" />} className="border-border/70 bg-background text-foreground border p-2.5" />
+                        }
                     >
                         <div className="space-y-4">
                             <ReportInsight
@@ -292,7 +316,7 @@ export default function ReportsIndex({ reports, filters, filterOptions }: Props)
                     <Card className="border-border/70 shadow-none xl:sticky xl:top-6">
                         <CardHeader>
                             <div className="flex items-center gap-2">
-                                <Filter className="size-4 text-muted-foreground" />
+                                <Filter className="text-muted-foreground size-4" />
                                 <CardTitle className="text-base font-medium">Filters</CardTitle>
                             </div>
                             <CardDescription>Use tenant-aware dropdowns and status constraints to narrow report datasets precisely.</CardDescription>
@@ -387,17 +411,17 @@ export default function ReportsIndex({ reports, filters, filterOptions }: Props)
                                     />
                                 </div>
 
-                                <div className="rounded-xl border border-border/70 bg-muted/25 p-4">
+                                <div className="border-border/70 bg-muted/25 rounded-xl border p-4">
                                     <div className="flex items-center justify-between gap-3">
                                         <div>
-                                            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Filter intensity</p>
+                                            <p className="text-muted-foreground text-xs tracking-[0.18em] uppercase">Filter intensity</p>
                                             <p className="mt-1 text-sm font-medium">{activeFilters} active constraints</p>
                                         </div>
                                         <Badge variant="outline" className="rounded-full px-3 py-1">
                                             {activeFilters === 0 ? 'Open view' : 'Scoped'}
                                         </Badge>
                                     </div>
-                                    <Progress className="mt-4 h-2 bg-muted" value={Math.min((activeFilters / 7) * 100, 100)} />
+                                    <Progress className="bg-muted mt-4 h-2" value={Math.min((activeFilters / 7) * 100, 100)} />
                                 </div>
 
                                 <div className="flex flex-wrap gap-2 pt-2">
@@ -435,6 +459,14 @@ export default function ReportsIndex({ reports, filters, filterOptions }: Props)
                                 <ReportWorkspacePanel rows={reports.employeeTraining} filters={form} meta={reportMeta.employeeTraining} />
                             </TabsContent>
 
+                            <TabsContent value="public-training" className="space-y-4">
+                                <ReportWorkspacePanel
+                                    rows={reports.publicTrainingAcknowledgements}
+                                    filters={form}
+                                    meta={reportMeta.publicTrainingAcknowledgements}
+                                />
+                            </TabsContent>
+
                             <TabsContent value="tests" className="space-y-4">
                                 <ReportWorkspacePanel rows={reports.testPerformance} filters={form} meta={reportMeta.testPerformance} />
                             </TabsContent>
@@ -465,10 +497,13 @@ export default function ReportsIndex({ reports, filters, filterOptions }: Props)
                     {recent_exports.length ? (
                         <div className="space-y-3">
                             {recent_exports.map((exportItem) => (
-                                <div key={exportItem.id} className="flex items-center justify-between gap-4 rounded-xl border border-border/70 bg-muted/20 px-4 py-3">
+                                <div
+                                    key={exportItem.id}
+                                    className="border-border/70 bg-muted/20 flex items-center justify-between gap-4 rounded-xl border px-4 py-3"
+                                >
                                     <div className="min-w-0">
                                         <p className="truncate text-sm font-medium">{exportItem.file_name ?? exportItem.source}</p>
-                                        <p className="text-xs text-muted-foreground">
+                                        <p className="text-muted-foreground text-xs">
                                             {exportItem.source} · {exportItem.format.toUpperCase()}
                                         </p>
                                     </div>
@@ -498,23 +533,15 @@ export default function ReportsIndex({ reports, filters, filterOptions }: Props)
     );
 }
 
-function TopMetricCard({
-    label,
-    value,
-    icon: Icon,
-}: {
-    label: string;
-    value: string | number;
-    icon: typeof Sparkles;
-}) {
+function TopMetricCard({ label, value, icon: Icon }: { label: string; value: string | number; icon: typeof Sparkles }) {
     return (
-        <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
+        <div className="border-border/70 bg-muted/20 rounded-2xl border p-4">
             <div className="flex items-start justify-between gap-3">
                 <div className="space-y-2">
-                    <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{label}</p>
+                    <p className="text-muted-foreground text-xs tracking-[0.18em] uppercase">{label}</p>
                     <p className="text-lg font-semibold tracking-tight">{value}</p>
                 </div>
-                <div className="rounded-lg border border-border/70 bg-background p-2">
+                <div className="border-border/70 bg-background rounded-lg border p-2">
                     <Icon className="size-4" />
                 </div>
             </div>
@@ -542,43 +569,35 @@ function SummaryCard({
             <CardContent className="space-y-4 p-5">
                 <div className="flex items-start justify-between gap-3">
                     <div className="space-y-1">
-                        <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{label}</p>
+                        <p className="text-muted-foreground text-xs tracking-[0.18em] uppercase">{label}</p>
                         <p className="text-3xl font-semibold tracking-tight tabular-nums">{value}</p>
                     </div>
-                    <div className="rounded-lg border border-border/70 bg-muted/35 p-2.5">
+                    <div className="border-border/70 bg-muted/35 rounded-lg border p-2.5">
                         <Icon className="size-4" />
                     </div>
                 </div>
-                <p className="text-sm leading-6 text-muted-foreground">{detail}</p>
+                <p className="text-muted-foreground text-sm leading-6">{detail}</p>
                 <div className="space-y-2">
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <div className="text-muted-foreground flex items-center justify-between text-xs">
                         <span>Share of current workspace</span>
                         <span>{percent}%</span>
                     </div>
-                    <Progress className="h-2 bg-muted" value={percent} />
+                    <Progress className="bg-muted h-2" value={percent} />
                 </div>
             </CardContent>
         </Card>
     );
 }
 
-function ReportInsight({
-    icon: Icon,
-    title,
-    description,
-}: {
-    icon: typeof CheckCircle2;
-    title: string;
-    description: string;
-}) {
+function ReportInsight({ icon: Icon, title, description }: { icon: typeof CheckCircle2; title: string; description: string }) {
     return (
         <div className="flex items-start gap-3">
-            <div className="rounded-lg border border-border/70 bg-background p-2 text-foreground">
+            <div className="border-border/70 bg-background text-foreground rounded-lg border p-2">
                 <Icon className="size-4" />
             </div>
             <div className="space-y-1">
                 <p className="text-sm font-medium">{title}</p>
-                <p className="text-sm leading-6 text-muted-foreground">{description}</p>
+                <p className="text-muted-foreground text-sm leading-6">{description}</p>
             </div>
         </div>
     );
@@ -666,12 +685,12 @@ function ReportWorkspacePanel({
             <Card className="border-border/70 bg-card shadow-none">
                 <CardHeader className="gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <div className="space-y-3">
-                        <Badge variant="outline" className="w-fit rounded-full px-3 py-1 text-[11px] uppercase tracking-[0.22em]">
+                        <Badge variant="outline" className="w-fit rounded-full px-3 py-1 text-[11px] tracking-[0.22em] uppercase">
                             {meta.eyebrow}
                         </Badge>
                         <div className="space-y-2">
                             <div className="flex items-center gap-3">
-                                <div className="rounded-lg border border-border/70 bg-muted/30 p-2.5">
+                                <div className="border-border/70 bg-muted/30 rounded-lg border p-2.5">
                                     <Icon className="size-4" />
                                 </div>
                                 <CardTitle className="text-2xl tracking-tight">{meta.title}</CardTitle>
@@ -710,11 +729,11 @@ function ReportWorkspacePanel({
                     </CardHeader>
                     <CardContent>
                         {previewRows.length === 0 ? (
-                            <div className="rounded-xl border border-dashed border-border/70 bg-muted/25 p-10 text-sm text-muted-foreground">
+                            <div className="border-border/70 bg-muted/25 text-muted-foreground rounded-xl border border-dashed p-10 text-sm">
                                 {meta.emptyMessage}
                             </div>
                         ) : (
-                            <div className="overflow-hidden rounded-xl border border-border/70">
+                            <div className="border-border/70 overflow-hidden rounded-xl border">
                                 <Table>
                                     <TableHeader>
                                         <TableRow>
@@ -772,8 +791,8 @@ function ReportWorkspacePanel({
 
 function ReportMiniMetric({ label, value }: { label: string; value: string | number }) {
     return (
-        <div className="rounded-xl border border-border/70 bg-muted/20 p-4">
-            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{label}</p>
+        <div className="border-border/70 bg-muted/20 rounded-xl border p-4">
+            <p className="text-muted-foreground text-xs tracking-[0.18em] uppercase">{label}</p>
             <p className="mt-2 text-2xl font-semibold tracking-tight tabular-nums">{value}</p>
         </div>
     );

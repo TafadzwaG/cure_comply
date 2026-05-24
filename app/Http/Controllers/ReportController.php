@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\ComplianceSummaryExport;
 use App\Exports\EmployeeTrainingExport;
 use App\Exports\EvidenceStatusExport;
+use App\Exports\PublicTrainingAcknowledgementExport;
 use App\Exports\TestPerformanceExport;
 use App\Http\Requests\ReportFilterRequest;
 use App\Models\ComplianceFramework;
@@ -19,9 +20,7 @@ use Inertia\Response;
 
 class ReportController extends Controller
 {
-    public function __construct(protected ReportService $reportService)
-    {
-    }
+    public function __construct(protected ReportService $reportService) {}
 
     public function index(ReportFilterRequest $request): Response
     {
@@ -78,6 +77,7 @@ class ReportController extends Controller
             'filters' => $filters,
             'reports' => [
                 'employeeTraining' => $this->reportService->employeeTraining($filters),
+                'publicTrainingAcknowledgements' => $this->reportService->publicTrainingAcknowledgements($filters, $user),
                 'testPerformance' => $this->reportService->testPerformance($filters),
                 'complianceSummary' => $this->reportService->complianceSummary($filters),
                 'evidenceStatus' => $this->reportService->evidenceStatus($filters),
@@ -94,6 +94,15 @@ class ReportController extends Controller
     public function employeeTraining(ReportFilterRequest $request): RedirectResponse
     {
         return $this->respond($request, 'employee-training', new EmployeeTrainingExport($this->reportService->employeeTraining($request->validated())));
+    }
+
+    public function publicTrainingAcknowledgements(ReportFilterRequest $request): RedirectResponse
+    {
+        return $this->respond(
+            $request,
+            'public-training-acknowledgements',
+            new PublicTrainingAcknowledgementExport($this->reportService->publicTrainingAcknowledgements($request->validated(), $request->user()))
+        );
     }
 
     public function testPerformance(ReportFilterRequest $request): RedirectResponse

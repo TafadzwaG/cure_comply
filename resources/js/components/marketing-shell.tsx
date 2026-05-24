@@ -7,7 +7,7 @@ import type { PropsWithChildren } from 'react';
 type MarketingShellProps = PropsWithChildren<{
     title: string;
     description: string;
-    current: 'home' | 'pricing' | 'resources' | 'privacy' | 'terms';
+    current: 'home' | 'pricing' | 'resources' | 'training' | 'privacy' | 'terms';
 }>;
 
 const navItems = [
@@ -15,6 +15,7 @@ const navItems = [
     { label: 'Solutions', href: `${route('home')}#solutions`, key: 'solutions', type: 'anchor' as const },
     { label: 'Pricing', href: route('pricing'), key: 'pricing', type: 'route' as const },
     { label: 'Resources', href: route('resources'), key: 'resources', type: 'route' as const },
+    { label: 'Training', href: route('training.index'), key: 'training', type: 'route' as const },
 ];
 
 export default function MarketingShell({ title, description, current, children }: MarketingShellProps) {
@@ -61,7 +62,10 @@ export default function MarketingShell({ title, description, current, children }
             >
                 <header className="sticky top-0 z-40 border-b border-[#c3c6d1]/30 bg-[#f7f9fb]/90 backdrop-blur dark:border-white/10 dark:bg-[#081a33]/90">
                     <div className="mx-auto flex w-full max-w-[1440px] flex-wrap items-center justify-between gap-4 px-6 py-5 lg:px-16">
-                        <Link href={route('home')} className="flex items-center gap-3 text-[#002753] transition-opacity hover:opacity-90 dark:text-white">
+                        <Link
+                            href={route('home')}
+                            className="flex items-center gap-3 text-[#002753] transition-opacity hover:opacity-90 dark:text-white"
+                        >
                             <img src={privacyCureLogo} alt="Privacy Cure Compliance" className="h-11 w-auto" />
                             <span className="hidden text-sm font-semibold tracking-tight md:inline">Privacy Cure Compliance</span>
                         </Link>
@@ -71,6 +75,7 @@ export default function MarketingShell({ title, description, current, children }
                                 const isActive =
                                     (item.key === 'pricing' && current === 'pricing') ||
                                     (item.key === 'resources' && current === 'resources') ||
+                                    (item.key === 'training' && current === 'training') ||
                                     (item.key === 'product' && current === 'home') ||
                                     (item.key === 'solutions' && current === 'home');
 
@@ -136,7 +141,7 @@ export default function MarketingShell({ title, description, current, children }
                             <span className="text-sm font-semibold tracking-tight">Privacy Cure Compliance</span>
                         </Link>
 
-                        <div className="flex flex-wrap items-center gap-5 text-xs font-medium uppercase tracking-[0.14em] text-[#434750] dark:text-white/70">
+                        <div className="flex flex-wrap items-center gap-5 text-xs font-medium tracking-[0.14em] text-[#434750] uppercase dark:text-white/70">
                             <Link href={route('privacy-policy')} className="transition-colors hover:text-[#002753] dark:hover:text-white">
                                 Privacy Policy
                             </Link>
