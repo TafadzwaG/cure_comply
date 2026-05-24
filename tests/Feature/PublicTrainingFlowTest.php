@@ -50,6 +50,14 @@ class PublicTrainingFlowTest extends TestCase
         $response->assertDontSee('Archived Awareness');
     }
 
+    public function test_landing_page_header_links_to_public_training(): void
+    {
+        $source = file_get_contents(resource_path('js/pages/welcome.tsx'));
+
+        $this->assertStringContainsString("route('training.index')", $source);
+        $this->assertStringContainsString('Training', $source);
+    }
+
     public function test_public_training_show_displays_published_lessons_and_active_tenants_only(): void
     {
         $activeTenant = Tenant::factory()->create(['name' => 'Active Company', 'status' => 'active']);

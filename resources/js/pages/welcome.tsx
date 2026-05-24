@@ -1,5 +1,6 @@
 import privacyCureLogo from '@/images/privacycure-logo.png';
 import { type SharedData } from '@/types';
+import { Head, Link, usePage } from '@inertiajs/react';
 import {
     BarChart3,
     BookOpen,
@@ -12,14 +13,12 @@ import {
     FolderCog,
     Gauge,
     GraduationCap,
-    Lock,
     ShieldCheck,
     User,
     UserCog,
     UserPlus,
     UsersRound,
 } from 'lucide-react';
-import { Head, Link, usePage } from '@inertiajs/react';
 import { useEffect } from 'react';
 
 export default function Welcome() {
@@ -590,12 +589,13 @@ export default function Welcome() {
             </Head>
 
             <div className="wc-root">
-
                 {/* ─── HEADER ─────────────────────────────────────────────── */}
                 <header
                     className="welcome-header"
                     style={{
-                        position: 'sticky', top: 0, zIndex: 50,
+                        position: 'sticky',
+                        top: 0,
+                        zIndex: 50,
                         background: 'rgba(247,249,251,0.92)',
                         backdropFilter: 'blur(20px)',
                         borderBottom: '1px solid rgba(195,198,209,0.2)',
@@ -604,15 +604,21 @@ export default function Welcome() {
                     <div
                         className="welcome-header-shell px-6 lg:px-16"
                         style={{
-                            maxWidth: 1440, margin: '0 auto',
+                            maxWidth: 1440,
+                            margin: '0 auto',
                             paddingTop: 18,
                             paddingBottom: 18,
-                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
                         }}
                     >
                         <div className="welcome-header-actions" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                             <img src={privacyCureLogo} alt="Privacy Cure" style={{ height: 40, width: 'auto' }} />
-                            <span className="welcome-header-brand-text" style={{ fontWeight: 700, fontSize: 15, color: '#002753', letterSpacing: '-0.01em' }}>
+                            <span
+                                className="welcome-header-brand-text"
+                                style={{ fontWeight: 700, fontSize: 15, color: '#002753', letterSpacing: '-0.01em' }}
+                            >
                                 Privacy Cure
                             </span>
                         </div>
@@ -622,8 +628,8 @@ export default function Welcome() {
                                 href="#product"
                                 className="nav-link"
                                 style={{ fontSize: 13, fontWeight: 500, color: '#434750', textDecoration: 'none', transition: 'color 0.2s' }}
-                                onMouseEnter={e => (e.currentTarget.style.color = '#002753')}
-                                onMouseLeave={e => (e.currentTarget.style.color = '#434750')}
+                                onMouseEnter={(e) => (e.currentTarget.style.color = '#002753')}
+                                onMouseLeave={(e) => (e.currentTarget.style.color = '#434750')}
                             >
                                 Product
                             </a>
@@ -631,8 +637,8 @@ export default function Welcome() {
                                 href="#solutions"
                                 className="nav-link"
                                 style={{ fontSize: 13, fontWeight: 500, color: '#434750', textDecoration: 'none', transition: 'color 0.2s' }}
-                                onMouseEnter={e => (e.currentTarget.style.color = '#002753')}
-                                onMouseLeave={e => (e.currentTarget.style.color = '#434750')}
+                                onMouseEnter={(e) => (e.currentTarget.style.color = '#002753')}
+                                onMouseLeave={(e) => (e.currentTarget.style.color = '#434750')}
                             >
                                 Solutions
                             </a>
@@ -640,8 +646,8 @@ export default function Welcome() {
                                 href={route('pricing')}
                                 className="nav-link"
                                 style={{ fontSize: 13, fontWeight: 500, color: '#434750', textDecoration: 'none', transition: 'color 0.2s' }}
-                                onMouseEnter={e => (e.currentTarget.style.color = '#002753')}
-                                onMouseLeave={e => (e.currentTarget.style.color = '#434750')}
+                                onMouseEnter={(e) => (e.currentTarget.style.color = '#002753')}
+                                onMouseLeave={(e) => (e.currentTarget.style.color = '#434750')}
                             >
                                 Pricing
                             </Link>
@@ -649,26 +655,29 @@ export default function Welcome() {
                                 href={route('resources')}
                                 className="nav-link"
                                 style={{ fontSize: 13, fontWeight: 500, color: '#434750', textDecoration: 'none', transition: 'color 0.2s' }}
-                                onMouseEnter={e => (e.currentTarget.style.color = '#002753')}
-                                onMouseLeave={e => (e.currentTarget.style.color = '#434750')}
+                                onMouseEnter={(e) => (e.currentTarget.style.color = '#002753')}
+                                onMouseLeave={(e) => (e.currentTarget.style.color = '#434750')}
                             >
                                 Resources
+                            </Link>
+                            <Link
+                                href={route('training.index')}
+                                className="nav-link"
+                                style={{ fontSize: 13, fontWeight: 500, color: '#434750', textDecoration: 'none', transition: 'color 0.2s' }}
+                                onMouseEnter={(e) => (e.currentTarget.style.color = '#002753')}
+                                onMouseLeave={(e) => (e.currentTarget.style.color = '#434750')}
+                            >
+                                Training
                             </Link>
                         </nav>
 
                         <div className="welcome-header-cta" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                             {auth.user ? (
-                                <Link
-                                    href={route('dashboard')}
-                                    style={{ fontSize: 13, fontWeight: 500, color: '#002753', textDecoration: 'none' }}
-                                >
+                                <Link href={route('dashboard')} style={{ fontSize: 13, fontWeight: 500, color: '#002753', textDecoration: 'none' }}>
                                     Dashboard
                                 </Link>
                             ) : (
-                                <Link
-                                    href={route('login')}
-                                    style={{ fontSize: 13, fontWeight: 500, color: '#002753', textDecoration: 'none' }}
-                                >
+                                <Link href={route('login')} style={{ fontSize: 13, fontWeight: 500, color: '#002753', textDecoration: 'none' }}>
                                     Sign in
                                 </Link>
                             )}
@@ -710,13 +719,16 @@ export default function Welcome() {
                             className="hidden lg:flex"
                             style={{
                                 position: 'absolute',
-                                top: '50%', left: '58%',
+                                top: '50%',
+                                left: '58%',
                                 transform: 'translate(-50%, -50%)',
-                                width: 96, height: 96,
+                                width: 96,
+                                height: 96,
                                 background: 'rgba(0,218,243,0.1)',
                                 border: '2px solid rgba(0,218,243,0.4)',
                                 borderRadius: '50%',
-                                alignItems: 'center', justifyContent: 'center',
+                                alignItems: 'center',
+                                justifyContent: 'center',
                                 zIndex: 2,
                             }}
                         >
@@ -761,14 +773,28 @@ export default function Welcome() {
                         </div>
 
                         {/* Content */}
-                        <div className="hero-content-wrap px-6 lg:px-16" style={{ maxWidth: 1440, margin: '0 auto', position: 'relative', zIndex: 4, paddingBottom: 120, transform: 'translateX(-24px)' }}>
-
+                        <div
+                            className="hero-content-wrap px-6 lg:px-16"
+                            style={{
+                                maxWidth: 1440,
+                                margin: '0 auto',
+                                position: 'relative',
+                                zIndex: 4,
+                                paddingBottom: 120,
+                                transform: 'translateX(-24px)',
+                            }}
+                        >
                             <div className="hero-tag-anim" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
                                 <div style={{ width: 40, height: 2, background: '#00daf3' }} />
-                                <span style={{
-                                    fontSize: 10, fontWeight: 700, letterSpacing: '0.22em',
-                                    textTransform: 'uppercase', color: 'rgba(0,218,243,0.7)',
-                                }}>
+                                <span
+                                    style={{
+                                        fontSize: 10,
+                                        fontWeight: 700,
+                                        letterSpacing: '0.22em',
+                                        textTransform: 'uppercase',
+                                        color: 'rgba(0,218,243,0.7)',
+                                    }}
+                                >
                                     Enterprise Compliance Infrastructure
                                 </span>
                             </div>
@@ -786,20 +812,25 @@ export default function Welcome() {
                                     marginBottom: 32,
                                 }}
                             >
-                                Your compliance<br />
-                                <span style={{ color: '#00daf3' }}>command</span><br />
+                                Your compliance
+                                <br />
+                                <span style={{ color: '#00daf3' }}>command</span>
+                                <br />
                                 centre.
                             </h1>
 
                             <p
                                 className="hero-sub-anim"
                                 style={{
-                                    fontSize: 16, lineHeight: 1.7, color: 'rgba(214,227,255,0.7)',
-                                    maxWidth: 480, marginBottom: 40,
+                                    fontSize: 16,
+                                    lineHeight: 1.7,
+                                    color: 'rgba(214,227,255,0.7)',
+                                    maxWidth: 480,
+                                    marginBottom: 40,
                                 }}
                             >
-                                From fragmented spreadsheets to a unified platform. Automate evidence
-                                collection, deploy training, and prove compliance in real time.
+                                From fragmented spreadsheets to a unified platform. Automate evidence collection, deploy training, and prove
+                                compliance in real time.
                             </p>
 
                             <div className="hero-cta-anim" style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 64 }}>
@@ -823,16 +854,18 @@ export default function Welcome() {
                             <div
                                 className="hero-stat-anim hero-stat-row"
                                 style={{
-                                    display: 'flex', flexWrap: 'wrap', gap: 0,
+                                    display: 'flex',
+                                    flexWrap: 'wrap',
+                                    gap: 0,
                                     borderTop: '1px solid rgba(255,255,255,0.08)',
                                     paddingTop: 32,
                                 }}
                             >
                                 {[
                                     { v: '450+', l: 'Active Controls' },
-                                    { v: '4',    l: 'Role Dashboards' },
-                                    { v: '99.9%',l: 'Uptime SLA'      },
-                                    { v: '10+',  l: 'Core Modules'    },
+                                    { v: '4', l: 'Role Dashboards' },
+                                    { v: '99.9%', l: 'Uptime SLA' },
+                                    { v: '10+', l: 'Core Modules' },
                                 ].map((s, i) => (
                                     <div
                                         key={s.l}
@@ -843,10 +876,17 @@ export default function Welcome() {
                                             borderRight: i < 3 ? '1px solid rgba(255,255,255,0.08)' : 'none',
                                         }}
                                     >
-                                        <div style={{ fontWeight: 700, fontSize: 32, color: '#00daf3', letterSpacing: '-0.02em' }}>
-                                            {s.v}
-                                        </div>
-                                        <div style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: 4 }}>
+                                        <div style={{ fontWeight: 700, fontSize: 32, color: '#00daf3', letterSpacing: '-0.02em' }}>{s.v}</div>
+                                        <div
+                                            style={{
+                                                fontSize: 11,
+                                                fontWeight: 500,
+                                                color: 'rgba(255,255,255,0.35)',
+                                                textTransform: 'uppercase',
+                                                letterSpacing: '0.12em',
+                                                marginTop: 4,
+                                            }}
+                                        >
                                             {s.l}
                                         </div>
                                     </div>
@@ -855,11 +895,18 @@ export default function Welcome() {
                         </div>
 
                         {/* Hero bottom gradient into next section */}
-                        <div className="hero-bottom-fade" style={{
-                            position: 'absolute', bottom: 0, left: 0, right: 0, height: 80,
-                            background: 'linear-gradient(to bottom, transparent, #f7f9fb)',
-                            pointerEvents: 'none',
-                        }} />
+                        <div
+                            className="hero-bottom-fade"
+                            style={{
+                                position: 'absolute',
+                                bottom: 0,
+                                left: 0,
+                                right: 0,
+                                height: 80,
+                                background: 'linear-gradient(to bottom, transparent, #f7f9fb)',
+                                pointerEvents: 'none',
+                            }}
+                        />
                     </section>
 
                     {/* ─── TICKER ─────────────────────────────────────────── */}
@@ -868,19 +915,37 @@ export default function Welcome() {
                             {[0, 1].map((idx) => (
                                 <div key={idx} style={{ display: 'flex', alignItems: 'center' }}>
                                     {[
-                                        { v: 'SOC 2',   l: 'Ready'             },
-                                        { v: 'GDPR',    l: 'Framework'         },
-                                        { v: '450+',    l: 'Controls'          },
-                                        { v: '4',       l: 'Role Dashboards'   },
-                                        { v: '10+',     l: 'Modules'           },
-                                        { v: '99.9%',   l: 'Uptime SLA'       },
-                                        { v: '1-click', l: 'Export'            },
-                                        { v: 'ISO 27001',l:'Alignment'         },
+                                        { v: 'SOC 2', l: 'Ready' },
+                                        { v: 'GDPR', l: 'Framework' },
+                                        { v: '450+', l: 'Controls' },
+                                        { v: '4', l: 'Role Dashboards' },
+                                        { v: '10+', l: 'Modules' },
+                                        { v: '99.9%', l: 'Uptime SLA' },
+                                        { v: '1-click', l: 'Export' },
+                                        { v: 'ISO 27001', l: 'Alignment' },
                                     ].map((item, j) => (
                                         <div key={`${idx}-${j}`} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 28px' }}>
                                             <span style={{ fontWeight: 700, fontSize: 15, color: '#00daf3' }}>{item.v}</span>
-                                            <span style={{ fontWeight: 500, fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgba(255,255,255,0.3)' }}>{item.l}</span>
-                                            <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'rgba(0,218,243,0.25)', marginLeft: 20 }} />
+                                            <span
+                                                style={{
+                                                    fontWeight: 500,
+                                                    fontSize: 9,
+                                                    textTransform: 'uppercase',
+                                                    letterSpacing: '0.18em',
+                                                    color: 'rgba(255,255,255,0.3)',
+                                                }}
+                                            >
+                                                {item.l}
+                                            </span>
+                                            <span
+                                                style={{
+                                                    width: 4,
+                                                    height: 4,
+                                                    borderRadius: '50%',
+                                                    background: 'rgba(0,218,243,0.25)',
+                                                    marginLeft: 20,
+                                                }}
+                                            />
                                         </div>
                                     ))}
                                 </div>
@@ -891,20 +956,39 @@ export default function Welcome() {
                     {/* ─── PLATFORM (BENTO) ───────────────────────────────── */}
                     <section id="product" style={{ padding: '120px 0' }} className="welcome-section px-6 lg:px-16">
                         <div style={{ maxWidth: 1440, margin: '0 auto' }}>
-
-                            <div data-reveal className="product-intro" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between', gap: 24, marginBottom: 56 }}>
+                            <div
+                                data-reveal
+                                className="product-intro"
+                                style={{
+                                    display: 'flex',
+                                    flexWrap: 'wrap',
+                                    alignItems: 'flex-end',
+                                    justifyContent: 'space-between',
+                                    gap: 24,
+                                    marginBottom: 56,
+                                }}
+                            >
                                 <div>
                                     <div className="sec-label">
                                         <div className="sec-label-line" />
                                         <span className="sec-label-text">01 - Platform</span>
                                     </div>
-                                    <h2 style={{ fontWeight: 700, fontSize: 'clamp(36px,4.5vw,64px)', lineHeight: 0.95, letterSpacing: '-0.03em', color: '#002753' }}>
-                                        The Architecture<br />of Trust
+                                    <h2
+                                        style={{
+                                            fontWeight: 700,
+                                            fontSize: 'clamp(36px,4.5vw,64px)',
+                                            lineHeight: 0.95,
+                                            letterSpacing: '-0.03em',
+                                            color: '#002753',
+                                        }}
+                                    >
+                                        The Architecture
+                                        <br />
+                                        of Trust
                                     </h2>
                                 </div>
                                 <p className="platform-intro-copy" style={{ maxWidth: 300, fontSize: 14, lineHeight: 1.7, color: '#434750' }}>
-                                    A modular platform designed to scale with your organization's
-                                    security and privacy maturity.
+                                    A modular platform designed to scale with your organization's security and privacy maturity.
                                 </p>
                             </div>
 
@@ -918,9 +1002,39 @@ export default function Welcome() {
                                 }}
                             >
                                 {/* Tile 1 */}
-                                <div data-reveal data-delay="1" className="bento-card card-lift bento-dark" style={{ gridColumn: 'span 5', padding: 40, position: 'relative', overflow: 'hidden' }}>
-                                    <div style={{ fontWeight: 900, fontSize: 120, color: '#fff', opacity: 0.04, position: 'absolute', top: -16, right: 8, lineHeight: 1, userSelect: 'none' }}>01</div>
-                                    <div style={{ width: 52, height: 52, background: 'rgba(255,255,255,0.07)', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
+                                <div
+                                    data-reveal
+                                    data-delay="1"
+                                    className="bento-card card-lift bento-dark"
+                                    style={{ gridColumn: 'span 5', padding: 40, position: 'relative', overflow: 'hidden' }}
+                                >
+                                    <div
+                                        style={{
+                                            fontWeight: 900,
+                                            fontSize: 120,
+                                            color: '#fff',
+                                            opacity: 0.04,
+                                            position: 'absolute',
+                                            top: -16,
+                                            right: 8,
+                                            lineHeight: 1,
+                                            userSelect: 'none',
+                                        }}
+                                    >
+                                        01
+                                    </div>
+                                    <div
+                                        style={{
+                                            width: 52,
+                                            height: 52,
+                                            background: 'rgba(255,255,255,0.07)',
+                                            borderRadius: 14,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            marginBottom: 24,
+                                        }}
+                                    >
                                         <Building2 size={24} color="#fff" />
                                     </div>
                                     <h3 style={{ fontWeight: 700, fontSize: 28, letterSpacing: '-0.02em', marginBottom: 12 }}>Tenant Workspaces</h3>
@@ -929,52 +1043,185 @@ export default function Welcome() {
                                     </p>
                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 28 }}>
                                         {['Data Isolation', 'Role-Based Access', 'Audit Trails'].map((t) => (
-                                            <span key={t} style={{ border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9999, padding: '4px 12px', fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.45)' }}>{t}</span>
+                                            <span
+                                                key={t}
+                                                style={{
+                                                    border: '1px solid rgba(255,255,255,0.1)',
+                                                    borderRadius: 9999,
+                                                    padding: '4px 12px',
+                                                    fontSize: 11,
+                                                    fontWeight: 500,
+                                                    color: 'rgba(255,255,255,0.45)',
+                                                }}
+                                            >
+                                                {t}
+                                            </span>
                                         ))}
                                     </div>
                                 </div>
 
                                 {/* Tile 2 */}
-                                <div data-reveal data-delay="2" className="bento-card card-lift bento-cyan" style={{ gridColumn: 'span 4', padding: 40, position: 'relative', overflow: 'hidden' }}>
-                                    <div style={{ fontWeight: 900, fontSize: 120, color: '#002753', opacity: 0.05, position: 'absolute', top: -16, right: 8, lineHeight: 1, userSelect: 'none' }}>02</div>
-                                    <div style={{ width: 52, height: 52, background: 'rgba(0,39,83,0.1)', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
+                                <div
+                                    data-reveal
+                                    data-delay="2"
+                                    className="bento-card card-lift bento-cyan"
+                                    style={{ gridColumn: 'span 4', padding: 40, position: 'relative', overflow: 'hidden' }}
+                                >
+                                    <div
+                                        style={{
+                                            fontWeight: 900,
+                                            fontSize: 120,
+                                            color: '#002753',
+                                            opacity: 0.05,
+                                            position: 'absolute',
+                                            top: -16,
+                                            right: 8,
+                                            lineHeight: 1,
+                                            userSelect: 'none',
+                                        }}
+                                    >
+                                        02
+                                    </div>
+                                    <div
+                                        style={{
+                                            width: 52,
+                                            height: 52,
+                                            background: 'rgba(0,39,83,0.1)',
+                                            borderRadius: 14,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            marginBottom: 24,
+                                        }}
+                                    >
                                         <GraduationCap size={24} color="#002753" />
                                     </div>
-                                    <h3 style={{ fontWeight: 700, fontSize: 28, letterSpacing: '-0.02em', color: '#002753', marginBottom: 12 }}>Training Delivery</h3>
+                                    <h3 style={{ fontWeight: 700, fontSize: 28, letterSpacing: '-0.02em', color: '#002753', marginBottom: 12 }}>
+                                        Training Delivery
+                                    </h3>
                                     <p style={{ fontSize: 14, lineHeight: 1.7, color: 'rgba(0,39,83,0.55)' }}>
                                         Automated assignment of privacy modules with built-in assessments and certificates.
                                     </p>
                                 </div>
 
                                 {/* Tile 3 */}
-                                <div data-reveal data-delay="3" className="bento-card card-lift bento-light" style={{ gridColumn: 'span 3', padding: 32, position: 'relative', overflow: 'hidden' }}>
-                                    <div style={{ fontWeight: 900, fontSize: 120, color: '#002753', opacity: 0.04, position: 'absolute', top: -16, right: 8, lineHeight: 1, userSelect: 'none' }}>03</div>
-                                    <div style={{ width: 48, height: 48, background: '#00b9ce', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+                                <div
+                                    data-reveal
+                                    data-delay="3"
+                                    className="bento-card card-lift bento-light"
+                                    style={{ gridColumn: 'span 3', padding: 32, position: 'relative', overflow: 'hidden' }}
+                                >
+                                    <div
+                                        style={{
+                                            fontWeight: 900,
+                                            fontSize: 120,
+                                            color: '#002753',
+                                            opacity: 0.04,
+                                            position: 'absolute',
+                                            top: -16,
+                                            right: 8,
+                                            lineHeight: 1,
+                                            userSelect: 'none',
+                                        }}
+                                    >
+                                        03
+                                    </div>
+                                    <div
+                                        style={{
+                                            width: 48,
+                                            height: 48,
+                                            background: '#00b9ce',
+                                            borderRadius: 12,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            marginBottom: 20,
+                                        }}
+                                    >
                                         <ClipboardCheck size={22} color="#fff" />
                                     </div>
-                                    <h3 style={{ fontWeight: 700, fontSize: 24, letterSpacing: '-0.02em', color: '#002753', marginBottom: 10 }}>Compliance Execution</h3>
+                                    <h3 style={{ fontWeight: 700, fontSize: 24, letterSpacing: '-0.02em', color: '#002753', marginBottom: 10 }}>
+                                        Compliance Execution
+                                    </h3>
                                     <p style={{ fontSize: 13, lineHeight: 1.7, color: '#434750' }}>
                                         Centralized evidence repository with automated review cycles.
                                     </p>
                                 </div>
 
                                 {/* Tile 4 */}
-                                <div data-reveal data-delay="1" className="bento-card card-lift bento-mid" style={{ gridColumn: 'span 7', padding: 40, position: 'relative', overflow: 'hidden' }}>
-                                    <div style={{ fontWeight: 900, fontSize: 120, color: '#fff', opacity: 0.04, position: 'absolute', top: -16, right: 8, lineHeight: 1, userSelect: 'none' }}>04</div>
+                                <div
+                                    data-reveal
+                                    data-delay="1"
+                                    className="bento-card card-lift bento-mid"
+                                    style={{ gridColumn: 'span 7', padding: 40, position: 'relative', overflow: 'hidden' }}
+                                >
+                                    <div
+                                        style={{
+                                            fontWeight: 900,
+                                            fontSize: 120,
+                                            color: '#fff',
+                                            opacity: 0.04,
+                                            position: 'absolute',
+                                            top: -16,
+                                            right: 8,
+                                            lineHeight: 1,
+                                            userSelect: 'none',
+                                        }}
+                                    >
+                                        04
+                                    </div>
                                     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between' }}>
                                         <div>
-                                            <div style={{ width: 52, height: 52, background: 'rgba(0,218,243,0.1)', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
+                                            <div
+                                                style={{
+                                                    width: 52,
+                                                    height: 52,
+                                                    background: 'rgba(0,218,243,0.1)',
+                                                    borderRadius: 14,
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    marginBottom: 24,
+                                                }}
+                                            >
                                                 <BarChart3 size={24} color="#00daf3" />
                                             </div>
-                                            <h3 style={{ fontWeight: 700, fontSize: 28, letterSpacing: '-0.02em', marginBottom: 12 }}>Executive Reporting</h3>
+                                            <h3 style={{ fontWeight: 700, fontSize: 28, letterSpacing: '-0.02em', marginBottom: 12 }}>
+                                                Executive Reporting
+                                            </h3>
                                             <p style={{ fontSize: 14, lineHeight: 1.7, color: 'rgba(214,227,255,0.6)' }}>
                                                 High-level transparency for board members with real-time scoring and gap analysis.
                                             </p>
                                         </div>
-                                        <div className="product-reporting-mini" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16, borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 28, marginTop: 28 }}>
-                                            {[['Real-time', 'Score tracking'], ['Gap', 'Analysis'], ['Board', 'Ready']].map(([a, b]) => (
+                                        <div
+                                            className="product-reporting-mini"
+                                            style={{
+                                                display: 'grid',
+                                                gridTemplateColumns: 'repeat(3,1fr)',
+                                                gap: 16,
+                                                borderTop: '1px solid rgba(255,255,255,0.08)',
+                                                paddingTop: 28,
+                                                marginTop: 28,
+                                            }}
+                                        >
+                                            {[
+                                                ['Real-time', 'Score tracking'],
+                                                ['Gap', 'Analysis'],
+                                                ['Board', 'Ready'],
+                                            ].map(([a, b]) => (
                                                 <div key={a}>
-                                                    <div style={{ fontSize: 9, fontWeight: 500, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(0,218,243,0.5)', marginBottom: 4 }}>{a}</div>
+                                                    <div
+                                                        style={{
+                                                            fontSize: 9,
+                                                            fontWeight: 500,
+                                                            letterSpacing: '0.18em',
+                                                            textTransform: 'uppercase',
+                                                            color: 'rgba(0,218,243,0.5)',
+                                                            marginBottom: 4,
+                                                        }}
+                                                    >
+                                                        {a}
+                                                    </div>
                                                     <div style={{ fontSize: 13, fontWeight: 600 }}>{b}</div>
                                                 </div>
                                             ))}
@@ -986,42 +1233,106 @@ export default function Welcome() {
                     </section>
 
                     {/* ─── WORKFLOW ───────────────────────────────────────── */}
-                    <section id="solutions" style={{ background: '#f2f4f6', padding: '120px 0' }} className="welcome-section workflow-bg px-6 lg:px-16">
+                    <section
+                        id="solutions"
+                        style={{ background: '#f2f4f6', padding: '120px 0' }}
+                        className="welcome-section workflow-bg px-6 lg:px-16"
+                    >
                         <div style={{ maxWidth: 1440, margin: '0 auto' }}>
                             <div data-reveal style={{ marginBottom: 72 }}>
                                 <div className="sec-label">
                                     <div className="sec-label-line" />
                                     <span className="sec-label-text">02 - Process</span>
                                 </div>
-                                <h2 style={{ fontWeight: 700, fontSize: 'clamp(36px,4.5vw,64px)', lineHeight: 0.95, letterSpacing: '-0.03em', color: '#002753' }}>
+                                <h2
+                                    style={{
+                                        fontWeight: 700,
+                                        fontSize: 'clamp(36px,4.5vw,64px)',
+                                        lineHeight: 0.95,
+                                        letterSpacing: '-0.03em',
+                                        color: '#002753',
+                                    }}
+                                >
                                     End-to-end workflow
                                 </h2>
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 40, position: 'relative' }} className="workflow-grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                            <div
+                                style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 40, position: 'relative' }}
+                                className="workflow-grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+                            >
                                 {[
-                                    { n: '01', icon: <UserPlus size={20} />, title: 'Register',     desc: 'Onboard employees and entities into the secure workspace with ease.' },
-                                    { n: '02', icon: <BookOpen size={20} />, title: 'Train',         desc: 'Deploy role-specific training modules to ensure organizational alignment.' },
-                                    { n: '03', icon: <CloudUpload size={20} />, title: 'Collect',    desc: 'Upload evidence files and initiate stakeholder review protocols.' },
-                                    { n: '04', icon: <FolderCog size={20} />, title: 'Score',        desc: 'Generate compliance scores and audit-ready reports in one click.' },
+                                    {
+                                        n: '01',
+                                        icon: <UserPlus size={20} />,
+                                        title: 'Register',
+                                        desc: 'Onboard employees and entities into the secure workspace with ease.',
+                                    },
+                                    {
+                                        n: '02',
+                                        icon: <BookOpen size={20} />,
+                                        title: 'Train',
+                                        desc: 'Deploy role-specific training modules to ensure organizational alignment.',
+                                    },
+                                    {
+                                        n: '03',
+                                        icon: <CloudUpload size={20} />,
+                                        title: 'Collect',
+                                        desc: 'Upload evidence files and initiate stakeholder review protocols.',
+                                    },
+                                    {
+                                        n: '04',
+                                        icon: <FolderCog size={20} />,
+                                        title: 'Score',
+                                        desc: 'Generate compliance scores and audit-ready reports in one click.',
+                                    },
                                 ].map((step, i) => (
-                                    <div key={step.n} data-reveal data-delay={`${i + 1}` as any} className="workflow-step" style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 24 }}>
+                                    <div
+                                        key={step.n}
+                                        data-reveal
+                                        data-delay={`${i + 1}` as any}
+                                        className="workflow-step"
+                                        style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 24 }}
+                                    >
                                         {i < 3 && <div className="step-line hidden lg:block" />}
-                                        <div className="workflow-step-badge" style={{
-                                            width: 104, height: 104,
-                                            borderRadius: '50%',
-                                            background: '#002753',
-                                            border: '4px solid #f2f4f6',
-                                            boxShadow: '0 16px 40px rgba(0,39,83,0.2)',
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        }}>
+                                        <div
+                                            className="workflow-step-badge"
+                                            style={{
+                                                width: 104,
+                                                height: 104,
+                                                borderRadius: '50%',
+                                                background: '#002753',
+                                                border: '4px solid #f2f4f6',
+                                                boxShadow: '0 16px 40px rgba(0,39,83,0.2)',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                            }}
+                                        >
                                             <span style={{ fontWeight: 700, fontSize: 28, color: '#fff', letterSpacing: '-0.02em' }}>{step.n}</span>
                                         </div>
                                         <div>
-                                            <div className="step-icon-wrap" style={{ width: 40, height: 40, background: '#d6e3ff', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12, color: '#083d77' }}>
+                                            <div
+                                                className="step-icon-wrap"
+                                                style={{
+                                                    width: 40,
+                                                    height: 40,
+                                                    background: '#d6e3ff',
+                                                    borderRadius: 10,
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    marginBottom: 12,
+                                                    color: '#083d77',
+                                                }}
+                                            >
                                                 {step.icon}
                                             </div>
-                                            <h4 style={{ fontWeight: 700, fontSize: 20, color: '#002753', letterSpacing: '-0.01em', marginBottom: 8 }}>{step.title}</h4>
+                                            <h4
+                                                style={{ fontWeight: 700, fontSize: 20, color: '#002753', letterSpacing: '-0.01em', marginBottom: 8 }}
+                                            >
+                                                {step.title}
+                                            </h4>
                                             <p style={{ fontSize: 13, lineHeight: 1.7, color: '#434750' }}>{step.desc}</p>
                                         </div>
                                     </div>
@@ -1033,30 +1344,68 @@ export default function Welcome() {
                     {/* ─── ROLE WORKSPACES ────────────────────────────────── */}
                     <section style={{ padding: '120px 0' }} className="welcome-section px-6 lg:px-16">
                         <div style={{ maxWidth: 1440, margin: '0 auto' }}>
-                            <div data-reveal style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, marginBottom: 64 }} className="role-intro-grid grid-cols-1 lg:grid-cols-2">
+                            <div
+                                data-reveal
+                                style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, marginBottom: 64 }}
+                                className="role-intro-grid grid-cols-1 lg:grid-cols-2"
+                            >
                                 <div>
                                     <div className="sec-label">
                                         <div className="sec-label-line" />
                                         <span className="sec-label-text">03 - Design System</span>
                                     </div>
-                                    <h2 style={{ fontWeight: 700, fontSize: 'clamp(36px,4.5vw,64px)', lineHeight: 0.95, letterSpacing: '-0.03em', color: '#002753' }}>
+                                    <h2
+                                        style={{
+                                            fontWeight: 700,
+                                            fontSize: 'clamp(36px,4.5vw,64px)',
+                                            lineHeight: 0.95,
+                                            letterSpacing: '-0.03em',
+                                            color: '#002753',
+                                        }}
+                                    >
                                         Every role, its own sanctuary
                                     </h2>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'flex-end' }}>
                                     <p className="role-intro-copy" style={{ fontSize: 15, lineHeight: 1.7, color: '#434750' }}>
-                                        No clutter - just the data each role needs to act.
-                                        Four distinct workspaces, one unified system.
+                                        No clutter - just the data each role needs to act. Four distinct workspaces, one unified system.
                                     </p>
                                 </div>
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }} className="role-cards-grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                            <div
+                                style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}
+                                className="role-cards-grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+                            >
                                 {[
-                                    { icon: <ShieldCheck size={20} />, title: 'Super Admin',    desc: 'Global oversight, workspace creation, and security policy management.', pts: ['Entity Hierarchy', 'Audit Logs'],      accent: '#002753' },
-                                    { icon: <UserCog size={20} />,     title: 'Company Admin',  desc: 'Training assignments and entity-level compliance tracking.',           pts: ['Team Performance', 'Deadline Alerts'],  accent: '#083d77' },
-                                    { icon: <UsersRound size={20} />,  title: 'Reviewer',       desc: 'Verification of evidence files and compliance score calculation.',     pts: ['Queue Management', 'Evidence Approval'],accent: '#00b9ce' },
-                                    { icon: <User size={20} />,        title: 'Employee',       desc: 'Assigned training and simple evidence upload portal.',                pts: ['My Certificates', 'Task Inbox'],        accent: '#00daf3' },
+                                    {
+                                        icon: <ShieldCheck size={20} />,
+                                        title: 'Super Admin',
+                                        desc: 'Global oversight, workspace creation, and security policy management.',
+                                        pts: ['Entity Hierarchy', 'Audit Logs'],
+                                        accent: '#002753',
+                                    },
+                                    {
+                                        icon: <UserCog size={20} />,
+                                        title: 'Company Admin',
+                                        desc: 'Training assignments and entity-level compliance tracking.',
+                                        pts: ['Team Performance', 'Deadline Alerts'],
+                                        accent: '#083d77',
+                                    },
+                                    {
+                                        icon: <UsersRound size={20} />,
+                                        title: 'Reviewer',
+                                        desc: 'Verification of evidence files and compliance score calculation.',
+                                        pts: ['Queue Management', 'Evidence Approval'],
+                                        accent: '#00b9ce',
+                                    },
+                                    {
+                                        icon: <User size={20} />,
+                                        title: 'Employee',
+                                        desc: 'Assigned training and simple evidence upload portal.',
+                                        pts: ['My Certificates', 'Task Inbox'],
+                                        accent: '#00daf3',
+                                    },
                                 ].map((role, i) => (
                                     <div
                                         key={role.title}
@@ -1073,14 +1422,47 @@ export default function Welcome() {
                                         }}
                                     >
                                         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: role.accent }} />
-                                        <div style={{ width: 48, height: 48, borderRadius: '50%', background: role.accent, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20, color: '#fff' }}>
+                                        <div
+                                            style={{
+                                                width: 48,
+                                                height: 48,
+                                                borderRadius: '50%',
+                                                background: role.accent,
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                marginBottom: 20,
+                                                color: '#fff',
+                                            }}
+                                        >
                                             {role.icon}
                                         </div>
-                                        <h4 style={{ fontWeight: 700, fontSize: 17, color: '#002753', letterSpacing: '-0.01em', marginBottom: 8 }}>{role.title}</h4>
+                                        <h4 style={{ fontWeight: 700, fontSize: 17, color: '#002753', letterSpacing: '-0.01em', marginBottom: 8 }}>
+                                            {role.title}
+                                        </h4>
                                         <p style={{ fontSize: 13, lineHeight: 1.7, color: '#434750' }}>{role.desc}</p>
-                                        <div style={{ borderTop: '1px solid rgba(195,198,209,0.2)', marginTop: 24, paddingTop: 20, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                        <div
+                                            style={{
+                                                borderTop: '1px solid rgba(195,198,209,0.2)',
+                                                marginTop: 24,
+                                                paddingTop: 20,
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                gap: 8,
+                                            }}
+                                        >
                                             {role.pts.map((pt) => (
-                                                <div key={pt} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 500, color: '#002753' }}>
+                                                <div
+                                                    key={pt}
+                                                    style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: 8,
+                                                        fontSize: 13,
+                                                        fontWeight: 500,
+                                                        color: '#002753',
+                                                    }}
+                                                >
                                                     <CheckCircle2 size={15} color="#00b9ce" style={{ flexShrink: 0 }} />
                                                     {pt}
                                                 </div>
@@ -1094,28 +1476,68 @@ export default function Welcome() {
 
                     {/* ─── REPORTING ──────────────────────────────────────── */}
                     <section style={{ background: '#002753', padding: '120px 0', color: '#fff' }} className="welcome-section px-6 lg:px-16">
-                        <div style={{ maxWidth: 1440, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80 }} className="reporting-main-grid grid-cols-1 lg:grid-cols-2">
+                        <div
+                            style={{ maxWidth: 1440, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80 }}
+                            className="reporting-main-grid grid-cols-1 lg:grid-cols-2"
+                        >
                             <div data-reveal>
                                 <div className="sec-label">
                                     <div className="sec-label-line" />
-                                    <span className="sec-label-text" style={{ color: 'rgba(0,218,243,0.55)' }}>04 - Reporting</span>
+                                    <span className="sec-label-text" style={{ color: 'rgba(0,218,243,0.55)' }}>
+                                        04 - Reporting
+                                    </span>
                                 </div>
-                                <h2 style={{ fontWeight: 700, fontSize: 'clamp(36px,4.5vw,64px)', lineHeight: 0.95, letterSpacing: '-0.03em', marginBottom: 20 }}>
-                                    Built for<br />
+                                <h2
+                                    style={{
+                                        fontWeight: 700,
+                                        fontSize: 'clamp(36px,4.5vw,64px)',
+                                        lineHeight: 0.95,
+                                        letterSpacing: '-0.03em',
+                                        marginBottom: 20,
+                                    }}
+                                >
+                                    Built for
+                                    <br />
                                     <span style={{ color: '#00daf3' }}>regulators</span>
                                 </h2>
                                 <p style={{ fontSize: 15, lineHeight: 1.7, color: 'rgba(214,227,255,0.6)', maxWidth: 420, marginBottom: 48 }}>
-                                    Don't just be compliant. Prove it with institutional-grade
-                                    reports that leave no room for doubt.
+                                    Don't just be compliant. Prove it with institutional-grade reports that leave no room for doubt.
                                 </p>
                                 <div>
                                     {[
-                                        { icon: <FileText size={18} />,        title: 'Employee Training Log',    desc: 'Detailed history of completions, scores, and timestamped certificates.' },
-                                        { icon: <Gauge size={18} />,           title: 'Test Performance Reports', desc: 'Deep dive into knowledge gaps and module efficacy across entities.' },
-                                        { icon: <FileSpreadsheet size={18} />, title: 'Compliance Summary',       desc: 'Aggregated global scores suitable for board meetings and stakeholder updates.' },
+                                        {
+                                            icon: <FileText size={18} />,
+                                            title: 'Employee Training Log',
+                                            desc: 'Detailed history of completions, scores, and timestamped certificates.',
+                                        },
+                                        {
+                                            icon: <Gauge size={18} />,
+                                            title: 'Test Performance Reports',
+                                            desc: 'Deep dive into knowledge gaps and module efficacy across entities.',
+                                        },
+                                        {
+                                            icon: <FileSpreadsheet size={18} />,
+                                            title: 'Compliance Summary',
+                                            desc: 'Aggregated global scores suitable for board meetings and stakeholder updates.',
+                                        },
                                     ].map((item) => (
-                                        <div key={item.title} style={{ display: 'flex', gap: 16, borderTop: '1px solid rgba(255,255,255,0.08)', padding: '24px 0' }}>
-                                            <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(0,218,243,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#00daf3' }}>
+                                        <div
+                                            key={item.title}
+                                            style={{ display: 'flex', gap: 16, borderTop: '1px solid rgba(255,255,255,0.08)', padding: '24px 0' }}
+                                        >
+                                            <div
+                                                style={{
+                                                    width: 36,
+                                                    height: 36,
+                                                    borderRadius: 10,
+                                                    background: 'rgba(0,218,243,0.1)',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    flexShrink: 0,
+                                                    color: '#00daf3',
+                                                }}
+                                            >
                                                 {item.icon}
                                             </div>
                                             <div>
@@ -1129,18 +1551,60 @@ export default function Welcome() {
 
                             <div data-reveal data-delay="2" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                                 <div className="reporting-stats-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                                    {[{ v: '450+', l: 'Controls Tracked' }, { v: '12', l: 'Countries' }].map((s) => (
+                                    {[
+                                        { v: '450+', l: 'Controls Tracked' },
+                                        { v: '12', l: 'Countries' },
+                                    ].map((s) => (
                                         <div key={s.l} className="reporting-card" style={{ background: '#083d77', borderRadius: 20, padding: 32 }}>
-                                            <div style={{ fontWeight: 700, fontSize: 56, color: '#00daf3', letterSpacing: '-0.03em', lineHeight: 1 }}>{s.v}</div>
-                                            <div style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginTop: 8 }}>{s.l}</div>
+                                            <div style={{ fontWeight: 700, fontSize: 56, color: '#00daf3', letterSpacing: '-0.03em', lineHeight: 1 }}>
+                                                {s.v}
+                                            </div>
+                                            <div
+                                                style={{
+                                                    fontSize: 10,
+                                                    fontWeight: 500,
+                                                    letterSpacing: '0.18em',
+                                                    textTransform: 'uppercase',
+                                                    color: 'rgba(255,255,255,0.3)',
+                                                    marginTop: 8,
+                                                }}
+                                            >
+                                                {s.l}
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
-                                <div className="reporting-card" style={{ background: 'rgba(8,61,119,0.4)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 20, padding: 32 }}>
+                                <div
+                                    className="reporting-card"
+                                    style={{
+                                        background: 'rgba(8,61,119,0.4)',
+                                        border: '1px solid rgba(255,255,255,0.05)',
+                                        borderRadius: 20,
+                                        padding: 32,
+                                    }}
+                                >
                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-                                        <span style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)' }}>Live Status</span>
+                                        <span
+                                            style={{
+                                                fontSize: 10,
+                                                fontWeight: 500,
+                                                letterSpacing: '0.18em',
+                                                textTransform: 'uppercase',
+                                                color: 'rgba(255,255,255,0.3)',
+                                            }}
+                                        >
+                                            Live Status
+                                        </span>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#00daf3', animation: 'blinkDot 2s ease-in-out infinite' }} />
+                                            <div
+                                                style={{
+                                                    width: 8,
+                                                    height: 8,
+                                                    borderRadius: '50%',
+                                                    background: '#00daf3',
+                                                    animation: 'blinkDot 2s ease-in-out infinite',
+                                                }}
+                                            />
                                             <span style={{ fontSize: 11, fontWeight: 500, color: '#00daf3' }}>Operational</span>
                                         </div>
                                     </div>
@@ -1149,11 +1613,20 @@ export default function Welcome() {
                                     </p>
                                 </div>
                                 {/* Mini progress bars */}
-                                <div style={{ background: '#083d77', borderRadius: 20, padding: 28, display: 'flex', flexDirection: 'column', gap: 16 }}>
+                                <div
+                                    style={{
+                                        background: '#083d77',
+                                        borderRadius: 20,
+                                        padding: 28,
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: 16,
+                                    }}
+                                >
                                     {[
-                                        { l: 'Training Readiness',     v: '76%', pct: 76, c: '#00daf3' },
-                                        { l: 'Evidence Approval',       v: '68%', pct: 68, c: '#9cf0ff' },
-                                        { l: 'Submission Completion',   v: '91%', pct: 91, c: '#d6e3ff' },
+                                        { l: 'Training Readiness', v: '76%', pct: 76, c: '#00daf3' },
+                                        { l: 'Evidence Approval', v: '68%', pct: 68, c: '#9cf0ff' },
+                                        { l: 'Submission Completion', v: '91%', pct: 91, c: '#d6e3ff' },
                                     ].map((b) => (
                                         <div key={b.l}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
@@ -1193,19 +1666,46 @@ export default function Welcome() {
                                 }}
                             >
                                 <div style={{ position: 'relative', zIndex: 2 }}>
-                                    <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(0,218,243,0.5)' }}>
+                                    <span
+                                        style={{
+                                            fontSize: 10,
+                                            fontWeight: 700,
+                                            letterSpacing: '0.22em',
+                                            textTransform: 'uppercase',
+                                            color: 'rgba(0,218,243,0.5)',
+                                        }}
+                                    >
                                         Ready to begin?
                                     </span>
-                                    <h2 style={{ fontWeight: 700, fontSize: 'clamp(44px,6vw,88px)', lineHeight: 0.9, letterSpacing: '-0.03em', color: '#fff', marginTop: 16 }}>
-                                        Secure your<br />
-                                        <span style={{ color: '#00daf3' }}>workspace</span><br />
+                                    <h2
+                                        style={{
+                                            fontWeight: 700,
+                                            fontSize: 'clamp(44px,6vw,88px)',
+                                            lineHeight: 0.9,
+                                            letterSpacing: '-0.03em',
+                                            color: '#fff',
+                                            marginTop: 16,
+                                        }}
+                                    >
+                                        Secure your
+                                        <br />
+                                        <span style={{ color: '#00daf3' }}>workspace</span>
+                                        <br />
                                         today.
                                     </h2>
                                 </div>
-                                <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 20 }}>
+                                <div
+                                    style={{
+                                        position: 'relative',
+                                        zIndex: 2,
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'flex-start',
+                                        gap: 20,
+                                    }}
+                                >
                                     <p className="cta-copy" style={{ maxWidth: 300, fontSize: 14, lineHeight: 1.7, color: 'rgba(214,227,255,0.5)' }}>
-                                        Join the architectural sanctuary of modern compliance.
-                                        Setup takes less than 10 minutes.
+                                        Join the architectural sanctuary of modern compliance. Setup takes less than 10 minutes.
                                     </p>
                                     <Link
                                         href={auth.user ? route('dashboard') : route('register')}
@@ -1215,16 +1715,55 @@ export default function Welcome() {
                                         {auth.user ? 'Open dashboard' : 'Create tenant workspace'}
                                     </Link>
                                 </div>
-                                <div style={{ position: 'absolute', bottom: -100, right: -100, width: 400, height: 400, borderRadius: '50%', background: '#00b9ce', opacity: 0.07, filter: 'blur(80px)', pointerEvents: 'none' }} />
-                                <div style={{ position: 'absolute', top: -100, left: -100, width: 400, height: 400, borderRadius: '50%', background: '#083d77', filter: 'blur(80px)', pointerEvents: 'none' }} />
+                                <div
+                                    style={{
+                                        position: 'absolute',
+                                        bottom: -100,
+                                        right: -100,
+                                        width: 400,
+                                        height: 400,
+                                        borderRadius: '50%',
+                                        background: '#00b9ce',
+                                        opacity: 0.07,
+                                        filter: 'blur(80px)',
+                                        pointerEvents: 'none',
+                                    }}
+                                />
+                                <div
+                                    style={{
+                                        position: 'absolute',
+                                        top: -100,
+                                        left: -100,
+                                        width: 400,
+                                        height: 400,
+                                        borderRadius: '50%',
+                                        background: '#083d77',
+                                        filter: 'blur(80px)',
+                                        pointerEvents: 'none',
+                                    }}
+                                />
                             </div>
                         </div>
                     </section>
                 </main>
 
                 {/* ─── FOOTER ─────────────────────────────────────────────── */}
-                <footer style={{ background: '#fff', borderTop: '1px solid rgba(195,198,209,0.2)', padding: '48px 0' }} className="welcome-footer px-6 lg:px-16">
-                    <div className="welcome-footer-shell" style={{ maxWidth: 1440, margin: '0 auto', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 32 }}>
+                <footer
+                    style={{ background: '#fff', borderTop: '1px solid rgba(195,198,209,0.2)', padding: '48px 0' }}
+                    className="welcome-footer px-6 lg:px-16"
+                >
+                    <div
+                        className="welcome-footer-shell"
+                        style={{
+                            maxWidth: 1440,
+                            margin: '0 auto',
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: 32,
+                        }}
+                    >
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                             <img src={privacyCureLogo} alt="Privacy Cure Compliance" style={{ height: 28, width: 'auto' }} />
                             <span style={{ fontWeight: 700, fontSize: 14, color: '#002753' }}>Privacy Cure Compliance</span>
@@ -1232,25 +1771,49 @@ export default function Welcome() {
                         <div className="welcome-footer-links" style={{ display: 'flex', flexWrap: 'wrap', gap: 32 }}>
                             <Link
                                 href={route('privacy-policy')}
-                                style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#434750', textDecoration: 'none', transition: 'color 0.2s' }}
-                                onMouseEnter={e => (e.currentTarget.style.color = '#002753')}
-                                onMouseLeave={e => (e.currentTarget.style.color = '#434750')}
+                                style={{
+                                    fontSize: 11,
+                                    fontWeight: 500,
+                                    letterSpacing: '0.12em',
+                                    textTransform: 'uppercase',
+                                    color: '#434750',
+                                    textDecoration: 'none',
+                                    transition: 'color 0.2s',
+                                }}
+                                onMouseEnter={(e) => (e.currentTarget.style.color = '#002753')}
+                                onMouseLeave={(e) => (e.currentTarget.style.color = '#434750')}
                             >
                                 Privacy Policy
                             </Link>
                             <Link
                                 href={route('terms-and-conditions')}
-                                style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#434750', textDecoration: 'none', transition: 'color 0.2s' }}
-                                onMouseEnter={e => (e.currentTarget.style.color = '#002753')}
-                                onMouseLeave={e => (e.currentTarget.style.color = '#434750')}
+                                style={{
+                                    fontSize: 11,
+                                    fontWeight: 500,
+                                    letterSpacing: '0.12em',
+                                    textTransform: 'uppercase',
+                                    color: '#434750',
+                                    textDecoration: 'none',
+                                    transition: 'color 0.2s',
+                                }}
+                                onMouseEnter={(e) => (e.currentTarget.style.color = '#002753')}
+                                onMouseLeave={(e) => (e.currentTarget.style.color = '#434750')}
                             >
                                 Terms of Service
                             </Link>
                             <Link
                                 href={route('resources')}
-                                style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#434750', textDecoration: 'none', transition: 'color 0.2s' }}
-                                onMouseEnter={e => (e.currentTarget.style.color = '#002753')}
-                                onMouseLeave={e => (e.currentTarget.style.color = '#434750')}
+                                style={{
+                                    fontSize: 11,
+                                    fontWeight: 500,
+                                    letterSpacing: '0.12em',
+                                    textTransform: 'uppercase',
+                                    color: '#434750',
+                                    textDecoration: 'none',
+                                    transition: 'color 0.2s',
+                                }}
+                                onMouseEnter={(e) => (e.currentTarget.style.color = '#002753')}
+                                onMouseLeave={(e) => (e.currentTarget.style.color = '#434750')}
                             >
                                 Support
                             </Link>
@@ -1262,4 +1825,3 @@ export default function Welcome() {
         </>
     );
 }
-
