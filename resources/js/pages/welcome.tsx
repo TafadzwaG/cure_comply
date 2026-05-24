@@ -13,6 +13,7 @@ import {
     FileText,
     FolderCog,
     Gauge,
+    GraduationCap,
     Mail,
     MapPin,
     Menu,
@@ -2149,6 +2150,10 @@ export default function Welcome() {
                                         <Link href={route('login')} className="cure-btn-ghost">
                                             <PlayCircle size={13} />
                                             See the method
+                                        </Link>
+                                        <Link href={route('training.index')} className="cure-btn-ghost">
+                                            <GraduationCap size={13} />
+                                            Training
                                         </Link>
                                     </div>
                                 </div>
