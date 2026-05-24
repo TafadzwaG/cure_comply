@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SharedData } from '@/types';
 import { Link, useForm, usePage } from '@inertiajs/react';
-import { ArrowLeft, BookOpen, CheckCircle2, Clock3, FileText, Loader2, PlayCircle, Video } from 'lucide-react';
+import { ArrowLeft, BookOpen, CheckCircle2, Clock3, FileText, Loader2, PlayCircle, ShieldCheck, Video } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 interface Lesson {
@@ -208,6 +208,24 @@ function AcknowledgementForm({ course, tenants }: { course: PublicCourse; tenant
                     placeholder="Enter your full name"
                 />
             </Field>
+
+            <div className="rounded-lg border border-[#c3c6d1]/60 bg-[#f7f9fb]/90 p-4 text-sm leading-6 text-[#434750] dark:border-white/15 dark:bg-white/5 dark:text-white/75">
+                <div className="mb-2 flex items-center gap-2 font-medium text-[#002753] dark:text-white">
+                    <ShieldCheck className="size-4" />
+                    Privacy notice
+                </div>
+                <p>
+                    We collect your selected tenant, full name, course acknowledgement time, IP address, and browser details to keep a compliance
+                    record that you reviewed this training material. Authorised administrators may view and export this record for reporting and audit
+                    purposes.
+                </p>
+                <Link
+                    href={route('privacy-policy')}
+                    className="mt-2 inline-flex font-medium text-[#002753] underline underline-offset-4 dark:text-[#a8c1ed]"
+                >
+                    Read the full Privacy Policy
+                </Link>
+            </div>
 
             <div className="space-y-2">
                 <label className="flex items-start gap-3 rounded-xl border border-[#c3c6d1]/60 bg-white/70 p-4 text-sm leading-6 dark:border-white/15 dark:bg-white/5 dark:text-white/80">
