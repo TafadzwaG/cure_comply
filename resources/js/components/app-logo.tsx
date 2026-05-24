@@ -10,13 +10,12 @@ export default function AppLogo() {
     const label = tenant?.name ?? 'Cure Compliance';
 
     return (
-        <>
-            <div className="flex items-center">
-                <img src={logoUrl} alt={label} className="h-8 w-auto max-w-[9rem] object-contain" />
-            </div>
-            <div className="ml-3 grid flex-1 text-left text-sm">
-                <span className="mb-0.5 truncate leading-none font-semibold">{label}</span>
-            </div>
-        </>
+        <div className="flex items-center">
+            <img
+                src={logoUrl}
+                alt={label}
+                className="h-14 w-auto max-w-[14rem] object-contain group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:max-w-[2rem]"
+            />
+        </div>
     );
 }
