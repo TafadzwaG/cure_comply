@@ -73,7 +73,7 @@ export default function TrainingIndex({ courses }: { courses: PublicCourse[] }) 
                             {courses.map((course) => (
                                 <Card
                                     key={course.id}
-                                    className="group overflow-hidden rounded-none border-0 bg-white shadow-none transition-colors hover:bg-[#f7f9fb] dark:bg-white/5 dark:hover:bg-white/10"
+                                    className="group overflow-hidden rounded-none border-0 bg-white shadow-none transition-colors hover:bg-[#f7f9fb] dark:bg-[#0b2241]/90 dark:hover:bg-[#123057]"
                                 >
                                     {course.image_url ? (
                                         <img src={course.image_url} alt="" className="h-44 w-full object-cover" />
@@ -106,7 +106,7 @@ export default function TrainingIndex({ courses }: { courses: PublicCourse[] }) 
                             ))}
                         </div>
                     ) : (
-                        <Card className="border-dashed border-[#c3c6d1]/70 shadow-none">
+                        <Card className="border-dashed border-[#c3c6d1]/70 bg-white shadow-none dark:border-white/15 dark:bg-[#0b2241]/90">
                             <CardContent className="flex flex-col items-center justify-center gap-3 py-16 text-center">
                                 <GraduationCap className="size-12 text-[#002753]/35 dark:text-white/35" />
                                 <div>
@@ -126,7 +126,7 @@ export default function TrainingIndex({ courses }: { courses: PublicCourse[] }) 
 
 function Metric({ label, value, icon: Icon }: { label: string; value: number; icon: typeof GraduationCap }) {
     return (
-        <Card className="rounded-none border-0 bg-white shadow-none dark:bg-white/5">
+        <Card className="rounded-none border-0 bg-white shadow-none dark:bg-[#0b2241]/90">
             <CardContent className="space-y-4 p-5">
                 <div className="flex items-center justify-between gap-3">
                     <p className="text-sm font-medium text-[#434750] dark:text-white/70">{label}</p>

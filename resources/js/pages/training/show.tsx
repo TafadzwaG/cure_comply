@@ -82,7 +82,7 @@ export default function TrainingShow({ course, tenants }: { course: PublicCourse
                         </div>
                     </div>
 
-                    <Card className="h-fit rounded-lg border-[#c3c6d1]/50 bg-white/95 shadow-none lg:col-span-3 dark:bg-white/5">
+                    <Card className="h-fit rounded-lg border-[#c3c6d1]/50 bg-white/95 shadow-none lg:col-span-3 dark:border-white/15 dark:bg-[#0b2241]/90">
                         <CardContent className="grid gap-4 p-5">
                             <SummaryRow label="Modules" value={course.modules.length} icon={<BookOpen className="size-4" />} />
                             <SummaryRow label="Lessons" value={lessons.length} icon={<FileText className="size-4" />} />
@@ -100,7 +100,10 @@ export default function TrainingShow({ course, tenants }: { course: PublicCourse
                 <div className="mx-auto grid w-full max-w-[1440px] gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
                     <div className="space-y-5">
                         {course.modules.map((module, moduleIndex) => (
-                            <Card key={module.id} className="overflow-hidden rounded-lg border-[#c3c6d1]/50 bg-white/95 shadow-none dark:bg-white/5">
+                            <Card
+                                key={module.id}
+                                className="overflow-hidden rounded-lg border-[#c3c6d1]/50 bg-white/95 shadow-none dark:border-white/15 dark:bg-[#0b2241]/90"
+                            >
                                 <CardHeader>
                                     <Badge variant="outline" className="w-fit">
                                         Module {moduleIndex + 1}
@@ -113,7 +116,7 @@ export default function TrainingShow({ course, tenants }: { course: PublicCourse
                                         module.lessons.map((lesson, lessonIndex) => (
                                             <div
                                                 key={lesson.id}
-                                                className="rounded-lg border border-[#c3c6d1]/45 bg-[#f7f9fb]/85 p-5 dark:border-white/10 dark:bg-white/5"
+                                                className="rounded-lg border border-[#c3c6d1]/45 bg-[#f7f9fb]/85 p-5 dark:border-white/10 dark:bg-[#081a33]/80"
                                             >
                                                 <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
                                                     <div className="space-y-2">
@@ -141,7 +144,7 @@ export default function TrainingShow({ course, tenants }: { course: PublicCourse
                     </div>
 
                     <div className="lg:sticky lg:top-24 lg:h-fit">
-                        <Card className="overflow-hidden rounded-lg border-[#c3c6d1]/50 bg-white/95 shadow-none dark:bg-white/5">
+                        <Card className="overflow-hidden rounded-lg border-[#c3c6d1]/50 bg-white/95 shadow-none dark:border-white/15 dark:bg-[#0b2241]/90">
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2 text-[#002753] dark:text-white">
                                     <CheckCircle2 className="size-5" />
@@ -151,7 +154,7 @@ export default function TrainingShow({ course, tenants }: { course: PublicCourse
                             </CardHeader>
                             <CardContent>
                                 {flash.success ? (
-                                    <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                                    <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-100">
                                         {flash.success}
                                     </div>
                                 ) : null}
@@ -207,7 +210,7 @@ function AcknowledgementForm({ course, tenants }: { course: PublicCourse; tenant
             </Field>
 
             <div className="space-y-2">
-                <label className="flex items-start gap-3 rounded-xl border border-[#c3c6d1]/60 p-4 text-sm leading-6">
+                <label className="flex items-start gap-3 rounded-xl border border-[#c3c6d1]/60 bg-white/70 p-4 text-sm leading-6 dark:border-white/15 dark:bg-white/5 dark:text-white/80">
                     <Checkbox
                         checked={form.data.acknowledgement}
                         onCheckedChange={(checked) => form.setData('acknowledgement', checked === true)}

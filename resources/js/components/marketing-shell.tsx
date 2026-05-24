@@ -209,10 +209,6 @@ export default function MarketingShell({ title, description, current, children }
                         border-radius: 4px !important;
                     }
 
-                    .public-marketing-shell [class*='bg-white'] {
-                        background-color: rgba(255, 255, 255, 0.92);
-                    }
-
                     .public-marketing-shell [class*='text-5xl'],
                     .public-marketing-shell [class*='text-6xl'] {
                         line-height: 0.98;
