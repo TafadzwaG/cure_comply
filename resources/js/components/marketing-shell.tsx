@@ -27,10 +27,73 @@ export default function MarketingShell({ title, description, current, children }
         <>
             <Head title={title}>
                 <meta name="description" content={description} />
-                <link rel="preconnect" href="https://fonts.googleapis.com" />
-                <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-                <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+                <link rel="preconnect" href="https://fonts.bunny.net" />
+                <link
+                    href="https://fonts.bunny.net/css?family=fraunces:300,400,500,600,700|instrument-sans:400,500,600|jetbrains-mono:400,500"
+                    rel="stylesheet"
+                />
                 <style>{`
+                    .public-marketing-shell {
+                        --public-ink: #002753;
+                        --public-mid: #083d77;
+                        --public-cyan: #00daf3;
+                        --public-paper: #f7f9fb;
+                        --public-soft: #f2f4f6;
+                        font-family: 'Instrument Sans', Arial, Helvetica, sans-serif;
+                        font-feature-settings: 'ss01', 'ss02', 'cv11';
+                    }
+
+                    .public-marketing-shell h1,
+                    .public-marketing-shell h2,
+                    .public-marketing-shell h3,
+                    .public-marketing-display {
+                        font-family: 'Fraunces', Georgia, serif;
+                        font-weight: 400;
+                        letter-spacing: 0;
+                    }
+
+                    .public-marketing-shell nav,
+                    .public-marketing-label,
+                    .public-marketing-shell footer a,
+                    .public-marketing-shell [class*='uppercase'] {
+                        font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+                        letter-spacing: 0.16em;
+                        text-transform: uppercase;
+                    }
+
+                    .public-marketing-shell .rounded-xl,
+                    .public-marketing-shell .rounded-2xl {
+                        border-radius: 8px !important;
+                    }
+
+                    .public-marketing-shell::before {
+                        content: '';
+                        position: fixed;
+                        inset: 0;
+                        z-index: 0;
+                        pointer-events: none;
+                        background-image:
+                            radial-gradient(rgba(0, 39, 83, 0.06) 1px, transparent 1px),
+                            radial-gradient(rgba(0, 218, 243, 0.08) 1px, transparent 1px);
+                        background-position: 0 0, 2px 3px;
+                        background-size: 4px 4px, 11px 11px;
+                        opacity: 0.28;
+                    }
+
+                    .public-marketing-shell::after {
+                        content: '';
+                        position: fixed;
+                        inset: 0;
+                        z-index: 0;
+                        pointer-events: none;
+                        background-image:
+                            linear-gradient(to right, rgba(0, 218, 243, 0.08) 1px, transparent 1px),
+                            linear-gradient(to bottom, rgba(0, 39, 83, 0.06) 1px, transparent 1px);
+                        background-size: 56px 56px;
+                        mask-image: linear-gradient(to bottom, black, transparent 70%);
+                        opacity: 0.45;
+                    }
+
                     @keyframes marketingPageEnter {
                         from {
                             opacity: 0;
@@ -56,21 +119,18 @@ export default function MarketingShell({ title, description, current, children }
                 `}</style>
             </Head>
 
-            <div
-                className="min-h-screen bg-[#f7f9fb] text-[#191c1e] dark:bg-[#081a33] dark:text-white"
-                style={{ fontFamily: "'Rubik', Arial, Helvetica, sans-serif" }}
-            >
-                <header className="sticky top-0 z-40 border-b border-[#c3c6d1]/30 bg-[#f7f9fb]/90 backdrop-blur dark:border-white/10 dark:bg-[#081a33]/90">
-                    <div className="mx-auto flex w-full max-w-[1440px] flex-wrap items-center justify-between gap-4 px-6 py-5 lg:px-16">
+            <div className="public-marketing-shell relative min-h-screen overflow-hidden bg-[#f7f9fb] text-[#191c1e] dark:bg-[#081a33] dark:text-white">
+                <header className="sticky top-0 z-40 border-b border-[#c3c6d1]/30 bg-[#f7f9fb]/88 backdrop-blur-xl dark:border-white/10 dark:bg-[#081a33]/90">
+                    <div className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-wrap items-center justify-between gap-4 px-6 py-5 lg:px-16">
                         <Link
                             href={route('home')}
                             className="flex items-center gap-3 text-[#002753] transition-opacity hover:opacity-90 dark:text-white"
                         >
                             <img src={privacyCureLogo} alt="Privacy Cure Compliance" className="h-11 w-auto" />
-                            <span className="hidden text-sm font-semibold tracking-tight md:inline">Privacy Cure Compliance</span>
+                            <span className="hidden text-sm font-semibold tracking-normal md:inline">Privacy Cure Compliance</span>
                         </Link>
 
-                        <nav className="order-3 flex w-full flex-wrap items-center gap-5 text-sm md:order-2 md:w-auto md:justify-center md:gap-8">
+                        <nav className="order-3 flex w-full flex-wrap items-center gap-5 text-[11px] md:order-2 md:w-auto md:justify-center md:gap-8">
                             {navItems.map((item) => {
                                 const isActive =
                                     (item.key === 'pricing' && current === 'pricing') ||
@@ -81,7 +141,7 @@ export default function MarketingShell({ title, description, current, children }
 
                                 const className = `transition-colors ${
                                     isActive
-                                        ? 'font-semibold text-[#002753] dark:text-white'
+                                        ? 'font-medium text-[#002753] dark:text-white'
                                         : 'font-medium text-[#434750] hover:text-[#002753] dark:text-white/70 dark:hover:text-white'
                                 }`;
 
@@ -130,18 +190,18 @@ export default function MarketingShell({ title, description, current, children }
                     </div>
                 </header>
 
-                <main key={currentUrl} className="marketing-page-enter">
+                <main key={currentUrl} className="marketing-page-enter relative z-10">
                     {children}
                 </main>
 
-                <footer className="border-t border-[#c3c6d1]/20 bg-white py-10 dark:border-white/10 dark:bg-[#061427]">
+                <footer className="relative z-10 border-t border-[#c3c6d1]/20 bg-white/90 py-10 backdrop-blur dark:border-white/10 dark:bg-[#061427]/95">
                     <div className="mx-auto flex w-full max-w-[1440px] flex-wrap items-center justify-between gap-6 px-6 lg:px-16">
                         <Link href={route('home')} className="flex items-center gap-3 text-[#002753] dark:text-white">
                             <img src={privacyCureLogo} alt="Privacy Cure Compliance" className="h-8 w-auto" />
                             <span className="text-sm font-semibold tracking-tight">Privacy Cure Compliance</span>
                         </Link>
 
-                        <div className="flex flex-wrap items-center gap-5 text-xs font-medium tracking-[0.14em] text-[#434750] uppercase dark:text-white/70">
+                        <div className="flex flex-wrap items-center gap-5 text-[10px] font-medium text-[#434750] dark:text-white/70">
                             <Link href={route('privacy-policy')} className="transition-colors hover:text-[#002753] dark:hover:text-white">
                                 Privacy Policy
                             </Link>

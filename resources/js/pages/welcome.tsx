@@ -45,18 +45,64 @@ export default function Welcome() {
     return (
         <>
             <Head title="Privacy Cure Compliance | Command-Grade Compliance Platform">
-                <link rel="preconnect" href="https://fonts.googleapis.com" />
-                <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-                <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
+                <link rel="preconnect" href="https://fonts.bunny.net" />
+                <link
+                    href="https://fonts.bunny.net/css?family=fraunces:300,400,500,600,700|instrument-sans:400,500,600|jetbrains-mono:400,500"
+                    rel="stylesheet"
+                />
                 <style>{`
                     /* ── Reset / Base ── */
                     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
                     html { scroll-behavior: smooth; }
 
                     body, .wc-root {
-                        font-family: 'Rubik', Arial, Helvetica, sans-serif;
+                        font-family: 'Instrument Sans', Arial, Helvetica, sans-serif;
                         background: #f7f9fb;
                         color: #191c1e;
+                        font-feature-settings: 'ss01', 'ss02', 'cv11';
+                    }
+
+                    .wc-root h1,
+                    .wc-root h2,
+                    .wc-root h3,
+                    .wc-root h4 {
+                        font-family: 'Fraunces', Georgia, serif !important;
+                        font-weight: 400 !important;
+                        letter-spacing: 0 !important;
+                    }
+
+                    .wc-root nav,
+                    .fc-label,
+                    .sec-label-text,
+                    .welcome-footer-links,
+                    .hero-stat-item > div:first-child {
+                        font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace !important;
+                    }
+
+                    .wc-root {
+                        position: relative;
+                        overflow: hidden;
+                    }
+
+                    .wc-root::before {
+                        content: '';
+                        position: fixed;
+                        inset: 0;
+                        z-index: 0;
+                        pointer-events: none;
+                        background-image:
+                            radial-gradient(rgba(0,39,83,0.07) 1px, transparent 1px),
+                            radial-gradient(rgba(0,218,243,0.08) 1px, transparent 1px);
+                        background-position: 0 0, 2px 3px;
+                        background-size: 4px 4px, 11px 11px;
+                        opacity: 0.28;
+                    }
+
+                    .wc-root > header,
+                    .wc-root > main,
+                    .wc-root > footer {
+                        position: relative;
+                        z-index: 1;
                     }
 
                     /* ── Scroll-reveal ── */
@@ -176,7 +222,7 @@ export default function Welcome() {
                     }
 
                     .fc-label {
-                        font-family: 'Rubik', sans-serif;
+                        font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
                         font-size: 9px;
                         font-weight: 700;
                         letter-spacing: 0.15em;
@@ -185,13 +231,13 @@ export default function Welcome() {
                         margin-bottom: 4px;
                     }
                     .fc-value {
-                        font-family: 'Rubik', sans-serif;
+                        font-family: 'Fraunces', Georgia, serif;
                         font-size: 22px;
-                        font-weight: 900;
+                        font-weight: 500;
                         color: #fff;
                     }
                     .fc-sub {
-                        font-family: 'Rubik', sans-serif;
+                        font-family: 'Instrument Sans', Arial, Helvetica, sans-serif;
                         font-size: 10px;
                         color: rgba(255,255,255,0.4);
                         margin-top: 2px;
@@ -246,8 +292,8 @@ export default function Welcome() {
                     .btn-primary {
                         background: #00daf3;
                         color: #002753;
-                        font-family: 'Rubik', sans-serif;
-                        font-weight: 900;
+                        font-family: 'Instrument Sans', Arial, Helvetica, sans-serif;
+                        font-weight: 700;
                         border-radius: 9999px;
                         transition: transform 0.2s ease, box-shadow 0.2s ease;
                         position: relative;
@@ -266,7 +312,7 @@ export default function Welcome() {
                     .btn-outline {
                         border: 2px solid rgba(255,255,255,0.2);
                         color: #fff;
-                        font-family: 'Rubik', sans-serif;
+                        font-family: 'Instrument Sans', Arial, Helvetica, sans-serif;
                         font-weight: 700;
                         border-radius: 9999px;
                         transition: border-color 0.2s, background 0.2s;
@@ -282,7 +328,7 @@ export default function Welcome() {
                     }
                     .sec-label-line { width: 32px; height: 2px; background: #00daf3; }
                     .sec-label-text {
-                        font-family: 'Rubik', sans-serif;
+                        font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
                         font-size: 10px;
                         font-weight: 700;
                         letter-spacing: 0.2em;
@@ -615,10 +661,7 @@ export default function Welcome() {
                     >
                         <div className="welcome-header-actions" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                             <img src={privacyCureLogo} alt="Privacy Cure" style={{ height: 40, width: 'auto' }} />
-                            <span
-                                className="welcome-header-brand-text"
-                                style={{ fontWeight: 700, fontSize: 15, color: '#002753', letterSpacing: '-0.01em' }}
-                            >
+                            <span className="welcome-header-brand-text" style={{ fontWeight: 700, fontSize: 15, color: '#002753', letterSpacing: 0 }}>
                                 Privacy Cure
                             </span>
                         </div>
@@ -802,11 +845,11 @@ export default function Welcome() {
                             <h1
                                 className="hero-h1-anim"
                                 style={{
-                                    fontFamily: "'Rubik', sans-serif",
+                                    fontFamily: "'Fraunces', Georgia, serif",
                                     fontWeight: 700,
                                     fontSize: 'clamp(48px, 7.5vw, 100px)',
                                     lineHeight: 0.92,
-                                    letterSpacing: '-0.03em',
+                                    letterSpacing: 0,
                                     color: '#fff',
                                     maxWidth: 780,
                                     marginBottom: 32,
