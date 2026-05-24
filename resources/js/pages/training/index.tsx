@@ -1,7 +1,6 @@
 import MarketingShell from '@/components/marketing-shell';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Link } from '@inertiajs/react';
 import { ArrowRight, BookOpen, Clock3, FileText, GraduationCap } from 'lucide-react';
 
@@ -68,51 +67,85 @@ export default function TrainingIndex({ courses }: { courses: PublicCourse[] }) 
 
             <section className="px-6 py-16 lg:px-16 lg:py-24">
                 <div className="mx-auto w-full max-w-[1440px]">
+                    <div className="mb-12 flex flex-wrap items-end justify-between gap-6">
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-3">
+                                <span className="h-0.5 w-8 bg-[#00daf3]" />
+                                <span className="text-[10px] font-bold tracking-[0.2em] text-[#00b9ce] uppercase">Catalog</span>
+                            </div>
+                            <h2 className="text-3xl tracking-tight text-[#002753] md:text-4xl lg:text-5xl dark:text-white">Published courses</h2>
+                        </div>
+                        <p className="max-w-md text-sm leading-7 text-[#434750] dark:text-white/65">
+                            Browse open materials, review lessons at your own pace, and submit acknowledgements when your organization requires them.
+                        </p>
+                    </div>
+
                     {courses.length ? (
-                        <div className="grid gap-px overflow-hidden rounded-lg border border-[#c3c6d1]/35 bg-[#c3c6d1]/35 md:grid-cols-2 xl:grid-cols-3 dark:border-white/10 dark:bg-white/10">
-                            {courses.map((course) => (
-                                <Card
+                        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                            {courses.map((course, index) => (
+                                <article
                                     key={course.id}
-                                    className="group overflow-hidden rounded-none border-0 bg-white shadow-none transition-colors hover:bg-[#f7f9fb] dark:bg-[#0b2241]/90 dark:hover:bg-[#123057]"
+                                    className="group flex flex-col overflow-hidden rounded-lg border border-[#c3c6d1]/35 bg-white transition-all duration-250 hover:-translate-y-1 hover:border-[#00daf3]/35 hover:shadow-[0_20px_40px_-18px_rgba(0,39,83,0.15)] dark:border-white/10 dark:bg-[#0b2241]/90 dark:hover:border-[#00daf3]/25 dark:hover:shadow-[0_20px_40px_-18px_rgba(0,0,0,0.45)]"
                                 >
-                                    {course.image_url ? (
-                                        <img src={course.image_url} alt="" className="h-44 w-full object-cover" />
-                                    ) : (
-                                        <div className="flex h-44 items-center justify-center bg-[#eaf0f6] text-[#002753] dark:bg-white/10 dark:text-white">
-                                            <BookOpen className="size-10" />
-                                        </div>
-                                    )}
-                                    <CardHeader>
-                                        <div className="flex flex-wrap gap-2">
-                                            <Badge variant="outline">{course.modules_count ?? 0} modules</Badge>
-                                            <Badge variant="outline">{course.published_lessons_count ?? 0} lessons</Badge>
-                                        </div>
-                                        <CardTitle className="text-2xl text-[#002753] dark:text-white">{course.title}</CardTitle>
-                                        <CardDescription className="line-clamp-3">{course.description ?? 'No summary provided.'}</CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="flex items-center justify-between gap-3">
-                                        <span className="inline-flex items-center gap-1.5 text-sm text-[#434750] dark:text-white/70">
-                                            <Clock3 className="size-4" />
-                                            {course.estimated_minutes ? `${course.estimated_minutes} min` : 'Self-paced'}
+                                    <div className="relative h-48 overflow-hidden bg-[#eaf0f6] dark:bg-white/5">
+                                        {course.image_url ? (
+                                            <img
+                                                src={course.image_url}
+                                                alt=""
+                                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                            />
+                                        ) : (
+                                            <div className="flex h-full items-center justify-center text-[#002753]/30 dark:text-white/25">
+                                                <BookOpen className="size-12" />
+                                            </div>
+                                        )}
+                                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#002753]/55 via-transparent to-transparent opacity-80" />
+                                        <span className="absolute top-4 right-4 font-[Fraunces] text-5xl leading-none font-black text-white/10 select-none">
+                                            {String(index + 1).padStart(2, '0')}
                                         </span>
-                                        <Button asChild>
-                                            <Link href={route('training.show', course.slug)}>
-                                                Open
-                                                <ArrowRight className="size-4" />
+                                        <div className="absolute bottom-4 left-4 flex flex-wrap gap-2">
+                                            <span className="rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[9px] font-medium tracking-[0.14em] text-white uppercase backdrop-blur-sm">
+                                                {course.modules_count ?? 0} modules
+                                            </span>
+                                            <span className="rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[9px] font-medium tracking-[0.14em] text-white uppercase backdrop-blur-sm">
+                                                {course.published_lessons_count ?? 0} lessons
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-1 flex-col p-6">
+                                        <h3 className="mb-2 text-xl leading-snug font-semibold text-[#002753] dark:text-white">{course.title}</h3>
+                                        <p className="line-clamp-3 flex-1 text-sm leading-6 text-[#434750] dark:text-white/65">
+                                            {course.description ?? 'No summary provided.'}
+                                        </p>
+
+                                        <div className="mt-6 flex flex-col gap-4 border-t border-[#c3c6d1]/25 pt-5 sm:flex-row sm:items-center sm:justify-between dark:border-white/10">
+                                            <span className="inline-flex items-center gap-1.5 text-xs font-medium tracking-wide text-[#434750] uppercase dark:text-white/60">
+                                                <Clock3 className="size-3.5 text-[#00b9ce]" />
+                                                {course.estimated_minutes ? `${course.estimated_minutes} min` : 'Self-paced'}
+                                            </span>
+                                            <Link
+                                                href={route('training.show', course.slug)}
+                                                className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-sm bg-[#00daf3] px-4 py-2.5 text-[11px] font-semibold tracking-[0.12em] text-[#002753] uppercase transition-colors hover:bg-[#9cf0ff] sm:w-auto"
+                                            >
+                                                Open course
+                                                <ArrowRight className="size-3.5" />
                                             </Link>
-                                        </Button>
-                                    </CardContent>
-                                </Card>
+                                        </div>
+                                    </div>
+                                </article>
                             ))}
                         </div>
                     ) : (
-                        <Card className="border-dashed border-[#c3c6d1]/70 bg-white shadow-none dark:border-white/15 dark:bg-[#0b2241]/90">
-                            <CardContent className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-                                <GraduationCap className="size-12 text-[#002753]/35 dark:text-white/35" />
+                        <Card className="border border-dashed border-[#c3c6d1]/70 bg-[#f7f9fb] shadow-none dark:border-white/15 dark:bg-[#0b2241]/60">
+                            <CardContent className="flex flex-col items-center justify-center gap-4 py-20 text-center">
+                                <div className="flex size-16 items-center justify-center rounded-lg border border-[#c3c6d1]/40 bg-white dark:border-white/10 dark:bg-white/5">
+                                    <GraduationCap className="size-8 text-[#002753]/35 dark:text-white/35" />
+                                </div>
                                 <div>
                                     <p className="text-lg font-medium text-[#002753] dark:text-white">No training materials published</p>
-                                    <p className="mt-1 text-sm text-[#434750] dark:text-white/70">
-                                        Published courses will appear here automatically.
+                                    <p className="mt-2 max-w-sm text-sm leading-6 text-[#434750] dark:text-white/70">
+                                        Published courses will appear here automatically once your administrators release them.
                                     </p>
                                 </div>
                             </CardContent>

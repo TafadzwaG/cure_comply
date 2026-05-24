@@ -52,10 +52,11 @@ class PublicTrainingFlowTest extends TestCase
 
     public function test_landing_page_header_links_to_public_training(): void
     {
-        $source = file_get_contents(resource_path('js/pages/welcome.tsx'));
+        $welcomeSource = file_get_contents(resource_path('js/pages/welcome.tsx'));
 
-        $this->assertStringContainsString("route('training.index')", $source);
-        $this->assertStringContainsString('Training', $source);
+        $this->assertStringContainsString('WelcomeHeader', $welcomeSource);
+        $this->assertStringContainsString("route('training.index')", $welcomeSource);
+        $this->assertStringContainsString('Training', $welcomeSource);
     }
 
     public function test_public_training_show_displays_published_lessons_and_active_tenants_only(): void

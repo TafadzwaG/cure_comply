@@ -19,7 +19,15 @@
       "Bash(grep -n \"use Illuminate\\\\\\\\Support\\\\\\\\Facades\\\\\\\\DB\\\\|use Carbon\" C:/Users/tafad/Documents/PROJECTS/Cure_Compliance/cure_comply/app/Services/DashboardService.php)",
       "Bash(grep -E \"\\\\.\\(php|tsx|ts\\)$\")",
       "Bash(find C:UserstafadDocumentsPROJECTSCure_Compliancecure_comply -type f \\\\\\(-name *Invitation* -o -path */Mail/* -o -path */Jobs/* -o -path */Notifications/* \\\\\\))",
-      "Bash(xargs cat:*)"
+      "Bash(xargs cat:*)",
+      "Skill(frontend-design)",
+      "Skill(frontend-design:*)",
+      "WebFetch(domain:curedev.online)",
+      "mcp__Claude_in_Chrome__list_connected_browsers",
+      "Bash(curl -s -L -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/120.0.0.0 Safari/537.36\" https://curedev.online/ -o /tmp/curedev.html)",
+      "Read(//tmp/**)",
+      "Bash(curl -s -L -A \"Mozilla/5.0\" https://curedev.online/ -o C:/temp/curedev.html)",
+      "Read(//c/temp/**)"
     ]
   }
 }
