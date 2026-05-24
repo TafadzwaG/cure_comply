@@ -61,6 +61,62 @@ export default function MarketingShell({ title, description, current, children }
                         text-transform: uppercase;
                     }
 
+                    .public-marketing-shell nav a {
+                        position: relative;
+                        padding-bottom: 6px;
+                    }
+
+                    .public-marketing-shell nav a::after {
+                        content: '';
+                        position: absolute;
+                        left: 0;
+                        bottom: 0;
+                        width: 0;
+                        height: 1px;
+                        background: var(--public-cyan);
+                        transition: width 180ms ease;
+                    }
+
+                    .public-marketing-shell nav a:hover::after,
+                    .public-marketing-shell nav a[aria-current='page']::after {
+                        width: 100%;
+                    }
+
+                    .public-marketing-shell a[class*='rounded-full'],
+                    .public-marketing-shell button[class*='rounded-full'],
+                    .public-marketing-shell [role='button'][class*='rounded-full'] {
+                        border-radius: 4px !important;
+                    }
+
+                    .public-marketing-shell a[class*='bg-[#002753]'],
+                    .public-marketing-shell a[class*='bg-primary'],
+                    .public-marketing-shell button[class*='bg-primary'],
+                    .public-marketing-shell button[class*='bg-[#002753]'] {
+                        border-radius: 4px !important;
+                        box-shadow: none !important;
+                        font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+                        font-size: 11px;
+                        font-weight: 500;
+                        letter-spacing: 0.14em;
+                        text-transform: uppercase;
+                    }
+
+                    .public-marketing-shell a[class*='border'],
+                    .public-marketing-shell button[class*='border'] {
+                        border-radius: 4px !important;
+                    }
+
+                    .public-marketing-shell a[class*='bg-primary'],
+                    .public-marketing-shell button[class*='bg-primary'],
+                    .public-marketing-shell a[class*='border'],
+                    .public-marketing-shell button[class*='border'] {
+                        font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+                        font-size: 11px;
+                        font-weight: 500;
+                        letter-spacing: 0.12em;
+                        text-transform: uppercase;
+                    }
+
                     .public-marketing-shell .rounded-xl,
                     .public-marketing-shell .rounded-2xl {
                         border-radius: 8px !important;
@@ -252,14 +308,14 @@ export default function MarketingShell({ title, description, current, children }
 
                                 if (item.type === 'route') {
                                     return (
-                                        <Link key={item.label} href={item.href} className={className}>
+                                        <Link key={item.label} href={item.href} className={className} aria-current={isActive ? 'page' : undefined}>
                                             {item.label}
                                         </Link>
                                     );
                                 }
 
                                 return (
-                                    <a key={item.label} href={item.href} className={className}>
+                                    <a key={item.label} href={item.href} className={className} aria-current={isActive ? 'page' : undefined}>
                                         {item.label}
                                     </a>
                                 );
@@ -270,14 +326,14 @@ export default function MarketingShell({ title, description, current, children }
                             {auth.user ? (
                                 <Link
                                     href={route('dashboard')}
-                                    className="inline-flex items-center gap-2 rounded-full border border-[#083d77]/15 px-4 py-2 text-sm font-medium text-[#002753] transition-colors hover:border-[#083d77]/25 hover:bg-[#083d77]/5 dark:border-white/15 dark:text-white dark:hover:bg-white/5"
+                                    className="inline-flex items-center gap-2 rounded-sm border border-[#083d77]/20 px-4 py-2 text-[11px] font-medium tracking-[0.14em] text-[#002753] uppercase transition-colors hover:border-[#083d77]/40 hover:bg-[#083d77]/5 dark:border-white/15 dark:text-white dark:hover:bg-white/5"
                                 >
                                     Dashboard
                                 </Link>
                             ) : (
                                 <Link
                                     href={route('login')}
-                                    className="inline-flex items-center gap-2 rounded-full border border-[#083d77]/15 px-4 py-2 text-sm font-medium text-[#002753] transition-colors hover:border-[#083d77]/25 hover:bg-[#083d77]/5 dark:border-white/15 dark:text-white dark:hover:bg-white/5"
+                                    className="inline-flex items-center gap-2 rounded-sm border border-[#083d77]/20 px-4 py-2 text-[11px] font-medium tracking-[0.14em] text-[#002753] uppercase transition-colors hover:border-[#083d77]/40 hover:bg-[#083d77]/5 dark:border-white/15 dark:text-white dark:hover:bg-white/5"
                                 >
                                     <LogIn className="size-4" />
                                     <span className="hidden sm:inline">Log in</span>
@@ -286,7 +342,7 @@ export default function MarketingShell({ title, description, current, children }
 
                             <Link
                                 href={auth.user ? route('dashboard') : route('register')}
-                                className="inline-flex items-center gap-2 rounded-full bg-[#002753] px-5 py-2.5 text-sm font-semibold text-white transition-transform hover:scale-[1.02] hover:bg-[#083d77]"
+                                className="inline-flex items-center gap-2 rounded-sm bg-[#002753] px-5 py-2.5 text-[11px] font-medium tracking-[0.14em] text-white uppercase transition-colors hover:bg-[#083d77]"
                             >
                                 {auth.user ? 'Open workspace' : 'Create workspace'}
                                 <ArrowRight className="size-4" />

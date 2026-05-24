@@ -324,10 +324,13 @@ export default function Welcome() {
                     .btn-primary {
                         background: #00daf3;
                         color: #002753;
-                        font-family: 'Instrument Sans', Arial, Helvetica, sans-serif;
-                        font-weight: 700;
-                        border-radius: 9999px;
-                        transition: transform 0.2s ease, box-shadow 0.2s ease;
+                        font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+                        font-size: 11px;
+                        font-weight: 500;
+                        letter-spacing: 0.14em;
+                        text-transform: uppercase;
+                        border-radius: 4px;
+                        transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
                         position: relative;
                         overflow: hidden;
                     }
@@ -339,14 +342,17 @@ export default function Welcome() {
                         background-size: 200%;
                         animation: shimmer 2.5s ease-in-out infinite;
                     }
-                    .btn-primary:hover { transform: scale(1.05); box-shadow: 0 12px 32px rgba(0,218,243,0.35); }
+                    .btn-primary:hover { background: #9cf0ff; box-shadow: none; }
 
                     .btn-outline {
                         border: 2px solid rgba(255,255,255,0.2);
                         color: #fff;
-                        font-family: 'Instrument Sans', Arial, Helvetica, sans-serif;
-                        font-weight: 700;
-                        border-radius: 9999px;
+                        font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+                        font-size: 11px;
+                        font-weight: 500;
+                        letter-spacing: 0.14em;
+                        text-transform: uppercase;
+                        border-radius: 4px;
                         transition: border-color 0.2s, background 0.2s;
                     }
                     .btn-outline:hover { border-color: #00daf3; background: rgba(0,218,243,0.08); }
@@ -398,8 +404,8 @@ export default function Welcome() {
                     .nav-link::after {
                         content: '';
                         position: absolute;
-                        bottom: -4px; left: 0;
-                        width: 0; height: 2px;
+                        bottom: -6px; left: 0;
+                        width: 0; height: 1px;
                         background: #00daf3;
                         transition: width 0.25s ease;
                     }
@@ -709,11 +715,19 @@ export default function Welcome() {
                             </span>
                         </div>
 
-                        <nav className="hidden lg:flex" style={{ gap: 40, alignItems: 'center' }}>
+                        <nav className="hidden lg:flex" style={{ gap: 34, alignItems: 'center' }}>
                             <a
                                 href="#product"
                                 className="nav-link"
-                                style={{ fontSize: 13, fontWeight: 500, color: '#434750', textDecoration: 'none', transition: 'color 0.2s' }}
+                                style={{
+                                    fontSize: 11,
+                                    fontWeight: 500,
+                                    color: '#434750',
+                                    textDecoration: 'none',
+                                    transition: 'color 0.2s',
+                                    letterSpacing: '0.16em',
+                                    textTransform: 'uppercase',
+                                }}
                                 onMouseEnter={(e) => (e.currentTarget.style.color = '#002753')}
                                 onMouseLeave={(e) => (e.currentTarget.style.color = '#434750')}
                             >
@@ -722,7 +736,15 @@ export default function Welcome() {
                             <a
                                 href="#solutions"
                                 className="nav-link"
-                                style={{ fontSize: 13, fontWeight: 500, color: '#434750', textDecoration: 'none', transition: 'color 0.2s' }}
+                                style={{
+                                    fontSize: 11,
+                                    fontWeight: 500,
+                                    color: '#434750',
+                                    textDecoration: 'none',
+                                    transition: 'color 0.2s',
+                                    letterSpacing: '0.16em',
+                                    textTransform: 'uppercase',
+                                }}
                                 onMouseEnter={(e) => (e.currentTarget.style.color = '#002753')}
                                 onMouseLeave={(e) => (e.currentTarget.style.color = '#434750')}
                             >
@@ -731,7 +753,15 @@ export default function Welcome() {
                             <Link
                                 href={route('pricing')}
                                 className="nav-link"
-                                style={{ fontSize: 13, fontWeight: 500, color: '#434750', textDecoration: 'none', transition: 'color 0.2s' }}
+                                style={{
+                                    fontSize: 11,
+                                    fontWeight: 500,
+                                    color: '#434750',
+                                    textDecoration: 'none',
+                                    transition: 'color 0.2s',
+                                    letterSpacing: '0.16em',
+                                    textTransform: 'uppercase',
+                                }}
                                 onMouseEnter={(e) => (e.currentTarget.style.color = '#002753')}
                                 onMouseLeave={(e) => (e.currentTarget.style.color = '#434750')}
                             >
@@ -740,7 +770,15 @@ export default function Welcome() {
                             <Link
                                 href={route('resources')}
                                 className="nav-link"
-                                style={{ fontSize: 13, fontWeight: 500, color: '#434750', textDecoration: 'none', transition: 'color 0.2s' }}
+                                style={{
+                                    fontSize: 11,
+                                    fontWeight: 500,
+                                    color: '#434750',
+                                    textDecoration: 'none',
+                                    transition: 'color 0.2s',
+                                    letterSpacing: '0.16em',
+                                    textTransform: 'uppercase',
+                                }}
                                 onMouseEnter={(e) => (e.currentTarget.style.color = '#002753')}
                                 onMouseLeave={(e) => (e.currentTarget.style.color = '#434750')}
                             >
@@ -749,7 +787,15 @@ export default function Welcome() {
                             <Link
                                 href={route('training.index')}
                                 className="nav-link"
-                                style={{ fontSize: 13, fontWeight: 500, color: '#434750', textDecoration: 'none', transition: 'color 0.2s' }}
+                                style={{
+                                    fontSize: 11,
+                                    fontWeight: 500,
+                                    color: '#434750',
+                                    textDecoration: 'none',
+                                    transition: 'color 0.2s',
+                                    letterSpacing: '0.16em',
+                                    textTransform: 'uppercase',
+                                }}
                                 onMouseEnter={(e) => (e.currentTarget.style.color = '#002753')}
                                 onMouseLeave={(e) => (e.currentTarget.style.color = '#434750')}
                             >
@@ -759,18 +805,40 @@ export default function Welcome() {
 
                         <div className="welcome-header-cta" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                             {auth.user ? (
-                                <Link href={route('dashboard')} style={{ fontSize: 13, fontWeight: 500, color: '#002753', textDecoration: 'none' }}>
+                                <Link
+                                    href={route('dashboard')}
+                                    style={{
+                                        fontFamily: "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
+                                        fontSize: 11,
+                                        fontWeight: 500,
+                                        letterSpacing: '0.14em',
+                                        textTransform: 'uppercase',
+                                        color: '#002753',
+                                        textDecoration: 'none',
+                                    }}
+                                >
                                     Dashboard
                                 </Link>
                             ) : (
-                                <Link href={route('login')} style={{ fontSize: 13, fontWeight: 500, color: '#002753', textDecoration: 'none' }}>
+                                <Link
+                                    href={route('login')}
+                                    style={{
+                                        fontFamily: "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
+                                        fontSize: 11,
+                                        fontWeight: 500,
+                                        letterSpacing: '0.14em',
+                                        textTransform: 'uppercase',
+                                        color: '#002753',
+                                        textDecoration: 'none',
+                                    }}
+                                >
                                     Sign in
                                 </Link>
                             )}
                             <Link
                                 href={auth.user ? route('dashboard') : route('register')}
                                 className="btn-primary"
-                                style={{ padding: '10px 22px', fontSize: 13, textDecoration: 'none', display: 'inline-block' }}
+                                style={{ padding: '10px 18px', textDecoration: 'none', display: 'inline-block' }}
                             >
                                 {auth.user ? 'Open dashboard' : 'Get started'}
                             </Link>
