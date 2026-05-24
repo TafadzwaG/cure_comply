@@ -22,7 +22,6 @@ export default function MarketingShell({ title, description, current, children }
                     href="https://fonts.bunny.net/css?family=fraunces:300,400,500,600,700|instrument-sans:400,500,600|jetbrains-mono:400,500"
                     rel="stylesheet"
                 />
-                <MarketingChromeStyles />
                 <style>{`
                     .public-marketing-shell {
                         --public-ink: #002753;
@@ -243,6 +242,8 @@ export default function MarketingShell({ title, description, current, children }
                     }
                 `}</style>
             </Head>
+
+            <MarketingChromeStyles />
 
             <div className="public-marketing-shell wc-root relative min-h-screen bg-[#f7f9fb] text-[#191c1e] dark:bg-[#081a33] dark:text-white">
                 <MarketingHeader current={current} />
